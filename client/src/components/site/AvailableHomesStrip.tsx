@@ -213,7 +213,7 @@ export function AvailableHomesStrip() {
           <div ref={trackRef} className="hstrip__track" dir={reduced ? "rtl" : "ltr"}>
             {selection.map(property => (
               <div className="hstrip__item" key={property.id} dir="rtl" onFocus={revealOnFocus}>
-                <PropertyCard property={property} />
+                <PropertyCard property={property} gallery={false} />
               </div>
             ))}
           </div>

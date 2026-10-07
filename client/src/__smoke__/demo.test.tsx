@@ -392,3 +392,32 @@ describe("قائمة الموبايل", () => {
     expect(container!.querySelector(".mobile-drawer")!.className).not.toContain("is-open");
   });
 });
+
+describe("صور الكرت من برا (CardGallery)", () => {
+  it("نقاط بعدد الصور وبحد أقصى 4، وبعد الصورة الرابعة تبقى آخر نقطة معلَّمة", async () => {
+    const { CardGallery } = await import("../components/site/CardGallery");
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const galleryRoot = createRoot(host);
+    const images = Array.from({ length: 6 }, (_, i) => `https://example.com/${i}.jpg`);
+    await act(async () => galleryRoot.render(<CardGallery images={images} href="/property/AK-1" alt="بيت" />));
+    const track = host.querySelector(".card-gallery__track") as HTMLDivElement;
+    Object.defineProperty(track, "clientWidth", { value: 200, configurable: true });
+    const activeDot = () => Array.from(host.querySelectorAll(".card-gallery__dots span")).findIndex((d) => d.classList.contains("is-active"));
+    expect(host.querySelectorAll(".card-gallery__dots span").length).toBe(4);
+    expect(activeDot()).toBe(0);
+    // RTL: السكرول سالب
+    for (const [slide, dot] of [[1, 1], [3, 3], [4, 3], [5, 3]] as const) {
+      await act(async () => {
+        track.scrollLeft = -slide * 200;
+        track.dispatchEvent(new Event("scroll"));
+      });
+      expect(activeDot()).toBe(dot);
+    }
+    // صورتان فقط: نقطتان
+    await act(async () => galleryRoot.render(<CardGallery images={images.slice(0, 2)} href="/property/AK-1" alt="بيت" />));
+    expect(host.querySelectorAll(".card-gallery__dots span").length).toBe(2);
+    act(() => galleryRoot.unmount());
+    host.remove();
+  });
+});

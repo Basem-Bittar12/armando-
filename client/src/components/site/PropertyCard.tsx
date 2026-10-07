@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { toast } from "sonner";
 import type { Property } from "@/data/properties";
 import { useDemoStore } from "@/store/DemoStore";
+import CardGallery from "./CardGallery";
 
 /** نوع العقار ومدة الإيجار ككلام عادي: "شقة للإيجار الشهري" */
 export const rentalLabel = (property: Pick<Property, "type" | "term">) =>
@@ -17,7 +18,10 @@ export const specsLine = (property: Pick<Property, "beds" | "baths" | "area">) =
  * الترتيب: الصورة، نوع الإيجار، العنوان، المنطقة، المواصفات، السعر — 12px بينها.
  * الشارة الوحيدة «جديد»؛ البيت المؤجَّر يظهر بشفافية 60% (وصفحة العقارات تنقله لآخر القائمة).
  */
-export function PropertyCard({ property }: { property: Property }) {
+/**
+ * gallery: صور الكرت تتقلّب من برا (نقاط + سحب). يُطفأ في شريط الرئيسية لأن الشريط نفسه يتسحب أفقياً.
+ */
+export function PropertyCard({ property, gallery = true }: { property: Property; gallery?: boolean }) {
   const { isFavorite, toggleFavorite } = useDemoStore();
   const favorite = isFavorite(property.id);
   const rented = property.status === "مؤجر";
@@ -30,7 +34,11 @@ export function PropertyCard({ property }: { property: Property }) {
   return (
     <article className={`property-card ${rented ? "property-card--rented" : ""}`}>
       <div className="property-card__image-wrap">
-        <img src={property.image} alt="" className="property-card__image" loading="lazy" decoding="async" />
+        {gallery && property.gallery.length > 1 ? (
+          <CardGallery images={property.gallery} href={`/property/${property.id}`} alt={property.title} />
+        ) : (
+          <img src={property.image} alt="" className="property-card__image" loading="lazy" decoding="async" />
+        )}
         {property.new && (
           <div className="property-card__chips">
             <span className="chip chip--dark">جديد</span>
