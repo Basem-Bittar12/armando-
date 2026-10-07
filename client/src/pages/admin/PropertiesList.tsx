@@ -25,8 +25,8 @@ export default function PropertiesList() {
     <AdminShell
       title="العقارات"
       actions={
-        <Link href="/admin/properties/new" className="adm-button adm-button--primary">
-          <Plus size={18} /> إضافة عقار
+        <Link href="/admin/properties/new" className="adm-button adm-button--primary" aria-label="إضافة عقار">
+          <Plus size={18} /> <span className="adm-button__text">إضافة عقار</span>
         </Link>
       }
     >

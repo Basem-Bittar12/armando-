@@ -233,3 +233,38 @@
   .adm-editor__actions { display: flex; justify-content: flex-start; }
   .adm-editor__actions .adm-button { min-width: 140px; }
 }
+
+/* ==========================================================================
+   التلفون: لا شيء يطلع برا الشاشة حتى مع خط كبير (إعدادات التلفون) أو شاشة ضيقة —
+   كل شيء ينكمش ويلتف بدل ما يفرض عرضاً ثابتاً
+   ========================================================================== */
+.adm, .adm-main, .adm-content, .adm-form, .adm-section, .adm-grid, .adm-item, .adm-list, .adm-toolbar { min-width: 0; max-width: 100%; }
+.adm-main { overflow-x: clip; }
+.adm-top h1 { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.adm-top__actions { flex: 0 1 auto; min-width: 0; }
+.adm-button { white-space: normal; text-align: center; line-height: 1.3; min-width: 0; }
+.adm-price { flex-wrap: wrap; }
+.adm-price .adm-input { flex: 1 1 120px; min-width: 0; }
+.adm-price span { white-space: normal; }
+.adm-chips button { max-width: 100%; text-align: start; line-height: 1.3; }
+.adm-item__head { grid-template-columns: minmax(64px, 84px) minmax(0, 1fr); }
+.adm-item__thumb { width: 100%; }
+.adm-item__title, .adm-item__meta, .adm-order__info strong, .adm-option__names strong { overflow-wrap: anywhere; }
+.adm-item__status button { min-width: 0; padding: 0 4px; }
+.adm-toggle { min-width: 0; }
+.adm-toggle__label { min-width: 0; }
+.adm-order__item { grid-template-columns: 44px 20px 48px minmax(0, 1fr) 44px; }
+.adm-order__item img, .adm-order__noimg { width: 48px; height: 60px; }
+.adm-count { max-width: 100%; grid-template-columns: 56px minmax(64px, 96px) 56px; }
+.adm-stepper { width: 100%; }
+.adm-savebar .adm-button, .adm-editor__actions .adm-button, .adm-item__actions .adm-button { padding: 0 10px; }
+/* زر «إضافة عقار» بالشريط العلوي: على الشاشات الضيقة جداً تبقى الأيقونة فقط */
+@media (max-width: 340px) {
+  .adm-top .adm-button { padding: 0 12px; }
+  .adm-top .adm-button .adm-button__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .adm-item__actions, .adm-savebar, .adm-editor__actions { grid-template-columns: 1fr; }
+}
+.adm-toolbar, .adm-section, .adm-form, .adm-images, .adm-order, .adm-options, .adm-empty { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 899px) { .adm-list { grid-template-columns: minmax(0, 1fr); } }
+.adm-search input { width: 100%; }
+.adm-count { width: 100%; max-width: 208px; }
