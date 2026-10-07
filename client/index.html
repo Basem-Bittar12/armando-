@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#EFE2D0" />
+    <title>أرماندو القاضي لبيوت العطلات — منازل مختارة للإيجار الشهري والسنوي في دبي</title>
+    <meta
+      name="description"
+      content="أرماندو القاضي لبيوت العطلات (Armando Alkadi Holiday Homes): شقق وفلل واستوديوهات مختارة للإيجار الشهري والسنوي في دبي والشارقة وعجمان."
+    />
+    <!-- الأيقونات الرسمية من ملف الهوية (05_Favicons) -->
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <!-- أول فريم من الهيرو يظهر فوراً: نحمّله مبكراً في الرئيسية فقط، وحسب اتجاه الشاشة -->
+    <script>
+      if (location.pathname === "/") {
+        var heroFrame = document.createElement("link");
+        heroFrame.rel = "preload";
+        heroFrame.as = "image";
+        heroFrame.type = "image/webp";
+        heroFrame.href = matchMedia("(orientation: portrait)").matches ? "/hero-frames/mobile/001.webp" : "/hero-frames/desktop/001.webp";
+        heroFrame.setAttribute("fetchpriority", "high");
+        document.head.appendChild(heroFrame);
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Castoro: اللاتيني والأرقام والأسعار · Noto Kufi Arabic: العربي (300 للعناوين الكبيرة، 400 للنص) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Castoro&family=Noto+Kufi+Arabic:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- سكربت التحليلات (Umami/GA) يُضاف هنا عند الإطلاق الفعلي -->
+  </body>
+</html>
