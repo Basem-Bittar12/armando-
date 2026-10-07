@@ -121,20 +121,16 @@ describe("صفحات الموقع العام", () => {
     // لوحة الفلترة: زر «فلترة» ثم زر ثابت بالعدد الحقيقي
     await click(container!.querySelector(".filter-toggle"));
     expect(container!.querySelector(".filter-drawer")).toBeTruthy();
-    const citySelect = container!.querySelector(".filter-drawer__grid select") as HTMLSelectElement;
-    await act(async () => {
-      citySelect.value = "الشارقة";
-      citySelect.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    // المدينة أزرار داخل اللوحة (لا قوائم نظام تطلع خارج الشاشة)
+    expect(container!.querySelector(".filter-drawer select")).toBeNull();
+    await click(byText(".filter-drawer .choice-chips button", "الشارقة"));
     expect(text()).toContain("2 عقارات · 1 متاح");
     expect(container!.querySelector(".filter-drawer__apply")?.textContent).toContain("عرض 2 عقارات");
 
     // الترتيب
-    const sort = container!.querySelector(".sort-select select") as HTMLSelectElement;
-    await act(async () => {
-      sort.value = "priceAsc";
-      sort.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    await click(container!.querySelector(".sort-menu__button"));
+    await click(byText(".sort-menu__list button", "السعر: من الأقل"));
+    expect(container!.querySelector(".sort-menu__list")).toBeNull();
     expect(window.location.search).toContain("sort=priceAsc");
   });
 

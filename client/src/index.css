@@ -1322,3 +1322,54 @@ bdi { unicode-bidi: isolate; }
   .lightbox__bottom .whatsapp-button { flex: 1 1 100%; }
   .lightbox__details { flex: 1 1 100%; }
 }
+
+/* ==========================================================================
+   الفلاتر بأزرار (ChoiceChips) وقائمة الترتيب (SortMenu) — بدل قوائم <select> الخاصة بالنظام
+   التي كانت تفتح خارج حدود الشاشة وبشكل النظام. ألوان الباليت فقط.
+   ========================================================================== */
+.choice-group { border: 0; margin: 0; padding: 0; min-width: 0; }
+.choice-group legend { padding: 0; margin-bottom: 10px; color: var(--date); font-size: 14px; }
+.choice-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice-chips button {
+  min-height: 44px; padding: 0 16px; border: 1px solid var(--sandstone); background: transparent;
+  color: var(--espresso-deep); font-size: 15px; display: inline-flex; align-items: center; white-space: nowrap;
+  transition: background-color .2s var(--ease-quiet), border-color .2s var(--ease-quiet), color .2s var(--ease-quiet);
+}
+.choice-chips button:hover { border-color: var(--espresso); }
+.choice-chips button.active { background: var(--espresso); border-color: var(--espresso); color: var(--almond); }
+.choice-chips button:focus-visible, .sort-menu button:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 2px; }
+
+/* اللوحة: عمودان على اللابتوب، عمود واحد على التلفون؛ البحث والسعر بعرض كامل */
+.filter-drawer__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 40px; align-items: start; }
+.filter-field--wide { grid-column: 1 / -1; }
+.filter-field { display: flex; flex-direction: column; gap: 8px; color: var(--date); font-size: 14px; }
+.filter-price { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.filter-price label { display: flex; flex-direction: column; gap: 8px; color: var(--date); font-size: 14px; }
+.filter-drawer__grid input { width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--date); padding: 0 2px; height: 48px; color: var(--espresso-deep); outline: 0; }
+.filter-drawer__grid input:focus { border-bottom-color: var(--espresso-deep); }
+.filter-drawer__grid input:disabled { border-bottom-style: dashed; cursor: not-allowed; }
+@media (max-width: 760px) {
+  .filter-sheet .filter-drawer__grid { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-bottom: 8px; }
+  .filter-drawer__grid input { font-size: 16px; }
+}
+
+/* قائمة الترتيب */
+.sort-menu { position: relative; }
+.sort-menu__button {
+  min-height: 44px; display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 0;
+  color: var(--date); font-size: 14px; padding: 0 2px;
+}
+.sort-menu__button svg { transition: transform .2s var(--ease-quiet); }
+.sort-menu.is-open .sort-menu__button svg { transform: rotate(180deg); }
+.sort-menu__list {
+  position: absolute; top: calc(100% + 4px); inset-inline-end: 0; z-index: 40; list-style: none; margin: 0; padding: 6px 0;
+  min-width: 210px; max-width: calc(100vw - 32px); background: var(--almond); border: 1px solid var(--sandstone);
+  box-shadow: 0 18px 40px -18px rgba(47,34,26,.35);
+}
+.sort-menu__list button {
+  width: 100%; min-height: 44px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  background: transparent; border: 0; color: var(--espresso-deep); font-size: 15px; text-align: start;
+}
+.sort-menu__list button:hover { background: rgba(216,195,165,.35); }
+.sort-menu__list button[aria-selected="true"] { color: var(--date); }
+.sort-menu__list button svg { color: var(--terracotta); flex: none; }

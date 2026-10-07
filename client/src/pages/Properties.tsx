@@ -8,6 +8,8 @@ import { useMeta } from "@/hooks/useMeta";
 import PublicLayout from "@/components/site/PublicLayout";
 import PropertyCard from "@/components/site/PropertyCard";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
+import ChoiceChips from "@/components/site/ChoiceChips";
+import SortMenu from "@/components/site/SortMenu";
 import { Ltr } from "@/components/site/pageContext";
 import {
   LAST_LISTING_KEY,
@@ -208,49 +210,7 @@ export default function Properties() {
                 </div>
 
                 <div className="filter-drawer__grid">
-                  <label>
-                    <span>المدينة</span>
-                    <select
-                      value={filters.city}
-                      onChange={(event) => update({ city: event.target.value as Filters["city"] })}
-                    >
-                      <option value="">كل الإمارات</option>
-                      {cities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label>
-                    <span>نوع العقار</span>
-                    <select
-                      value={filters.type}
-                      onChange={(event) => update({ type: event.target.value as Filters["type"] })}
-                    >
-                      <option value="">كل الأنواع</option>
-                      {propertyTypes.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label>
-                    <span>غرف النوم</span>
-                    <select value={filters.beds} onChange={(event) => update({ beds: event.target.value })}>
-                      <option value="">أي عدد</option>
-                      {bedOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label>
+                  <label className="filter-field filter-field--wide">
                     <span>بحث</span>
                     <input
                       ref={searchRef}
@@ -261,31 +221,64 @@ export default function Properties() {
                     />
                   </label>
 
-                  <label>
-                    <span>أقل سعر (درهم)</span>
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
-                      value={filters.minPrice}
-                      disabled={!filters.term}
-                      onChange={(event) => update({ minPrice: event.target.value })}
-                      placeholder="0"
-                    />
-                  </label>
+                  <ChoiceChips
+                    label="المدينة"
+                    allLabel="كل الإمارات"
+                    options={cities.map((city) => ({ value: city, label: city }))}
+                    value={filters.city}
+                    onChange={(value) => update({ city: value as Filters["city"] })}
+                  />
 
-                  <label>
-                    <span>أعلى سعر (درهم)</span>
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
-                      value={filters.maxPrice}
-                      disabled={!filters.term}
-                      onChange={(event) => update({ maxPrice: event.target.value })}
-                      placeholder="بدون حد"
-                    />
-                  </label>
+                  <ChoiceChips
+                    label="نوع العقار"
+                    allLabel="كل الأنواع"
+                    options={propertyTypes.map((type) => ({ value: type, label: type }))}
+                    value={filters.type}
+                    onChange={(value) => update({ type: value as Filters["type"] })}
+                  />
+
+                  <ChoiceChips
+                    label="غرف النوم"
+                    allLabel="أي عدد"
+                    options={bedOptions}
+                    value={filters.beds}
+                    onChange={(value) => update({ beds: value })}
+                  />
+
+                  <ChoiceChips
+                    label="نوع الإيجار"
+                    allLabel="الكل"
+                    options={rentalTerms.map((term) => ({ value: term, label: term }))}
+                    value={filters.term}
+                    onChange={(value) => update({ term: value as Filters["term"] })}
+                  />
+
+                  <div className="filter-field filter-field--wide filter-price">
+                    <label>
+                      <span>أقل سعر (درهم)</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        value={filters.minPrice}
+                        disabled={!filters.term}
+                        onChange={(event) => update({ minPrice: event.target.value })}
+                        placeholder="0"
+                      />
+                    </label>
+                    <label>
+                      <span>أعلى سعر (درهم)</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        value={filters.maxPrice}
+                        disabled={!filters.term}
+                        onChange={(event) => update({ maxPrice: event.target.value })}
+                        placeholder="بدون حد"
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 <div className="filter-drawer__foot">
@@ -320,16 +313,12 @@ export default function Properties() {
               : `${countLabel(results.length)} · ${availableCount} ${availableCount === 1 ? "متاح" : "متاحة"}`}
             {filterCount > 0 && <em className="result-meta__hint"> · نتائج مفلترة</em>}
           </span>
-          <label className="sort-select">
-            <span className="sr-only">ترتيب النتائج</span>
-            <select value={filters.sort} onChange={(event) => update({ sort: event.target.value as SortKey })}>
-              {(Object.keys(sortLabels) as SortKey[]).map((key) => (
-                <option key={key} value={key}>
-                  {sortLabels[key]}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SortMenu
+            label="ترتيب النتائج"
+            options={(Object.keys(sortLabels) as SortKey[]).map((key) => ({ value: key, label: sortLabels[key] }))}
+            value={filters.sort}
+            onChange={(sort) => update({ sort })}
+          />
         </div>
 
         {filters.fav && results.length > 0 && (
