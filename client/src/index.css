@@ -1373,3 +1373,24 @@ bdi { unicode-bidi: isolate; }
 .sort-menu__list button:hover { background: rgba(216,195,165,.35); }
 .sort-menu__list button[aria-selected="true"] { color: var(--date); }
 .sort-menu__list button svg { color: var(--terracotta); flex: none; }
+
+/* ==========================================================================
+   صفحة العقارات على التلفون: كل عقارين جنب بعض — نفس الكرت بمقاسات أصغر (لا نص تحت 12px)
+   ========================================================================== */
+@media (max-width: 760px) {
+  .property-grid--listing { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 12px; }
+  .property-grid--listing .property-card__image-wrap { height: auto; aspect-ratio: 4 / 5; }
+  .property-grid--listing .property-card__chips { top: 8px; left: 8px; right: 8px; }
+  .property-grid--listing .chip { padding: 4px 7px; font-size: 12px; }
+  .property-grid--listing .property-card__heart { width: 36px; height: 36px; right: 8px; bottom: 8px; }
+  .property-grid--listing .property-card__heart svg { width: 16px; height: 16px; }
+  .property-grid--listing .property-card__body { gap: 6px; padding-top: 10px; }
+  .property-grid--listing .property-card__term { font-size: 12px; }
+  .property-grid--listing .property-card h3 { font-size: 15px; line-height: 1.45; }
+  .property-grid--listing .property-card__location,
+  .property-grid--listing .property-card__specs { font-size: 12px; line-height: 1.5; }
+  .property-grid--listing .property-card__location svg { width: 13px; height: 13px; }
+  .property-grid--listing .property-card__price { flex-wrap: wrap; gap: 2px 6px; }
+  .property-grid--listing .property-card__price strong { font-size: 18px; }
+  .property-grid--listing .property-card__price span { font-size: 12px; }
+}
