@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -81,6 +81,15 @@ const FRAME_SETS: Record<Device, FrameSet> = {
  * سطر الاسم وزر واتساب ظاهران من أول لحظة (بلا data-story).
  */
 const STORY_ENTER = [0, 0.2, 0.41, 0.78] as const;
+
+const VISITED_KEY = "aahh:visited-home";
+const readReturning = () => {
+  try {
+    return localStorage.getItem(VISITED_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
 
 /** عمودي ← فيديو الموبايل (يشمل التابلت الواقف)، أفقي ← فيديو اللابتوب */
 const PORTRAIT_QUERY = "(orientation: portrait)";
@@ -230,6 +239,15 @@ export default function HeroCanvas() {
   const device = useMediaFlag(PORTRAIT_QUERY, readDevice);
   // "reduced" هنا = الوضع الثابت لأي سبب من الأسباب الثلاثة (lib/motion.ts)
   const { reduced, reducedMotion, lite } = useStaticMotion();
+  // الزائر الراجع: «تصفّح البيوت» ظاهر من أول لحظة (لا يعيد القصة كاملة ليصل له)؛ الزائر الأول كما هو (78%)
+  const [returning] = useState(readReturning);
+  useEffect(() => {
+    try {
+      localStorage.setItem(VISITED_KEY, "1");
+    } catch {
+      // التخزين غير متاح — يبقى كزائر أول
+    }
+  }, []);
 
   // Lenis: سكرول ناعم يغذي ScrollTrigger — فقط لمن لم يطلب تقليل الحركة
   useEffect(() => {
@@ -495,7 +513,7 @@ export default function HeroCanvas() {
             {/* صف الأزرار: واتساب من أول لحظة، «تصفّح البيوت» يُضاف بجانبه عند 78% (مكانه محجوز) */}
             <div className="hero-story__actions">
               <WhatsAppButton label="واتساب" className="hero-story__whatsapp" />
-              <Link href={heroStory.cta.href} className="hero-story__browse" data-story={3}>
+              <Link href={heroStory.cta.href} className="hero-story__browse" data-story={returning ? undefined : 3}>
                 {heroStory.cta.label}
               </Link>
             </div>

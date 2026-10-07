@@ -71,7 +71,29 @@ export const whatsappTemplates = {
   viewing: (title: string, id: string) => `مرحباً، أرغب بحجز موعد معاينة لـ ${title} - ${id}`,
   /** صفحة العقارات بعد الفلترة: الفلاتر المختارة */
   filtered: (summary: string) => `مرحباً، أبحث عن عقار: ${summary}`,
+  /** بيت مؤجَّر: السؤال عن بيت مشابه متاح */
+  similar: (title: string, id: string) => `مرحباً، ${title} (${id}) مؤجر حالياً — هل لديكم بيت مشابه متاح؟`,
+  /** المفضلة: كل بيت بالاسم والكود والرابط */
+  favorites: (lines: string[]) => `مرحباً، هذه البيوت التي أعجبتني:\n${lines.join("\n")}`,
+  /** نموذج صفحة التواصل: يُرسله الزائر بنفسه من واتساب */
+  contactForm: (form: { name: string; phone: string; term: string; city: string; message: string }) =>
+    [
+      "مرحباً، أريد المساعدة في إيجاد عقار.",
+      `الاسم: ${form.name}`,
+      `الهاتف: ${form.phone}`,
+      form.term && `نوع الإيجار: ${form.term}`,
+      form.city && `المنطقة: ${form.city}`,
+      form.message && `التفاصيل: ${form.message}`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
 } as const;
+
+/**
+ * النسخة الإنجليزية: false = لا يظهر مبدّل اللغة إطلاقاً (لا خيار «قريباً» يوصل لحيط).
+ * عند جاهزيتها: true فقط ويعود المبدّل في الهيدر وقائمة الموبايل.
+ */
+export const englishReady = false;
 
 /** رابط واتساب برسالة جاهزة */
 export const whatsappHref = (message: string = whatsappTemplates.general) =>

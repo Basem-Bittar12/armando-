@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { brand, contact, pageMeta, whatsappTemplates } from "@/config/site";
 import { useDemoStore } from "@/store/DemoStore";
 import { useMeta } from "@/hooks/useMeta";
-import { similarProperties } from "@/lib/propertyFilters";
+import { lastListingHref, similarProperties } from "@/lib/propertyFilters";
 import PublicLayout from "@/components/site/PublicLayout";
 import PropertyCard, { rentalLabel, specsLine } from "@/components/site/PropertyCard";
 import SwipeGallery from "@/components/site/SwipeGallery";
@@ -63,10 +63,19 @@ export default function PropertyDetail() {
   if (!property) return <NotFoundProperty id={params.id ?? ""} />;
 
   const favorite = isFavorite(property.id);
-  const similar = similarProperties(properties, property);
+  // لبيت مؤجَّر: المشابهة من البيوت غير المؤجّرة فقط (الرابط يعدها «متاحة»)
+  const similar = similarProperties(
+    property.status === "مؤجر" ? properties.filter((item) => item.status !== "مؤجر") : properties,
+    property,
+  );
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.location)}`;
+  // البيت المؤجَّر: السؤال يصير عن بيت مشابه متاح
+  const rented = property.status === "مؤجر";
   // رسالة واتساب: الكود والعنوان والرابط
-  const message = whatsappTemplates.property(property.title, property.id, `${window.location.origin}/property/${property.id}`);
+  const message = rented
+    ? whatsappTemplates.similar(property.title, property.id)
+    : whatsappTemplates.property(property.title, property.id, `${window.location.origin}/property/${property.id}`);
+  const askLabel = rented ? "اسأل عن بيت مشابه" : "استفسر عبر واتساب";
   const total = property.gallery.length;
 
   const share = async () => {
@@ -100,14 +109,19 @@ export default function PropertyDetail() {
               <strong>{property.price}</strong>
               <span>درهم / {property.term}</span>
             </div>
-            <WhatsAppButton label="اسأل عبر واتساب" message={message} className="mobile-action-bar__ask" />
+            <WhatsAppButton
+              label={rented ? "اسأل عن بيت مشابه" : "اسأل عبر واتساب"}
+              message={message}
+              className="mobile-action-bar__ask"
+            />
           </>
         ),
       }}
     >
       <div className="detail-page">
         <div className="container detail-breadcrumb">
-          <Link href="/properties">
+          {/* يرجع لنفس البحث والفلاتر التي جاء منها الزائر */}
+          <Link href={lastListingHref()}>
             <ChevronRight size={18} /> العودة إلى العقارات
           </Link>
         </div>
@@ -176,13 +190,25 @@ export default function PropertyDetail() {
               {/* الحالة تظهر فقط إذا لم يكن العقار متاحاً */}
               {property.status !== "متاح" && <small className="detail-status">{property.status}</small>}
             </div>
+            {rented && similar.length > 0 && (
+              <a
+                href="#similar"
+                className="text-button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  document.getElementById("similar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+              >
+                هذا البيت مؤجر حالياً — شوف بيوت مشابهة متاحة
+              </a>
+            )}
 
             <p className="detail-specs">{specsLine(property)}</p>
 
             <p className="detail-description">{property.description}</p>
 
             <div className="detail-actions">
-              <WhatsAppButton label="استفسر عبر واتساب" message={message} />
+              <WhatsAppButton label={askLabel} message={message} />
               <a href={`tel:${contact.phoneHref}`} className="outline-button">
                 <Phone size={17} /> اتصل بنا
               </a>
@@ -243,6 +269,13 @@ export default function PropertyDetail() {
                 <dt>المدينة</dt>
                 <dd>{property.city}</dd>
               </div>
+              {/* «متاح من» يظهر فقط حين يضيف المكتب التاريخ للعقار */}
+              {property.availableFrom && (
+                <div>
+                  <dt>متاح من</dt>
+                  <dd>{property.availableFrom}</dd>
+                </div>
+              )}
               {property.details.map((item) => (
                 <div key={item.label}>
                   <dt>{item.label}</dt>
@@ -265,7 +298,7 @@ export default function PropertyDetail() {
         </div>
 
         {similar.length > 0 && (
-          <section className="section section--ruled">
+          <section className="section section--ruled" id="similar">
             <div className="container">
               <div className="section-heading">
                 <h2>عقارات مشابهة</h2>

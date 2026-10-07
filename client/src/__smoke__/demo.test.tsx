@@ -106,7 +106,8 @@ describe("صفحات الموقع العام", () => {
 
   it("صفحة العقارات: البحث والفلاتر والترتيب تعمل وتنعكس على الرابط", async () => {
     await mount("/properties");
-    expect(text()).toContain("6 عقارات متاحة");
+    // العدّ صادق: 6 عقارات منها 4 متاحة (واحد محجوز وواحد مؤجَّر)
+    expect(text()).toContain("6 عقارات · 4 متاحة");
 
     // فلتر: إيجار شهري
     await click(byText(".filter-pills button", "شهري"));
@@ -115,7 +116,7 @@ describe("صفحات الموقع العام", () => {
 
     // إزالة الفلتر: الضغط على نفس الزر مرة ثانية
     await click(byText(".filter-pills button", "شهري"));
-    expect(text()).toContain("6 عقارات متاحة");
+    expect(text()).toContain("6 عقارات · 4 متاحة");
 
     // لوحة الفلترة: زر «فلترة» ثم زر ثابت بالعدد الحقيقي
     await click(container!.querySelector(".filter-toggle"));
@@ -125,7 +126,7 @@ describe("صفحات الموقع العام", () => {
       citySelect.value = "الشارقة";
       citySelect.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    expect(text()).toContain("2 عقارات متاحة");
+    expect(text()).toContain("2 عقارات · 1 متاح");
     expect(container!.querySelector(".filter-drawer__apply")?.textContent).toContain("عرض 2 عقارات");
 
     // الترتيب
@@ -137,16 +138,47 @@ describe("صفحات الموقع العام", () => {
     expect(window.location.search).toContain("sort=priceAsc");
   });
 
+  it("السعر لا يخلط الشهري بالسنوي: الترتيب بالمجموعات وفلتر السعر يحتاج نوع إيجار", async () => {
+    await mount("/properties?sort=priceAsc");
+    const prices = () =>
+      Array.from(container!.querySelectorAll(".property-card__price")).map((p) => p.textContent!.replace(/\s+/g, " "));
+    // المتاح والمحجوز: الشهري تصاعدياً ثم السنوي تصاعدياً، والمؤجَّر آخراً
+    expect(prices()).toEqual([
+      "4,900 درهم / شهري",
+      "5,200 درهم / شهري",
+      "8,500 درهم / شهري",
+      "92,000 درهم / سنوي",
+      "185,000 درهم / سنوي",
+      "68,000 درهم / سنوي",
+    ]);
+    // رابط فيه سعر بلا نوع إيجار: السعر يُتجاهل، وحقلاه معطّلان مع شرح
+    await navigate("/properties?min=50000");
+    expect(container!.querySelectorAll(".property-card").length).toBe(6);
+    await click(container!.querySelector(".filter-toggle"));
+    const priceInput = container!.querySelector(".filter-drawer__grid input[type=number]") as HTMLInputElement;
+    expect(priceInput.disabled).toBe(true);
+    expect(text()).toContain("اختر شهري أو سنوي أولاً");
+    // مع «سنوي»: الفلتر يعمل
+    await navigate("/properties?term=%D8%B3%D9%86%D9%88%D9%8A&min=90000");
+    expect(container!.querySelectorAll(".property-card").length).toBe(2);
+  });
+
+  it("زر «بحث» يفتح اللوحة والمؤشر داخل حقل البحث", async () => {
+    await mount("/properties");
+    await click(byText(".filter-pills button", "بحث"));
+    expect(document.activeElement?.getAttribute("aria-label")).toBe("بحث في العقارات");
+  });
+
   it("رابط الفلتر قابل للمشاركة مباشرة", async () => {
     await mount("/properties?term=%D8%B3%D9%86%D9%88%D9%8A");
-    expect(text()).toContain("3 عقارات متاحة");
+    expect(text()).toContain("3 عقارات · 1 متاح");
   });
 
   it("الحالة الفارغة تظهر عند عدم وجود نتائج", async () => {
     await mount("/properties?q=xyzxyz");
     expect(text()).toContain("لا توجد نتائج مطابقة");
     await click(byText(".empty-state__actions button", "إزالة كل الفلاتر"));
-    expect(text()).toContain("6 عقارات متاحة");
+    expect(text()).toContain("6 عقارات · 4 متاحة");
   });
 
   it("المفضلة: الإضافة من البطاقة تظهر في صفحة المفضلة", async () => {
@@ -156,6 +188,10 @@ describe("صفحات الموقع العام", () => {
     // المفضلة صارت من قائمة الموبايل / أيقونة الهيدر: نفس الرابط ?fav=1
     await navigate("/properties?fav=1");
     expect(text()).toContain("1 عقار متاح");
+    // إرسال المفضلة على واتساب: الرسالة فيها البيت بالاسم والكود
+    const share = container!.querySelector(".favorites-share a") as HTMLAnchorElement;
+    expect(share.textContent).toContain("أرسل مفضلتي عبر واتساب");
+    expect(decodeURIComponent(share.href)).toMatch(/هذه البيوت التي أعجبتني[\s\S]*\(AK-\d+\)/);
   });
 
   it("صفحة العقار: المعرض والمرافق والعقارات المشابهة", async () => {
@@ -192,13 +228,24 @@ describe("صفحات الموقع العام", () => {
     expect(text()).toContain("العودة إلى الرئيسية");
   });
 
-  it("نموذج التواصل يتحقق من الحقول ثم يعرض رسالة النجاح", async () => {
+  it("نموذج التواصل يتحقق من الحقول ثم يفتح واتساب بالرسالة", async () => {
+    const opened: string[] = [];
+    const originalOpen = window.open;
+    window.open = ((url: string) => {
+      opened.push(url);
+      return null;
+    }) as typeof window.open;
     await mount("/contact");
+    // لا اختيار مسبق عن الزائر
+    const selects = Array.from(container!.querySelectorAll<HTMLSelectElement>(".contact-form select"));
+    expect(selects.map((s) => s.value)).toEqual(["", ""]);
     const form = container!.querySelector(".contact-form") as HTMLFormElement;
     await act(async () => {
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
     expect(text()).toContain("الرجاء كتابة الاسم الكامل");
+    // المؤشر على أول حقل خاطئ
+    expect(document.activeElement).toBe(container!.querySelectorAll(".contact-form input")[0]);
 
     const inputs = container!.querySelectorAll(".contact-form input");
     await act(async () => {
@@ -216,7 +263,13 @@ describe("صفحات الموقع العام", () => {
         new Event("submit", { bubbles: true, cancelable: true }),
       );
     });
-    expect(text()).toContain("تم استلام طلبك");
+    expect(text()).toContain("رسالتك جاهزة على واتساب");
+    expect(opened.length).toBe(1);
+    const sentText = decodeURIComponent(opened[0]);
+    expect(sentText).toContain("الاسم: باسم الكادي");
+    expect(sentText).toContain("+971500000000");
+    expect(sentText).not.toContain("نوع الإيجار");
+    window.open = originalOpen;
   });
 });
 
@@ -276,7 +329,7 @@ describe("لوحة المكتب", () => {
     // العقار الجديد يظهر في الموقع العام
     await navigate("/properties");
     expect(text()).toContain("شقة تجريبية للفحص");
-    expect(text()).toContain("7 عقارات متاحة");
+    expect(text()).toContain("7 عقارات · 5 متاحة");
   });
 
   it("تغيير حالة عقار وحذفه يعملان مع تأكيد", async () => {

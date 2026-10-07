@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CheckCircle2, Clock3, Mail, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
-import { contact, pageMeta } from "@/config/site";
+import { contact, pageMeta, whatsappHref, whatsappTemplates } from "@/config/site";
 import { cities, rentalTerms } from "@/data/properties";
 import { useDemoStore } from "@/store/DemoStore";
 import { useMeta } from "@/hooks/useMeta";
@@ -17,11 +17,12 @@ type FormState = {
   message: string;
 };
 
+/** نوع الإيجار والمنطقة يبدآن فارغين («اختر») — النموذج لا يختار عن الزائر */
 const initialForm: FormState = {
   name: "",
   phone: "",
-  term: rentalTerms[0],
-  city: cities[0],
+  term: "",
+  city: "",
   message: "",
 };
 
@@ -31,6 +32,8 @@ export default function Contact() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [sent, setSent] = useState(false);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
 
   const validate = () => {
     const next: Partial<Record<keyof FormState, string>> = {};
@@ -38,23 +41,37 @@ export default function Contact() {
     const digits = form.phone.replace(/\D/g, "");
     if (digits.length < 9) next.phone = "الرجاء إدخال رقم هاتف صحيح";
     setErrors(next);
-    return Object.keys(next).length === 0;
+    return next;
   };
+
+  // الرسالة الجاهزة: الزائر يرسلها بنفسه من واتساب، فتصل للمكتب فعلاً
+  const message = whatsappTemplates.contactForm({
+    name: form.name.trim(),
+    phone: form.phone.trim(),
+    term: form.term,
+    city: form.city,
+    message: form.message.trim(),
+  });
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!validate()) {
+    const found = validate();
+    if (Object.keys(found).length > 0) {
+      // الحقل الخاطئ قد يكون فوق الشاشة: نذهب إليه ونضع المؤشر فيه
+      const field = found.name ? nameRef.current : phoneRef.current;
+      field?.scrollIntoView({ block: "center", behavior: "smooth" });
+      field?.focus({ preventScroll: true });
       toast.error("راجع الحقول المطلوبة قبل الإرسال");
       return;
     }
-    // في هذه النسخة التجريبية يُضاف الطلب إلى استفسارات لوحة المكتب محلياً فقط
+    // نسخة في استفسارات لوحة المكتب (تجريبية، محلياً)
     addInquiry({
       name: form.name.trim(),
       phone: form.phone.trim(),
-      message: `${form.term} · ${form.city} — ${form.message.trim() || "بدون تفاصيل إضافية"}`,
+      message: `${[form.term, form.city].filter(Boolean).join(" · ") || "بدون تفضيلات"} — ${form.message.trim() || "بدون تفاصيل إضافية"}`,
     });
+    window.open(whatsappHref(message), "_blank", "noopener");
     setSent(true);
-    toast.success("شكراً، تم إرسال طلبك بنجاح");
   };
 
   return (
@@ -113,13 +130,13 @@ export default function Contact() {
           {sent ? (
             <div className="contact-form contact-form--sent">
               <CheckCircle2 size={34} />
-              <h2>تم استلام طلبك</h2>
+              <h2>رسالتك جاهزة على واتساب</h2>
               <p>
-                شكراً {form.name.trim()}. سيتواصل معك أحد مستشارينا على الرقم <Ltr>{form.phone.trim()}</Ltr>
-                {contact.hours ? ` خلال ساعات العمل (${contact.hours}).` : " في أقرب وقت."}
+                شكراً {form.name.trim()}. فتحنا لك واتساب ورسالتك مكتوبة فيه — اضغط «إرسال» هناك لتصلنا، ونتواصل
+                معك على الرقم <Ltr>{form.phone.trim()}</Ltr>.
               </p>
               <div className="contact-form__sent-actions">
-                <WhatsAppButton label="تحدث معنا الآن عبر واتساب" />
+                <WhatsAppButton label="افتح الرسالة على واتساب" message={message} />
                 <button
                   className="outline-button"
                   onClick={() => {
@@ -138,8 +155,12 @@ export default function Contact() {
               </div>
 
               <label>
-                الاسم الكامل
+                <span>
+                  الاسم الكامل <span aria-hidden="true">*</span>
+                </span>
                 <input
+                  ref={nameRef}
+                  aria-required="true"
                   value={form.name}
                   onChange={(event) => setForm({ ...form, name: event.target.value })}
                   placeholder="اكتب اسمك"
@@ -149,8 +170,12 @@ export default function Contact() {
               </label>
 
               <label>
-                رقم الهاتف
+                <span>
+                  رقم الهاتف <span aria-hidden="true">*</span>
+                </span>
                 <input
+                  ref={phoneRef}
+                  aria-required="true"
                   value={form.phone}
                   onChange={(event) => setForm({ ...form, phone: event.target.value })}
                   placeholder="+971 50 000 0000"
@@ -170,6 +195,7 @@ export default function Contact() {
                     value={form.term}
                     onChange={(event) => setForm({ ...form, term: event.target.value })}
                   >
+                    <option value="">اختر</option>
                     {rentalTerms.map((term) => (
                       <option key={term}>{term}</option>
                     ))}
@@ -181,6 +207,7 @@ export default function Contact() {
                     value={form.city}
                     onChange={(event) => setForm({ ...form, city: event.target.value })}
                   >
+                    <option value="">اختر</option>
                     {cities.map((city) => (
                       <option key={city}>{city}</option>
                     ))}
@@ -199,7 +226,7 @@ export default function Contact() {
               </label>
 
               <button className="primary-button primary-button--large" type="submit">
-                إرسال الطلب
+                إرسال عبر واتساب
               </button>
             </form>
           )}

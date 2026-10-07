@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "wouter";
 import { RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
 import { pageMeta, whatsappTemplates } from "@/config/site";
@@ -10,6 +10,7 @@ import PropertyCard from "@/components/site/PropertyCard";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
 import { Ltr } from "@/components/site/pageContext";
 import {
+  LAST_LISTING_KEY,
   activeFilterCount,
   applyFilters,
   filtersFromParams,
@@ -40,9 +41,12 @@ function describeFilters(filters: Filters) {
   if (filters.city) parts.push(`في ${filters.city}`);
   const beds = bedOptions.find((option) => option.value === filters.beds);
   if (beds) parts.push(beds.label);
-  if (filters.minPrice && filters.maxPrice) parts.push(`بين ${filters.minPrice} و${filters.maxPrice} درهم`);
-  else if (filters.minPrice) parts.push(`من ${filters.minPrice} درهم`);
-  else if (filters.maxPrice) parts.push(`حتى ${filters.maxPrice} درهم`);
+  // السعر يُذكر فقط مع نوع إيجار (لا يُقارن الشهري بالسنوي)
+  if (filters.term) {
+    if (filters.minPrice && filters.maxPrice) parts.push(`بين ${filters.minPrice} و${filters.maxPrice} درهم`);
+    else if (filters.minPrice) parts.push(`من ${filters.minPrice} درهم`);
+    else if (filters.maxPrice) parts.push(`حتى ${filters.maxPrice} درهم`);
+  }
   if (filters.q) parts.push(`(${filters.q})`);
   return parts.join("، ");
 }
@@ -54,6 +58,8 @@ export default function Properties() {
 
   const filters = useMemo(() => filtersFromParams(params), [params]);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [focusSearch, setFocusSearch] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
   // حقل البحث يُحدَّث محلياً ثم يُكتب في الرابط بعد توقف الكتابة
   const [searchDraft, setSearchDraft] = useState(filters.q);
 
@@ -71,6 +77,24 @@ export default function Properties() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchDraft]);
+
+  // آخر بحث في العقارات: رابط «العودة إلى العقارات» في صفحة البيت يرجع لنفس الفلاتر
+  useEffect(() => {
+    const query = params.toString();
+    try {
+      sessionStorage.setItem(LAST_LISTING_KEY, `/properties${query ? `?${query}` : ""}`);
+    } catch {
+      // التخزين غير متاح (وضع خاص) — الرابط يرجع لكل العقارات
+    }
+  }, [params]);
+
+  // زر «بحث»: يفتح اللوحة والمؤشر داخل حقل البحث مباشرة
+  useEffect(() => {
+    if (sheetOpen && focusSearch) {
+      searchRef.current?.focus();
+      setFocusSearch(false);
+    }
+  }, [sheetOpen, focusSearch]);
 
   // لوحة الفلترة على الموبايل تغطي الشاشة: نمنع تمرير الصفحة خلفها، وEscape يغلقها
   useEffect(() => {
@@ -91,6 +115,11 @@ export default function Properties() {
     return [...list.filter((p) => p.status !== "مؤجر"), ...list.filter((p) => p.status === "مؤجر")];
   }, [properties, filters, favorites]);
   const filterCount = activeFilterCount(filters);
+  const availableCount = results.filter((p) => p.status === "متاح").length;
+  // المفضلة على واتساب: كل بيت بالاسم والكود والرابط
+  const favoritesMessage = whatsappTemplates.favorites(
+    results.map((p) => `• ${p.title} (${p.id}) ${window.location.origin}/property/${p.id}`),
+  );
   const summary = describeFilters(filters);
 
   const resetAll = () => {
@@ -124,6 +153,15 @@ export default function Properties() {
               )}
             </button>
             <div className="filter-pills" role="group" aria-label="فلاتر سريعة">
+              <button
+                className={filters.q ? "active" : ""}
+                onClick={() => {
+                  setFocusSearch(true);
+                  setSheetOpen(true);
+                }}
+              >
+                <Search size={14} /> {filters.q ? filters.q : "بحث"}
+              </button>
               {filters.fav && (
                 <button className="active" onClick={() => update({ fav: false })} aria-label="إزالة فلتر المفضلة">
                   المفضلة <X size={14} />
@@ -215,6 +253,7 @@ export default function Properties() {
                   <label>
                     <span>بحث</span>
                     <input
+                      ref={searchRef}
                       value={searchDraft}
                       onChange={(event) => setSearchDraft(event.target.value)}
                       placeholder="منطقة أو اسم عقار"
@@ -229,6 +268,7 @@ export default function Properties() {
                       inputMode="numeric"
                       min={0}
                       value={filters.minPrice}
+                      disabled={!filters.term}
                       onChange={(event) => update({ minPrice: event.target.value })}
                       placeholder="0"
                     />
@@ -241,6 +281,7 @@ export default function Properties() {
                       inputMode="numeric"
                       min={0}
                       value={filters.maxPrice}
+                      disabled={!filters.term}
                       onChange={(event) => update({ maxPrice: event.target.value })}
                       placeholder="بدون حد"
                     />
@@ -248,7 +289,11 @@ export default function Properties() {
                 </div>
 
                 <div className="filter-drawer__foot">
-                  <small>السعر يُقارن بقيمة الإيجار كما هي معروضة (شهري أو سنوي حسب العقار).</small>
+                  <small>
+                    {filters.term
+                      ? `السعر بالدرهم للإيجار ال${filters.term}.`
+                      : "اختر شهري أو سنوي أولاً ليعمل فلتر السعر."}
+                  </small>
                   <button className="text-button" onClick={resetAll}>
                     <RotateCcw size={16} /> إعادة تعيين الفلاتر
                   </button>
@@ -267,7 +312,12 @@ export default function Properties() {
 
         <div className="container result-meta">
           <span>
-            <strong>{results.length}</strong> {results.length === 1 ? "عقار متاح" : "عقارات متاحة"}
+            <strong>{results.length}</strong>{" "}
+            {availableCount === results.length
+              ? results.length === 1
+                ? "عقار متاح"
+                : "عقارات متاحة"
+              : `${countLabel(results.length)} · ${availableCount} ${availableCount === 1 ? "متاح" : "متاحة"}`}
             {filterCount > 0 && <em className="result-meta__hint"> · نتائج مفلترة</em>}
           </span>
           <label className="sort-select">
@@ -281,6 +331,12 @@ export default function Properties() {
             </select>
           </label>
         </div>
+
+        {filters.fav && results.length > 0 && (
+          <div className="container section-cta favorites-share">
+            <WhatsAppButton label="أرسل مفضلتي عبر واتساب" message={favoritesMessage} />
+          </div>
+        )}
 
         {results.length > 0 ? (
           <div className="container property-grid property-grid--listing">

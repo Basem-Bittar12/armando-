@@ -33,6 +33,8 @@ export type Property = {
   status: PropertyStatus;
   description: string;
   amenities: string[];
+  /** متاح من تاريخ (نص كما يكتبه المكتب، مثل «1 نوفمبر 2026») — اختياري، لا يظهر شيء بدونه */
+  availableFrom?: string;
   /** تفاصيل إضافية تظهر في صفحة العقار */
   details: { label: string; value: string }[];
   featured?: boolean;

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useSearchParams } from "wouter";
 import { ChevronDown, Heart, Menu, Phone, X } from "lucide-react";
 import { toast } from "sonner";
-import { contact, mainNav } from "@/config/site";
+import { contact, englishReady, mainNav } from "@/config/site";
 import { useDemoStore } from "@/store/DemoStore";
 import Logo from "./Logo";
 import WhatsAppButton from "./WhatsAppButton";
@@ -112,6 +112,8 @@ export function Header() {
               {favorites.length > 0 && <b>{favorites.length}</b>}
             </Link>
 
+            {/* مبدّل اللغة يظهر فقط حين تجهز النسخة الإنجليزية (englishReady في config/site.ts) */}
+            {englishReady && (
             <div className="language-menu" ref={langRef}>
               <button
                 className="language-switch"
@@ -139,6 +141,7 @@ export function Header() {
               )}
             </div>
 
+            )}
             <WhatsAppButton label="واتساب" className="header-whatsapp" />
           </div>
 
@@ -179,6 +182,7 @@ export function Header() {
             </Link>
           </nav>
 
+          {englishReady && (
           <div className="mobile-drawer__language" role="group" aria-label="اللغة">
             <span>اللغة</span>
             <button className="is-current" aria-pressed="true">
@@ -188,6 +192,7 @@ export function Header() {
               English <span className="soon-tag">قريباً</span>
             </button>
           </div>
+          )}
 
           <div className="mobile-drawer__contact">
             <a href={`tel:${contact.phoneHref}`}>

@@ -5,6 +5,19 @@ import type { City, Property, PropertyType, RentalTerm } from "@/data/properties
  * حتى يمكن مشاركة نتيجة بحث معيّنة كرابط مباشر.
  */
 
+/** مفتاح آخر بحث في العقارات (sessionStorage) — يقرؤه رابط «العودة إلى العقارات» في صفحة البيت */
+export const LAST_LISTING_KEY = "aahh:last-listing";
+
+/** آخر صفحة عقارات زارها الزائر (بفلاترها)، أو كل العقارات */
+export function lastListingHref(): string {
+  try {
+    const href = sessionStorage.getItem(LAST_LISTING_KEY);
+    return href && href.startsWith("/properties") ? href : "/properties";
+  } catch {
+    return "/properties";
+  }
+}
+
 export type SortKey = "newest" | "priceAsc" | "priceDesc" | "areaDesc";
 
 export type Filters = {
@@ -77,10 +90,15 @@ export function activeFilterCount(filters: Filters): number {
   if (filters.type) count += 1;
   if (filters.city) count += 1;
   if (filters.beds) count += 1;
-  if (filters.minPrice || filters.maxPrice) count += 1;
+  if (priceFilterActive(filters)) count += 1;
   if (filters.fav) count += 1;
   return count;
 }
+
+const termOrder = (term: RentalTerm) => (term === "شهري" ? 0 : 1);
+
+/** فلتر السعر فعّال فقط مع نوع إيجار محدد */
+export const priceFilterActive = (filters: Filters) => Boolean(filters.term && (filters.minPrice || filters.maxPrice));
 
 export function applyFilters(
   list: Property[],
@@ -88,8 +106,9 @@ export function applyFilters(
   favorites: string[] = [],
 ): Property[] {
   const query = filters.q.trim().toLowerCase();
-  const min = Number(filters.minPrice) || 0;
-  const max = Number(filters.maxPrice) || Number.POSITIVE_INFINITY;
+  // السعر الشهري والسنوي لا يُقارنان ببعض: فلتر السعر يعمل فقط بعد اختيار شهري أو سنوي
+  const min = filters.term ? Number(filters.minPrice) || 0 : 0;
+  const max = filters.term ? Number(filters.maxPrice) || Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
   const beds = filters.beds === "" ? null : Number(filters.beds);
 
   const filtered = list.filter((property) => {
@@ -110,12 +129,14 @@ export function applyFilters(
   });
 
   const sorted = [...filtered];
+  // الترتيب بالسعر: الشهري معاً ثم السنوي معاً، وكل مجموعة مرتبة بسعرها
+  const byTerm = (a: Property, b: Property) => termOrder(a.term) - termOrder(b.term);
   switch (filters.sort) {
     case "priceAsc":
-      sorted.sort((a, b) => a.priceValue - b.priceValue);
+      sorted.sort((a, b) => byTerm(a, b) || a.priceValue - b.priceValue);
       break;
     case "priceDesc":
-      sorted.sort((a, b) => b.priceValue - a.priceValue);
+      sorted.sort((a, b) => byTerm(a, b) || b.priceValue - a.priceValue);
       break;
     case "areaDesc":
       sorted.sort((a, b) => b.areaValue - a.areaValue);
