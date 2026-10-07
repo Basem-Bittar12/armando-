@@ -43,12 +43,9 @@ function describeFilters(filters: Filters) {
   if (filters.city) parts.push(`في ${filters.city}`);
   const beds = bedOptions.find((option) => option.value === filters.beds);
   if (beds) parts.push(beds.label);
-  // السعر يُذكر فقط مع نوع إيجار (لا يُقارن الشهري بالسنوي)
-  if (filters.term) {
-    if (filters.minPrice && filters.maxPrice) parts.push(`بين ${filters.minPrice} و${filters.maxPrice} درهم`);
-    else if (filters.minPrice) parts.push(`من ${filters.minPrice} درهم`);
-    else if (filters.maxPrice) parts.push(`حتى ${filters.maxPrice} درهم`);
-  }
+  if (filters.minPrice && filters.maxPrice) parts.push(`بين ${filters.minPrice} و${filters.maxPrice} درهم`);
+  else if (filters.minPrice) parts.push(`من ${filters.minPrice} درهم`);
+  else if (filters.maxPrice) parts.push(`حتى ${filters.maxPrice} درهم`);
   if (filters.q) parts.push(`(${filters.q})`);
   return parts.join("، ");
 }
@@ -264,7 +261,6 @@ export default function Properties() {
                         inputMode="numeric"
                         min={0}
                         value={filters.minPrice}
-                        disabled={!filters.term}
                         onChange={(event) => update({ minPrice: event.target.value })}
                         placeholder="0"
                       />
@@ -276,7 +272,6 @@ export default function Properties() {
                         inputMode="numeric"
                         min={0}
                         value={filters.maxPrice}
-                        disabled={!filters.term}
                         onChange={(event) => update({ maxPrice: event.target.value })}
                         placeholder="بدون حد"
                       />
@@ -288,7 +283,7 @@ export default function Properties() {
                   <small>
                     {filters.term
                       ? `السعر بالدرهم للإيجار ال${filters.term}.`
-                      : "اختر شهري أو سنوي أولاً ليعمل فلتر السعر."}
+                      : "السعر بالدرهم كما هو معروض لكل عقار (شهري أو سنوي)."}
                   </small>
                   <button className="text-button" onClick={resetAll}>
                     <RotateCcw size={16} /> إعادة تعيين الفلاتر

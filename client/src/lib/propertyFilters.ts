@@ -97,8 +97,8 @@ export function activeFilterCount(filters: Filters): number {
 
 const termOrder = (term: RentalTerm) => (term === "شهري" ? 0 : 1);
 
-/** فلتر السعر فعّال فقط مع نوع إيجار محدد */
-export const priceFilterActive = (filters: Filters) => Boolean(filters.term && (filters.minPrice || filters.maxPrice));
+/** هل فلتر السعر مستعمل */
+export const priceFilterActive = (filters: Filters) => Boolean(filters.minPrice || filters.maxPrice);
 
 export function applyFilters(
   list: Property[],
@@ -106,9 +106,9 @@ export function applyFilters(
   favorites: string[] = [],
 ): Property[] {
   const query = filters.q.trim().toLowerCase();
-  // السعر الشهري والسنوي لا يُقارنان ببعض: فلتر السعر يعمل فقط بعد اختيار شهري أو سنوي
-  const min = filters.term ? Number(filters.minPrice) || 0 : 0;
-  const max = filters.term ? Number(filters.maxPrice) || Number.POSITIVE_INFINITY : Number.POSITIVE_INFINITY;
+  // فلتر السعر يعمل دائماً على السعر المعروض (شهري أو سنوي حسب العقار)، بلا حاجة لاختيار نوع الإيجار
+  const min = Number(filters.minPrice) || 0;
+  const max = Number(filters.maxPrice) || Number.POSITIVE_INFINITY;
   const beds = filters.beds === "" ? null : Number(filters.beds);
 
   const filtered = list.filter((property) => {

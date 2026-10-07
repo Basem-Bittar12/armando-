@@ -136,19 +136,18 @@ describe("صفحات الموقع العام", () => {
     expect(window.location.search).toContain("sort=priceAsc");
   });
 
-  it("السعر لا يخلط الشهري بالسنوي: الترتيب بالمجموعات وفلتر السعر يحتاج نوع إيجار", async () => {
+  it("الترتيب بالسعر: الشهري ثم السنوي؛ وفلتر السعر يعمل بدون اختيار نوع الإيجار", async () => {
     await mount("/properties?sort=priceAsc");
     const prices = () =>
       Array.from(container!.querySelectorAll(".property-card__price")).map((p) => p.textContent!.replace(/\s+/g, " "));
     // الشهري تصاعدياً ثم السنوي
     expect(prices()).toEqual(["4,900 درهم / شهري", "8,500 درهم / شهري", "185,000 درهم / سنوي"]);
-    // رابط فيه سعر بلا نوع إيجار: السعر يُتجاهل، وحقلاه معطّلان مع شرح
-    await navigate("/properties?min=50000");
-    expect(container!.querySelectorAll(".property-card").length).toBe(3);
+    // فلتر السعر بدون نوع إيجار يعمل مباشرة على السعر المعروض
+    await navigate("/properties?max=10000");
+    expect(container!.querySelectorAll(".property-card").length).toBe(2);
     await click(container!.querySelector(".filter-toggle"));
     const priceInput = container!.querySelector(".filter-drawer__grid input[type=number]") as HTMLInputElement;
-    expect(priceInput.disabled).toBe(true);
-    expect(text()).toContain("اختر شهري أو سنوي أولاً");
+    expect(priceInput.disabled).toBe(false);
     // مع «سنوي»: الفلتر يعمل
     await navigate("/properties?term=%D8%B4%D9%87%D8%B1%D9%8A&min=5000");
     expect(container!.querySelectorAll(".property-card").length).toBe(1);
