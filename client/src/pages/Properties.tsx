@@ -136,7 +136,7 @@ export default function Properties() {
           <h1>
             عقارات مختارة<span className="listing-hero__more"> للحياة اليومية</span>
           </h1>
-          <p>تصفح مجموعة أرماندو القاضي من المساحات السكنية المختارة للإيجار الشهري والسنوي في الإمارات.</p>
+          <p>تصفح مجموعة أرماندو القاضي من المساحات السكنية المختارة للإيجار الشهري والسنوي في دبي.</p>
         </div>
 
         {/* صف الفلاتر: «فلترة» ثابت أوله، ثم صف يتمرر جانبياً — والصف كله ثابت تحت الهيدر */}
@@ -221,6 +221,8 @@ export default function Properties() {
                     />
                   </label>
 
+                  {/* المدينة تظهر فقط حين يكون هناك أكثر من مدينة (حالياً دبي فقط) */}
+                  {cities.length > 1 && (
                   <ChoiceChips
                     label="المدينة"
                     allLabel="كل الإمارات"
@@ -228,6 +230,7 @@ export default function Properties() {
                     value={filters.city}
                     onChange={(value) => update({ city: value as Filters["city"] })}
                   />
+                  )}
 
                   <ChoiceChips
                     label="نوع العقار"

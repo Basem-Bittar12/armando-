@@ -66,7 +66,7 @@ describe("صفحات الموقع العام", () => {
     // الرئيسية: لا مربع بحث، وقسم «اختيارات تستحق الانتباه»: 4 كروت عقارات في صف أفقي + زر «عرض كل البيوت»
     expect(container!.querySelector(".search-panel")).toBeNull();
     expect(text()).toContain("اختيارات تستحق الانتباه");
-    expect(container!.querySelectorAll(".hstrip .property-card").length).toBe(4);
+    expect(container!.querySelectorAll(".hstrip .property-card").length).toBe(3);
     expect(container!.querySelector(".hstrip__cta a")?.getAttribute("href")).toBe("/properties");
     // لا فقاعة واتساب عائمة، ولا كود عقار على الكروت
     expect(container!.querySelector(".floating-whatsapp")).toBeNull();
@@ -106,26 +106,28 @@ describe("صفحات الموقع العام", () => {
 
   it("صفحة العقارات: البحث والفلاتر والترتيب تعمل وتنعكس على الرابط", async () => {
     await mount("/properties");
-    // العدّ صادق: 6 عقارات منها 4 متاحة (واحد محجوز وواحد مؤجَّر)
-    expect(text()).toContain("6 عقارات · 4 متاحة");
+    // حالياً دبي فقط: 3 عقارات كلها متاحة
+    expect(text()).toContain("3 عقارات متاحة");
 
     // فلتر: إيجار شهري
     await click(byText(".filter-pills button", "شهري"));
     expect(window.location.search).toContain("term=");
-    expect(text()).toContain("3 عقارات متاحة");
+    expect(text()).toContain("2 عقارات متاحة");
 
     // إزالة الفلتر: الضغط على نفس الزر مرة ثانية
     await click(byText(".filter-pills button", "شهري"));
-    expect(text()).toContain("6 عقارات · 4 متاحة");
+    expect(text()).toContain("3 عقارات متاحة");
 
     // لوحة الفلترة: زر «فلترة» ثم زر ثابت بالعدد الحقيقي
     await click(container!.querySelector(".filter-toggle"));
     expect(container!.querySelector(".filter-drawer")).toBeTruthy();
     // المدينة أزرار داخل اللوحة (لا قوائم نظام تطلع خارج الشاشة)
     expect(container!.querySelector(".filter-drawer select")).toBeNull();
-    await click(byText(".filter-drawer .choice-chips button", "الشارقة"));
-    expect(text()).toContain("2 عقارات · 1 متاح");
-    expect(container!.querySelector(".filter-drawer__apply")?.textContent).toContain("عرض 2 عقارات");
+    // مدينة واحدة فقط (دبي): لا خانة مدينة
+    expect(Array.from(container!.querySelectorAll(".filter-drawer legend")).map((l) => l.textContent)).not.toContain("المدينة");
+    await click(byText(".filter-drawer .choice-chips button", "فيلا"));
+    expect(text()).toContain("1 عقار متاح");
+    expect(container!.querySelector(".filter-drawer__apply")?.textContent).toContain("عرض 1 عقار");
 
     // الترتيب
     await click(container!.querySelector(".sort-menu__button"));
@@ -138,25 +140,18 @@ describe("صفحات الموقع العام", () => {
     await mount("/properties?sort=priceAsc");
     const prices = () =>
       Array.from(container!.querySelectorAll(".property-card__price")).map((p) => p.textContent!.replace(/\s+/g, " "));
-    // المتاح والمحجوز: الشهري تصاعدياً ثم السنوي تصاعدياً، والمؤجَّر آخراً
-    expect(prices()).toEqual([
-      "4,900 درهم / شهري",
-      "5,200 درهم / شهري",
-      "8,500 درهم / شهري",
-      "92,000 درهم / سنوي",
-      "185,000 درهم / سنوي",
-      "68,000 درهم / سنوي",
-    ]);
+    // الشهري تصاعدياً ثم السنوي
+    expect(prices()).toEqual(["4,900 درهم / شهري", "8,500 درهم / شهري", "185,000 درهم / سنوي"]);
     // رابط فيه سعر بلا نوع إيجار: السعر يُتجاهل، وحقلاه معطّلان مع شرح
     await navigate("/properties?min=50000");
-    expect(container!.querySelectorAll(".property-card").length).toBe(6);
+    expect(container!.querySelectorAll(".property-card").length).toBe(3);
     await click(container!.querySelector(".filter-toggle"));
     const priceInput = container!.querySelector(".filter-drawer__grid input[type=number]") as HTMLInputElement;
     expect(priceInput.disabled).toBe(true);
     expect(text()).toContain("اختر شهري أو سنوي أولاً");
     // مع «سنوي»: الفلتر يعمل
-    await navigate("/properties?term=%D8%B3%D9%86%D9%88%D9%8A&min=90000");
-    expect(container!.querySelectorAll(".property-card").length).toBe(2);
+    await navigate("/properties?term=%D8%B4%D9%87%D8%B1%D9%8A&min=5000");
+    expect(container!.querySelectorAll(".property-card").length).toBe(1);
   });
 
   it("زر «بحث» يفتح اللوحة والمؤشر داخل حقل البحث", async () => {
@@ -167,14 +162,14 @@ describe("صفحات الموقع العام", () => {
 
   it("رابط الفلتر قابل للمشاركة مباشرة", async () => {
     await mount("/properties?term=%D8%B3%D9%86%D9%88%D9%8A");
-    expect(text()).toContain("3 عقارات · 1 متاح");
+    expect(text()).toContain("1 عقار متاح");
   });
 
   it("الحالة الفارغة تظهر عند عدم وجود نتائج", async () => {
     await mount("/properties?q=xyzxyz");
     expect(text()).toContain("لا توجد نتائج مطابقة");
     await click(byText(".empty-state__actions button", "إزالة كل الفلاتر"));
-    expect(text()).toContain("6 عقارات · 4 متاحة");
+    expect(text()).toContain("3 عقارات متاحة");
   });
 
   it("المفضلة: الإضافة من البطاقة تظهر في صفحة المفضلة", async () => {
@@ -273,7 +268,7 @@ describe("لوحة المكتب", () => {
   it("النظرة العامة تعرض الإحصائيات الحقيقية من الحالة", async () => {
     await mount("/admin");
     expect(text()).toContain("صباح الخير");
-    expect(byText(".stat-card", "إجمالي العقارات")?.textContent).toContain("6");
+    expect(byText(".stat-card", "إجمالي العقارات")?.textContent).toContain("3");
     expect(text()).toContain("آخر التحديثات");
   });
 
@@ -325,7 +320,7 @@ describe("لوحة المكتب", () => {
     // العقار الجديد يظهر في الموقع العام
     await navigate("/properties");
     expect(text()).toContain("شقة تجريبية للفحص");
-    expect(text()).toContain("7 عقارات · 5 متاحة");
+    expect(text()).toContain("4 عقارات متاحة");
   });
 
   it("تغيير حالة عقار وحذفه يعملان مع تأكيد", async () => {
@@ -343,7 +338,7 @@ describe("لوحة المكتب", () => {
     expect(container!.querySelector(".confirm-dialog")).toBeTruthy();
     await click(byText(".confirm-dialog .modal-footer button", "حذف"));
     expect(container!.querySelector(".confirm-dialog")).toBeFalsy();
-    expect(text()).toContain("PROPERTY COLLECTION / 5");
+    expect(text()).toContain("PROPERTY COLLECTION / 2");
   });
 
   it("الاستفسارات: الاختيار وتغيير الحالة يعملان", async () => {

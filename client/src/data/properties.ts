@@ -6,7 +6,8 @@
 export type RentalTerm = "شهري" | "سنوي";
 export type PropertyStatus = "متاح" | "محجوز" | "مؤجر";
 export type PropertyType = "شقة" | "فيلا" | "استوديو" | "تاون هاوس";
-export type City = "دبي" | "الشارقة" | "عجمان";
+/** حالياً دبي فقط */
+export type City = "دبي";
 
 export type Property = {
   id: string;
@@ -128,73 +129,6 @@ export const properties: Property[] = [
     updatedLabel: "منذ يومين",
   },
   {
-    id: "AK-114",
-    title: "جناح هادئ بالقرب من البحر",
-    location: "الخان، الشارقة",
-    city: "الشارقة",
-    price: "5,200",
-    priceValue: 5200,
-    term: "شهري",
-    type: "شقة",
-    beds: 1,
-    baths: 1,
-    area: "820 قدم²",
-    areaValue: 820,
-    image:
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=85",
-    gallery: [
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=85",
-      INTERIOR_C,
-      INTERIOR_A,
-      INTERIOR_B,
-    ],
-    status: "متاح",
-    description:
-      "جناح بغرفة نوم واحدة على مقربة من كورنيش الخان، بإطلالة جانبية على البحر. مساحة هادئة مناسبة للأفراد أو الأزواج، مع شرفة مطلة وتشطيبات حديثة.",
-    amenities: ["إطلالة بحرية", "موقف سيارة", "شرفة", "أمن 24 ساعة"],
-    details: [
-      { label: "الطابق", value: "الطابق 8" },
-      { label: "سنة البناء", value: "2020" },
-      { label: "الحد الأدنى للإيجار", value: "شهر واحد" },
-      { label: "التأثيث", value: "مفروش جزئياً" },
-    ],
-    new: true,
-    updatedLabel: "منذ 3 أيام",
-  },
-  {
-    id: "AK-061",
-    title: "منزل عائلي بحديقة خاصة",
-    location: "الزاهية، عجمان",
-    city: "عجمان",
-    price: "92,000",
-    priceValue: 92000,
-    term: "سنوي",
-    type: "تاون هاوس",
-    beds: 3,
-    baths: 4,
-    area: "2,450 قدم²",
-    areaValue: 2450,
-    image:
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=85",
-    gallery: [
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=85",
-      INTERIOR_A,
-      INTERIOR_C,
-      INTERIOR_B,
-    ],
-    status: "محجوز",
-    description:
-      "تاون هاوس عائلي ضمن مجمع سكني هادئ في الزاهية، مع حديقة خلفية خاصة ومساحة معيشة مفتوحة. المجمع يضم مسبحاً مشتركاً ومنطقة ألعاب للأطفال.",
-    amenities: ["حديقة خاصة", "مجمع مغلق", "مسبح مشترك", "موقف سيارة"],
-    details: [
-      { label: "عدد الطوابق", value: "طابقان" },
-      { label: "سنة البناء", value: "2022" },
-      { label: "الحد الأدنى للإيجار", value: "سنة واحدة" },
-      { label: "التأثيث", value: "غير مفروش" },
-    ],
-    updatedLabel: "منذ يومين",
-  },
-  {
     id: "AK-095",
     title: "استوديو أنيق مفروش بالكامل",
     location: "الخليج التجاري، دبي",
@@ -227,39 +161,6 @@ export const properties: Property[] = [
     ],
     updatedLabel: "منذ أسبوع",
   },
-  {
-    id: "AK-073",
-    title: "شقة عائلية بإطلالة مفتوحة",
-    location: "النهدة، الشارقة",
-    city: "الشارقة",
-    price: "68,000",
-    priceValue: 68000,
-    term: "سنوي",
-    type: "شقة",
-    beds: 2,
-    baths: 2,
-    area: "1,180 قدم²",
-    areaValue: 1180,
-    image:
-      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=85",
-    gallery: [
-      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=85",
-      INTERIOR_C,
-      INTERIOR_B,
-      INTERIOR_A,
-    ],
-    status: "مؤجر",
-    description:
-      "شقة عائلية بغرفتي نوم في النهدة بالشارقة، بإطلالة مفتوحة وصالة واسعة. موقع عملي قريب من الخدمات والمواصلات وعلى حدود دبي مباشرة.",
-    amenities: ["موقف سيارة", "صالة رياضية", "أمن 24 ساعة", "قريب من المترو", "شرفة"],
-    details: [
-      { label: "الطابق", value: "الطابق 5" },
-      { label: "سنة البناء", value: "2018" },
-      { label: "الحد الأدنى للإيجار", value: "سنة واحدة" },
-      { label: "التأثيث", value: "غير مفروشة" },
-    ],
-    updatedLabel: "منذ يومين",
-  },
 ];
 
 export const neighborhoods = [
@@ -269,7 +170,7 @@ export const neighborhoods = [
     image:
       "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=900&q=85",
     /** الفلتر الذي يُطبّق عند الضغط على البطاقة */
-    query: "?city=دبي",
+    query: "?q=وسط مدينة دبي",
   },
   {
     name: "البرشاء",
@@ -279,16 +180,16 @@ export const neighborhoods = [
     query: "?q=البرشاء",
   },
   {
-    name: "الخان، الشارقة",
+    name: "الخليج التجاري",
     count: "12 عقار",
     image:
       "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&fit=crop&w=900&q=85",
-    query: "?city=الشارقة",
+    query: "?q=الخليج التجاري",
   },
 ];
 
 export const propertyTypes: PropertyType[] = ["شقة", "فيلا", "استوديو", "تاون هاوس"];
-export const cities: City[] = ["دبي", "الشارقة", "عجمان"];
+export const cities: City[] = ["دبي"];
 export const rentalTerms: RentalTerm[] = ["شهري", "سنوي"];
 export const statuses: PropertyStatus[] = ["متاح", "محجوز", "مؤجر"];
 
