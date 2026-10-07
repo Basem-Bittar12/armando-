@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { Link } from "wouter";
 import { brand, pageMeta } from "@/config/site";
-import { neighborhoods } from "@/data/properties";
-import { useDemoStore } from "@/store/DemoStore";
+import { useCatalog } from "@/lib/catalog/store";
+import { areaCards } from "@/lib/catalog/view";
+import { srcsetFor } from "@/lib/imageSrcset";
 import { useMeta } from "@/hooks/useMeta";
-import { applyFilters, filtersFromParams } from "@/lib/propertyFilters";
 import PublicLayout from "@/components/site/PublicLayout";
 import HeroCanvas from "@/components/site/HeroCanvas";
 import AvailableHomesStrip from "@/components/site/AvailableHomesStrip";
@@ -15,15 +15,9 @@ const countLabel = (count: number) => (count === 1 ? "بيت واحد" : count =
 
 export default function Home() {
   useMeta(pageMeta.home);
-  const { properties } = useDemoStore();
-
-  const areaCounts = useMemo(
-    () =>
-      neighborhoods.map(
-        neighborhood => applyFilters(properties, filtersFromParams(new URLSearchParams(neighborhood.query)), []).length,
-      ),
-    [properties],
-  );
+  const { data } = useCatalog();
+  // المناطق المفعّلة التي فيها عقار منشور، بأعدادها الحقيقية
+  const areas = useMemo(() => (data ? areaCards(data) : []), [data]);
 
   return (
     <PublicLayout mobileBar="after-hero">
@@ -53,29 +47,32 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section section--ruled">
-        <div className="container">
-          <div className="section-heading section-heading--center">
-            <h2>اكتشف المكان</h2>
+      {areas.length > 0 && (
+        <section className="section section--ruled">
+          <div className="container">
+            <div className="section-heading section-heading--center">
+              <h2>اكتشف المكان</h2>
+            </div>
+            <div className="neighborhood-grid">
+              {areas.map((area) => {
+                const cover = area.cover ? srcsetFor(area.cover) : null;
+                return (
+                  <Link key={area.id} href={`/properties?q=${encodeURIComponent(area.name)}`} className="neighborhood-card">
+                    {cover && (
+                      <img src={cover.src} srcSet={cover.srcSet} sizes="(max-width: 760px) 100vw, 33vw" alt="" loading="lazy" decoding="async" />
+                    )}
+                    <div className="neighborhood-card__overlay" />
+                    <div className="neighborhood-card__copy">
+                      <span>{countLabel(area.count)}</span>
+                      <h3>{area.name}</h3>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-          <div className="neighborhood-grid">
-            {neighborhoods.map((neighborhood, index) => (
-              <Link
-                key={neighborhood.name}
-                href={`/properties${neighborhood.query}`}
-                className="neighborhood-card"
-              >
-                <img src={neighborhood.image} alt="" loading="lazy" decoding="async" />
-                <div className="neighborhood-card__overlay" />
-                <div className="neighborhood-card__copy">
-                  {areaCounts[index] > 0 && <span>{countLabel(areaCounts[index])}</span>}
-                  <h3>{neighborhood.name}</h3>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="section contact-banner">
         <div className="container contact-banner__inner">

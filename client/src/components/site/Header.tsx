@@ -3,7 +3,7 @@ import { Link, useLocation, useSearchParams } from "wouter";
 import { ChevronDown, Heart, Menu, Phone, X } from "lucide-react";
 import { toast } from "sonner";
 import { contact, englishReady, mainNav } from "@/config/site";
-import { useDemoStore } from "@/store/DemoStore";
+import { useFavorites } from "@/store/Favorites";
 import Logo from "./Logo";
 import WhatsAppButton from "./WhatsAppButton";
 import { Ltr } from "./pageContext";
@@ -28,7 +28,7 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [condensed, setCondensed] = useState(false);
-  const { favorites } = useDemoStore();
+  const { favorites } = useFavorites();
   const langRef = useRef<HTMLDivElement>(null);
   const [params] = useSearchParams();
 

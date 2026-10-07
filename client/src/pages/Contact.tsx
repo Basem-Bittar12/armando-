@@ -2,8 +2,7 @@ import { useRef, useState } from "react";
 import { CheckCircle2, Clock3, Mail, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { contact, pageMeta, whatsappHref, whatsappTemplates } from "@/config/site";
-import { cities, rentalTerms } from "@/data/properties";
-import { useDemoStore } from "@/store/DemoStore";
+import { useCatalog, bySort } from "@/lib/catalog/store";
 import { useMeta } from "@/hooks/useMeta";
 import PublicLayout from "@/components/site/PublicLayout";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
@@ -28,7 +27,10 @@ const initialForm: FormState = {
 
 export default function Contact() {
   useMeta(pageMeta.contact);
-  const { addInquiry } = useDemoStore();
+  const { data } = useCatalog();
+  // خيارات النموذج من الخيارات المفعّلة
+  const rentalTerms = data ? bySort(data.rental_terms.filter((t) => t.is_active)).map((t) => t.name_ar) : [];
+  const cities = data ? bySort(data.cities.filter((c) => c.is_active)).map((c) => c.name_ar) : [];
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [sent, setSent] = useState(false);
@@ -64,12 +66,6 @@ export default function Contact() {
       toast.error("راجع الحقول المطلوبة قبل الإرسال");
       return;
     }
-    // نسخة في استفسارات لوحة المكتب (تجريبية، محلياً)
-    addInquiry({
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      message: `${[form.term, form.city].filter(Boolean).join(" · ") || "بدون تفضيلات"} — ${form.message.trim() || "بدون تفاصيل إضافية"}`,
-    });
     window.open(whatsappHref(message), "_blank", "noopener");
     setSent(true);
   };

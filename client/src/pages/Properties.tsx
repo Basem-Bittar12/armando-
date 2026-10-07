@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "wouter";
 import { RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
 import { pageMeta, whatsappTemplates } from "@/config/site";
-import { cities, propertyTypes, rentalTerms, type PropertyType } from "@/data/properties";
-import { useDemoStore } from "@/store/DemoStore";
+import { useCatalog } from "@/lib/catalog/store";
+import { filterOptions, publishedProperties } from "@/lib/catalog/view";
+import { useFavorites } from "@/store/Favorites";
+import { CardSkeletons, LoadError } from "@/components/site/CatalogState";
 import { useMeta } from "@/hooks/useMeta";
 import PublicLayout from "@/components/site/PublicLayout";
 import PropertyCard from "@/components/site/PropertyCard";
@@ -22,16 +24,15 @@ import {
   type SortKey,
 } from "@/lib/propertyFilters";
 
-const bedOptions = [
-  { value: "0", label: "استوديو" },
-  { value: "1", label: "غرفة" },
-  { value: "2", label: "غرفتان" },
-  { value: "3", label: "3 غرف" },
-  { value: "4", label: "4+ غرف" },
-];
+const bedLabel = (beds: number) =>
+  beds === 0 ? "استوديو" : beds === 1 ? "غرفة" : beds === 2 ? "غرفتان" : beds >= 4 ? "4+ غرف" : `${beds} غرف`;
 
-/** أنواع العقار في صف الفلاتر السريع (البقية في لوحة «فلترة») */
-const quickTypes: PropertyType[] = ["شقة", "فيلا", "استوديو"];
+/** خيارات غرف النوم من البيانات نفسها (4 فأكثر تُجمع بخيار واحد «4+ غرف») */
+const bedOptionsFrom = (beds: number[]) =>
+  Array.from(new Set(beds.map((value) => Math.min(value, 4)))).map((value) => ({ value: String(value), label: bedLabel(value) }));
+
+/** عدد أنواع العقار في صف الفلاتر السريع (البقية في لوحة «فلترة») */
+const QUICK_TYPES = 3;
 
 const countLabel = (count: number) => (count === 1 ? "عقار" : "عقارات");
 
@@ -41,8 +42,7 @@ function describeFilters(filters: Filters) {
   if (filters.type) parts.push(filters.type);
   if (filters.term) parts.push(`للإيجار ال${filters.term}`);
   if (filters.city) parts.push(`في ${filters.city}`);
-  const beds = bedOptions.find((option) => option.value === filters.beds);
-  if (beds) parts.push(beds.label);
+  if (filters.beds) parts.push(bedLabel(Number(filters.beds)));
   if (filters.minPrice && filters.maxPrice) parts.push(`بين ${filters.minPrice} و${filters.maxPrice} درهم`);
   else if (filters.minPrice) parts.push(`من ${filters.minPrice} درهم`);
   else if (filters.maxPrice) parts.push(`حتى ${filters.maxPrice} درهم`);
@@ -53,7 +53,17 @@ function describeFilters(filters: Filters) {
 export default function Properties() {
   useMeta(pageMeta.properties);
   const [params, setParams] = useSearchParams();
-  const { properties, favorites } = useDemoStore();
+  const { data, status, reload } = useCatalog();
+  const { favorites } = useFavorites();
+  const properties = useMemo(() => (data ? publishedProperties(data) : []), [data]);
+  // الفلاتر تُبنى من الخيارات المفعّلة التي عليها عقار منشور
+  const options = useMemo(
+    () => (data ? filterOptions(data) : { cities: [], types: [], terms: [], beds: [] }),
+    [data],
+  );
+  const bedOptions = useMemo(() => bedOptionsFrom(options.beds), [options.beds]);
+  const quickTypes = options.types.slice(0, QUICK_TYPES);
+  const { cities, terms: rentalTerms, types: propertyTypes } = options;
 
   const filters = useMemo(() => filtersFromParams(params), [params]);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -225,7 +235,7 @@ export default function Properties() {
                     allLabel="كل الإمارات"
                     options={cities.map((city) => ({ value: city, label: city }))}
                     value={filters.city}
-                    onChange={(value) => update({ city: value as Filters["city"] })}
+                    onChange={(value) => update({ city: value })}
                   />
                   )}
 
@@ -234,7 +244,7 @@ export default function Properties() {
                     allLabel="كل الأنواع"
                     options={propertyTypes.map((type) => ({ value: type, label: type }))}
                     value={filters.type}
-                    onChange={(value) => update({ type: value as Filters["type"] })}
+                    onChange={(value) => update({ type: value })}
                   />
 
                   <ChoiceChips
@@ -250,7 +260,7 @@ export default function Properties() {
                     allLabel="الكل"
                     options={rentalTerms.map((term) => ({ value: term, label: term }))}
                     value={filters.term}
-                    onChange={(value) => update({ term: value as Filters["term"] })}
+                    onChange={(value) => update({ term: value })}
                   />
 
                   <div className="filter-field filter-field--wide filter-price">
@@ -325,7 +335,15 @@ export default function Properties() {
           </div>
         )}
 
-        {results.length > 0 ? (
+        {status === "loading" ? (
+          <div className="container property-grid property-grid--listing" aria-busy="true">
+            <CardSkeletons count={4} />
+          </div>
+        ) : status === "error" ? (
+          <div className="container">
+            <LoadError onRetry={reload} />
+          </div>
+        ) : results.length > 0 ? (
           <div className="container property-grid property-grid--listing">
             {results.map((property) => (
               <PropertyCard key={property.id} property={property} />

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { whatsappTemplates } from "@/config/site";
-import type { Property } from "@/data/properties";
+import type { Property } from "@/lib/catalog/view";
 import { pauseScroll, resumeScroll } from "@/lib/motion";
 import SwipeGallery from "./SwipeGallery";
 import WhatsAppButton from "./WhatsAppButton";

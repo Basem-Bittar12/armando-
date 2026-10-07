@@ -1,5 +1,5 @@
 import { whatsappHref, whatsappTemplates } from "@/config/site";
-import type { Property } from "@/data/properties";
+import type { Property } from "@/lib/catalog/view";
 import { usePageWhatsAppMessage } from "./pageContext";
 import WhatsAppIcon from "./WhatsAppIcon";
 

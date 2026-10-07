@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import { ChevronRight, Heart, MapPin, Phone, Share2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { brand, contact, pageMeta, whatsappTemplates } from "@/config/site";
-import { useDemoStore } from "@/store/DemoStore";
+import { useCatalog } from "@/lib/catalog/store";
+import { publishedProperties } from "@/lib/catalog/view";
+import { useFavorites } from "@/store/Favorites";
+import { LoadError } from "@/components/site/CatalogState";
 import { useMeta } from "@/hooks/useMeta";
 import { lastListingHref, similarProperties } from "@/lib/propertyFilters";
 import PublicLayout from "@/components/site/PublicLayout";
@@ -42,8 +45,10 @@ const counter = (index: number, total: number) => (
 
 export default function PropertyDetail() {
   const params = useParams<{ id: string }>();
-  const { getProperty, properties, isFavorite, toggleFavorite } = useDemoStore();
-  const property = getProperty(params.id ?? "");
+  const { data, status, reload } = useCatalog();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const properties = useMemo(() => (data ? publishedProperties(data) : []), [data]);
+  const property = properties.find((item) => item.id === params.id);
 
   const [activeImage, setActiveImage] = useState(0);
   const [lightbox, setLightbox] = useState(false);
@@ -55,11 +60,32 @@ export default function PropertyDetail() {
   useMeta({
     title: property ? `${property.title} — ${property.id} | ${brand.name}` : pageMeta.notFound.title,
     description: property
-      ? `${property.type} ${property.term} في ${property.location} · ${property.price} درهم / ${property.term} · ${property.beds === 0 ? "استوديو" : `${property.beds} غرف`} · ${property.area}`
+      ? `${property.type} ${property.term} في ${property.location} · ${property.price} ${property.unit} · ${property.beds === 0 ? "استوديو" : `${property.beds} غرف`} · ${property.area}`
       : pageMeta.notFound.description,
     image: property?.image,
   });
 
+  if (status === "loading") {
+    return (
+      <PublicLayout>
+        <div className="container detail-loading" aria-busy="true">
+          <div className="skeleton-block detail-loading__image" />
+          <span className="skeleton-line skeleton-line--mid" />
+          <span className="skeleton-line" />
+          <span className="skeleton-line skeleton-line--short" />
+        </div>
+      </PublicLayout>
+    );
+  }
+  if (status === "error") {
+    return (
+      <PublicLayout>
+        <div className="container">
+          <LoadError onRetry={reload} />
+        </div>
+      </PublicLayout>
+    );
+  }
   if (!property) return <NotFoundProperty id={params.id ?? ""} />;
 
   const favorite = isFavorite(property.id);
@@ -68,7 +94,8 @@ export default function PropertyDetail() {
     property.status === "مؤجر" ? properties.filter((item) => item.status !== "مؤجر") : properties,
     property,
   );
-  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.location)}`;
+  // رابط الخريطة من لوحة التحكم إن وُجد، وإلا بحث باسم المنطقة
+  const mapUrl = property.mapUrl ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.location)}`;
   // البيت المؤجَّر: السؤال يصير عن بيت مشابه متاح
   const rented = property.status === "مؤجر";
   // رسالة واتساب: الكود والعنوان والرابط
@@ -107,7 +134,7 @@ export default function PropertyDetail() {
           <>
             <div className="mobile-action-bar__price">
               <strong>{property.price}</strong>
-              <span>درهم / {property.term}</span>
+              <span>{property.unit}</span>
             </div>
             <WhatsAppButton
               label={rented ? "اسأل عن بيت مشابه" : "اسأل عبر واتساب"}
@@ -186,10 +213,20 @@ export default function PropertyDetail() {
 
             <div className="detail-price">
               <strong>{property.price}</strong>
-              <span>درهم / {property.term}</span>
+              <span>{property.unit}</span>
               {/* الحالة تظهر فقط إذا لم يكن العقار متاحاً */}
               {property.status !== "متاح" && <small className="detail-status">{property.status}</small>}
             </div>
+            {/* سعر ثانٍ (مثلاً سنوي بجانب الشهري) */}
+            {property.prices.length > 1 && (
+              <p className="detail-other-prices">
+                {property.prices.slice(1).map((price) => (
+                  <span key={price.term}>
+                    أو <strong>{new Intl.NumberFormat("en-US").format(price.amount)}</strong> {price.unit}
+                  </span>
+                ))}
+              </p>
+            )}
             {rented && similar.length > 0 && (
               <a
                 href="#similar"

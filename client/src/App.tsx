@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { Route, Switch, useLocation } from "wouter";
+import { Redirect, Route, Switch, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { DemoStoreProvider } from "./store/DemoStore";
+import { CatalogProvider } from "./lib/catalog/store";
+import { FavoritesProvider } from "./store/Favorites";
 import RevealObserver from "./components/motion/RevealObserver";
 
 import Home from "./pages/Home";
@@ -13,12 +14,10 @@ import PropertyDetail from "./pages/PropertyDetail";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
-import Overview from "./pages/admin/Overview";
-import PropertiesAdmin from "./pages/admin/PropertiesAdmin";
-import Inquiries from "./pages/admin/Inquiries";
-import Media from "./pages/admin/Media";
-import Settings from "./pages/admin/Settings";
-import UsersPage from "./pages/admin/UsersPage";
+import PropertiesList from "./pages/admin/PropertiesList";
+import PropertyEdit from "./pages/admin/PropertyEdit";
+import HomeOrder from "./pages/admin/HomeOrder";
+import Options from "./pages/admin/Options";
 
 /** يعيد الصفحة إلى الأعلى عند الانتقال بين المسارات (وليس عند تغيير الفلاتر) */
 function ScrollToTop() {
@@ -39,12 +38,13 @@ function Routes() {
       <Route path="/property/:id" component={PropertyDetail} />
       <Route path="/contact" component={Contact} />
 
-      <Route path="/admin" component={Overview} />
-      <Route path="/admin/properties" component={PropertiesAdmin} />
-      <Route path="/admin/inquiries" component={Inquiries} />
-      <Route path="/admin/media" component={Media} />
-      <Route path="/admin/settings" component={Settings} />
-      <Route path="/admin/users" component={UsersPage} />
+      <Route path="/admin">
+        <Redirect to="/admin/properties" replace />
+      </Route>
+      <Route path="/admin/properties" component={PropertiesList} />
+      <Route path="/admin/properties/:id" component={PropertyEdit} />
+      <Route path="/admin/home" component={HomeOrder} />
+      <Route path="/admin/options" component={Options} />
 
       <Route component={NotFound} />
     </Switch>
@@ -56,12 +56,14 @@ export default function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
-          <DemoStoreProvider>
+          <CatalogProvider>
+            <FavoritesProvider>
             <Toaster position="top-center" />
             <ScrollToTop />
             <Routes />
             <RevealObserver />
-          </DemoStoreProvider>
+            </FavoritesProvider>
+          </CatalogProvider>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

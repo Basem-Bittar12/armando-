@@ -1,0 +1,235 @@
+/* ==========================================================================
+   هياكل التحميل (skeleton) للموقع العام + لوحة التحكم — ألوان الباليت فقط
+   ========================================================================== */
+@keyframes skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+.skeleton-block, .skeleton-line { background: var(--sandstone); animation: skeleton-pulse 1.4s ease-in-out infinite; }
+.skeleton-line { display: block; height: 14px; border-radius: 2px; width: 100%; }
+.skeleton-line--mid { width: 70%; }
+.skeleton-line--short { width: 40%; }
+.skeleton-card .property-card__body { gap: 10px; }
+.skeleton-card .property-card__image-wrap { background: var(--sandstone); }
+.detail-loading { display: grid; gap: 14px; padding-top: 32px; padding-bottom: 80px; }
+.detail-loading__image { height: min(60vw, 420px); }
+.load-error { margin: 32px 0; }
+.detail-other-prices { margin: -6px 0 0; color: var(--date); font-size: 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.detail-other-prices strong { color: var(--espresso-deep); font-weight: 400; font-size: 18px; }
+@media (prefers-reduced-motion: reduce) { .skeleton-block, .skeleton-line { animation: none; } }
+
+/* ==========================================================================
+   لوحة التحكم (adm-*) — للتلفون أولاً: تبويبات ثابتة أسفل الشاشة، أزرار 44px+، لا نص تحت 13px
+   ========================================================================== */
+.adm { min-height: 100vh; min-height: 100svh; background: var(--almond); color: var(--espresso-deep); font-size: 15px; }
+.adm-side { display: none; }
+.adm-main { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+.adm-top {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 60px; padding: 8px 16px; background: var(--almond); border-bottom: 1px solid var(--sandstone);
+}
+.adm-top h1 { margin: 0; font-size: 22px; font-weight: 400; line-height: 1.3; }
+.adm-top__actions { display: flex; align-items: center; gap: 8px; }
+.adm-icon-link, .adm-icon-button {
+  width: 44px; height: 44px; display: inline-grid; place-items: center; border: 1px solid var(--sandstone); border-radius: 50%;
+  background: transparent; color: var(--espresso-deep); flex: none;
+}
+.adm-icon-button:disabled { opacity: .35; cursor: not-allowed; }
+.adm-icon-button--danger:not(:disabled):hover { border-color: var(--date); color: var(--date); }
+.adm-demo-note { margin: 0; padding: 10px 16px; background: var(--sandstone); color: var(--espresso-deep); font-size: 13px; line-height: 1.6; }
+.adm-content { padding: 16px; max-width: 980px; margin: 0 auto; }
+.adm-loading { display: grid; gap: 12px; padding: 24px 0; }
+
+/* التبويبات أسفل الشاشة (تلفون) */
+.adm-tabs {
+  position: fixed; inset: auto 0 0 0; z-index: 30; display: grid; grid-template-columns: repeat(3, 1fr);
+  background: var(--espresso-deep); padding-bottom: env(safe-area-inset-bottom);
+}
+.adm-tabs a { min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: rgba(239,226,208,.72); font-size: 13px; }
+.adm-tabs a.active { color: var(--almond); box-shadow: inset 0 3px 0 var(--terracotta); }
+
+/* أزرار */
+.adm-button {
+  min-height: 48px; padding: 0 18px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid var(--espresso); background: transparent; color: var(--espresso-deep); font-size: 15px; white-space: nowrap;
+}
+.adm-button--primary { background: var(--espresso); color: var(--almond); }
+.adm-button--primary:hover { background: var(--espresso-deep); }
+.adm-button--danger { border-color: var(--date); color: var(--date); }
+.adm-button:disabled { opacity: .5; cursor: not-allowed; }
+.adm-top .adm-button { min-height: 44px; padding: 0 14px; }
+.adm-add { width: 100%; margin-bottom: 16px; }
+
+/* أزرار الاختيار */
+.adm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.adm-chips button {
+  min-height: 44px; padding: 0 14px; border: 1px solid var(--sandstone); background: transparent; color: var(--espresso-deep);
+  font-size: 15px; display: inline-flex; align-items: center; gap: 6px;
+}
+.adm-chips button.active { background: var(--espresso); border-color: var(--espresso); color: var(--almond); }
+.adm-chips button.is-muted:not(.active) { border-style: dashed; color: var(--date); }
+.adm-chips button b { font-weight: 400; font-size: 13px; color: var(--date); }
+.adm-chips button.active b { color: var(--sandstone); }
+.adm-chips button:focus-visible, .adm-button:focus-visible, .adm-icon-button:focus-visible, .adm-handle:focus-visible, .adm-tabs a:focus-visible {
+  outline: 2px solid var(--terracotta); outline-offset: 2px;
+}
+
+/* شريط البحث والفلترة */
+.adm-toolbar { display: grid; gap: 12px; margin-bottom: 16px; }
+.adm-search { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 12px; border: 1px solid var(--sandstone); color: var(--date); }
+.adm-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--espresso-deep); font-size: 16px; height: 46px; }
+.adm-note { margin: 0; color: var(--date); font-size: 14px; line-height: 1.7; }
+.adm-note a, .adm-item__hint a { color: var(--espresso-deep); text-decoration: underline; text-underline-offset: 3px; }
+.adm-empty { padding: 40px 0; display: grid; justify-items: start; gap: 16px; color: var(--date); }
+
+/* قائمة العقارات: كرت لكل عقار */
+.adm-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.adm-item { border: 1px solid var(--sandstone); padding: 14px; display: grid; gap: 12px; background: var(--almond); align-content: start; }
+.adm-item.is-draft { border-style: dashed; }
+.adm-item__head { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 12px; align-items: start; }
+.adm-item__thumb { width: 84px; aspect-ratio: 4 / 5; background: var(--sandstone); display: grid; place-items: center; overflow: hidden; color: var(--date); font-size: 13px; text-align: center; }
+.adm-item__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.adm-item__info { display: grid; gap: 4px; min-width: 0; }
+.adm-item__title { font-size: 17px; line-height: 1.45; color: var(--espresso-deep); }
+.adm-item__meta, .adm-item__price { margin: 0; color: var(--date); font-size: 14px; }
+.adm-item__price { color: var(--espresso-deep); }
+.adm-item__badges { margin: 2px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { font-size: 13px; padding: 2px 8px; border: 1px solid var(--sandstone); color: var(--date); }
+.badge--on { background: var(--sandstone); border-color: var(--sandstone); color: var(--espresso-deep); }
+.adm-item__status { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--sandstone); }
+.adm-item__status button { min-height: 44px; border: 0; background: transparent; color: var(--espresso-deep); font-size: 15px; }
+.adm-item__status button + button { border-inline-start: 1px solid var(--sandstone); }
+.adm-item__status button.active { background: var(--espresso); color: var(--almond); }
+.adm-item__toggles { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.adm-item__hint { margin: -4px 0 0; font-size: 13px; color: var(--date); }
+.adm-item__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.adm-danger-zone { margin-top: 32px; padding: 16px; border: 1px dashed var(--date); display: grid; gap: 10px; justify-items: start; }
+.adm-danger-zone h2 { margin: 0; font-size: 18px; font-weight: 400; }
+.adm-danger-zone p { margin: 0; color: var(--date); font-size: 14px; }
+
+/* مفتاح تشغيل/إيقاف */
+.adm-toggle { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; font-size: 15px; }
+.adm-toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.adm-toggle__track { width: 46px; height: 26px; border-radius: 13px; background: var(--sandstone); position: relative; flex: none; transition: background-color .2s var(--ease-quiet); }
+.adm-toggle__thumb { position: absolute; top: 3px; inset-inline-start: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--almond); box-shadow: 0 1px 3px rgba(47,34,26,.3); transition: inset-inline-start .2s var(--ease-quiet); }
+.adm-toggle input:checked + .adm-toggle__track { background: var(--espresso); }
+.adm-toggle input:checked + .adm-toggle__track .adm-toggle__thumb { inset-inline-start: 23px; }
+.adm-toggle input:focus-visible + .adm-toggle__track { outline: 2px solid var(--terracotta); outline-offset: 2px; }
+.adm-toggle.is-disabled { cursor: not-allowed; opacity: .5; }
+
+/* الفورم */
+.adm-form { display: grid; gap: 16px; padding-bottom: 88px; }
+.adm-back { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; color: var(--date); font-size: 14px; justify-self: start; }
+.adm-section { border: 1px solid var(--sandstone); padding: 16px; display: grid; gap: 14px; }
+.adm-section.has-error { border-color: var(--date); }
+.adm-section h2 { margin: 0; font-size: 19px; font-weight: 400; }
+.adm-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.adm-field { display: grid; gap: 8px; min-width: 0; border: 0; margin: 0; padding: 0; }
+.adm-field__label { color: var(--date); font-size: 14px; padding: 0; }
+.adm-field__hint { color: var(--date); font-size: 13px; line-height: 1.6; }
+.adm-field__error { color: var(--date); font-size: 13px; }
+.adm-field.has-error .adm-input { border-color: var(--date); border-width: 2px; }
+.adm-input {
+  width: 100%; min-height: 48px; padding: 0 12px; border: 1px solid var(--sandstone); background: transparent;
+  color: var(--espresso-deep); font-size: 16px; outline: 0; border-radius: 0;
+}
+.adm-input:focus { border-color: var(--espresso); }
+.adm-textarea { padding: 12px; line-height: 1.8; resize: vertical; min-height: 120px; }
+.adm-price { display: flex; align-items: center; gap: 10px; }
+.adm-price span { color: var(--date); font-size: 14px; white-space: nowrap; }
+.adm-stepper { display: grid; grid-template-columns: 48px 1fr 48px; border: 1px solid var(--sandstone); max-width: 220px; }
+.adm-stepper button { height: 48px; border: 0; background: transparent; color: var(--espresso-deep); display: grid; place-items: center; }
+.adm-stepper button:disabled { opacity: .3; }
+.adm-stepper output { display: grid; place-items: center; font-size: 17px; border-inline: 1px solid var(--sandstone); }
+.adm-toggles { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.adm-savebar {
+  position: fixed; inset: auto 0 calc(64px + env(safe-area-inset-bottom)) 0; z-index: 25; display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px;
+  padding: 10px 16px; background: var(--almond); border-top: 1px solid var(--sandstone); box-shadow: 0 -10px 24px -18px rgba(47,34,26,.4);
+}
+
+/* الصور */
+.adm-images { display: grid; gap: 12px; }
+.adm-images__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.adm-images__item { position: relative; aspect-ratio: 4 / 5; background: var(--sandstone); overflow: hidden; }
+.adm-images__item.is-dragging { z-index: 5; box-shadow: 0 18px 30px -12px rgba(47,34,26,.5); }
+.adm-images__item img { width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; }
+.adm-images__cover, .adm-images__new { position: absolute; top: 8px; inset-inline-start: 8px; padding: 3px 8px; font-size: 13px; background: var(--espresso); color: var(--almond); }
+.adm-images__new { inset-inline-start: auto; inset-inline-end: 8px; background: var(--almond); color: var(--espresso-deep); }
+.adm-images__bar { position: absolute; inset: auto 0 0 0; display: flex; justify-content: space-between; padding: 6px; background: linear-gradient(to top, rgba(47,34,26,.55), transparent); }
+.adm-images__bar button { width: 44px; height: 44px; border-radius: 50%; border: 0; display: grid; place-items: center; background: rgba(239,226,208,.92); color: var(--espresso-deep); }
+.adm-images__add {
+  min-height: 96px; border: 1px dashed var(--date); background: transparent; color: var(--espresso-deep); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px; font-size: 15px; padding: 12px;
+}
+.adm-images__add span { display: grid; gap: 6px; justify-items: center; }
+.adm-images__add progress { width: 180px; accent-color: var(--espresso); }
+
+/* مقبض السحب */
+.adm-handle {
+  width: 44px; height: 44px; flex: none; display: grid; place-items: center; border: 0; background: transparent; color: var(--date);
+  cursor: grab; touch-action: none; border-radius: 50%;
+}
+.adm-images__bar .adm-handle { background: rgba(239,226,208,.92); color: var(--espresso-deep); }
+.adm-handle:active { cursor: grabbing; }
+
+/* صفحة الرئيسية */
+.adm-count { display: grid; grid-template-columns: 56px 96px 56px; border: 1px solid var(--sandstone); width: max-content; }
+.adm-count button { height: 56px; border: 0; background: transparent; color: var(--espresso-deep); display: grid; place-items: center; }
+.adm-count button:disabled { opacity: .3; }
+.adm-count input { border: 0; border-inline: 1px solid var(--sandstone); background: transparent; text-align: center; font-size: 20px; color: var(--espresso-deep); outline: 0; width: 100%; }
+.adm-order { display: grid; gap: 8px; }
+.adm-order__item { display: grid; grid-template-columns: 44px 24px 56px minmax(0, 1fr) 44px; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--sandstone); background: var(--almond); }
+.adm-order__item.is-dragging, .adm-option.is-dragging { z-index: 5; position: relative; box-shadow: 0 14px 28px -14px rgba(47,34,26,.5); }
+.adm-order__num { color: var(--date); font-size: 15px; text-align: center; }
+.adm-order__item img, .adm-order__noimg { width: 56px; height: 70px; object-fit: cover; background: var(--sandstone); display: block; }
+.adm-order__info { display: grid; gap: 2px; min-width: 0; }
+.adm-order__info strong { font-weight: 400; font-size: 15px; line-height: 1.45; }
+.adm-order__info span { color: var(--date); font-size: 13px; }
+.adm-order__info em { font-style: normal; }
+
+/* صفحة الخيارات */
+.adm-tabs-row { margin-bottom: 16px; }
+.adm-options { display: grid; gap: 8px; margin-bottom: 16px; }
+.adm-option { display: grid; grid-template-columns: 44px auto minmax(0, 1fr); align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--sandstone); background: var(--almond); }
+.adm-option > .adm-option__cover { width: 48px; height: 48px; object-fit: cover; background: var(--sandstone); display: block; }
+.adm-option > .adm-handle + .adm-option__names { grid-column: 2 / 4; }
+.adm-option__names { display: grid; gap: 2px; min-width: 0; }
+.adm-option__names strong { font-weight: 400; font-size: 16px; }
+.adm-option__names strong.is-off { color: var(--date); text-decoration: line-through; text-decoration-color: var(--sandstone); }
+.adm-option__names span { color: var(--date); font-size: 13px; }
+.adm-option__actions { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid var(--sandstone); padding-top: 6px; }
+.adm-option__actions .adm-toggle { margin-inline-end: auto; }
+.adm-editor { margin-bottom: 16px; border-color: var(--espresso); }
+.adm-editor__actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; }
+.adm-cover { display: grid; gap: 10px; justify-items: start; }
+.adm-cover img { width: 100%; max-width: 360px; aspect-ratio: 16 / 10; object-fit: cover; }
+.adm-cover__empty { color: var(--date); font-size: 14px; }
+
+/* لابتوب: قائمة جانبية يمين، بلا تبويبات سفلية */
+@media (min-width: 900px) {
+  .adm { display: grid; grid-template-columns: 240px minmax(0, 1fr); }
+  .adm-side {
+    display: flex; flex-direction: column; gap: 24px; position: sticky; top: 0; height: 100vh; padding: 24px 16px;
+    background: var(--espresso-deep); color: var(--almond);
+  }
+  .adm-side__brand { display: flex; align-items: center; gap: 12px; font-size: 16px; padding: 0 8px; }
+  .adm-side__nav { display: grid; gap: 4px; }
+  .adm-side__nav a, .adm-side__site { min-height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 12px; color: rgba(239,226,208,.8); font-size: 15px; }
+  .adm-side__nav a.active { background: rgba(239,226,208,.1); color: var(--almond); box-shadow: inset -3px 0 0 var(--terracotta); }
+  .adm-side__site { margin-top: auto; }
+  .adm-tabs, .adm-top__site { display: none; }
+  .adm-main { padding-bottom: 0; }
+  .adm-top { padding: 12px 32px; min-height: 72px; }
+  .adm-top h1 { font-size: 26px; }
+  .adm-content { padding: 24px 32px 48px; }
+  .adm-demo-note { padding: 10px 32px; }
+  .adm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; }
+  .adm-field--wide { grid-column: 1 / -1; }
+  .adm-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adm-images__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .adm-form { padding-bottom: 0; }
+  .adm-savebar { position: sticky; inset: auto 0 0 0; margin: 0 -32px; padding: 12px 32px; display: flex; justify-content: flex-start; }
+  .adm-savebar .adm-button { min-width: 180px; }
+  .adm-add { width: auto; }
+  .adm-option { grid-template-columns: 44px auto minmax(0, 1fr) auto; }
+  .adm-option__actions { grid-column: auto; border-top: 0; padding-top: 0; }
+  .adm-editor__actions { display: flex; justify-content: flex-start; }
+  .adm-editor__actions .adm-button { min-width: 140px; }
+}

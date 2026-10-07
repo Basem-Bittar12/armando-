@@ -1,8 +1,8 @@
 import { Heart, MapPin } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
-import type { Property } from "@/data/properties";
-import { useDemoStore } from "@/store/DemoStore";
+import type { Property } from "@/lib/catalog/view";
+import { useFavorites } from "@/store/Favorites";
 import CardGallery from "./CardGallery";
 
 /** نوع العقار ومدة الإيجار ككلام عادي: "شقة للإيجار الشهري" */
@@ -22,7 +22,7 @@ export const specsLine = (property: Pick<Property, "beds" | "baths" | "area">) =
  * gallery: صور الكرت تتقلّب من برا (نقاط + سحب). يُطفأ في شريط الرئيسية لأن الشريط نفسه يتسحب أفقياً.
  */
 export function PropertyCard({ property, gallery = true }: { property: Property; gallery?: boolean }) {
-  const { isFavorite, toggleFavorite } = useDemoStore();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(property.id);
   const rented = property.status === "مؤجر";
 
@@ -65,7 +65,7 @@ export function PropertyCard({ property, gallery = true }: { property: Property;
         </p>
         <p className="property-card__specs">{specsLine(property)}</p>
         <p className="property-card__price">
-          <strong>{property.price}</strong> <span>درهم / {property.term}</span>
+          <strong>{property.price}</strong> <span>{property.unit}</span>
         </p>
       </div>
     </article>

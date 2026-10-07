@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef } from "react";
 import { Link } from "wouter";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useDemoStore } from "@/store/DemoStore";
+import { useCatalog } from "@/lib/catalog/store";
+import { homeProperties } from "@/lib/catalog/view";
+import { CardSkeletons, LoadError } from "./CatalogState";
 import { getActiveLenis, useStaticMotion } from "@/lib/motion";
 import PropertyCard from "./PropertyCard";
 
@@ -25,15 +27,9 @@ const USER_IDLE_MS = 180;
  * النسخة الثابتة (تقليل الحركة / توفير البيانات): صف يتسحب بالإصبع (scroll-snap) بلا تثبيت.
  */
 export function AvailableHomesStrip() {
-  const { properties } = useDemoStore();
-  const selection = useMemo(() => {
-    const ordered = [
-      ...properties.filter(property => property.featured),
-      ...properties.filter(property => property.new),
-      ...properties,
-    ];
-    return ordered.filter((property, index) => ordered.findIndex(other => other.id === property.id) === index).slice(0, 4);
-  }, [properties]);
+  const { data, status, reload } = useCatalog();
+  // المنشور + المعروض بالرئيسية + غير المؤجّر، بترتيبه وبحد العدد من الإعدادات
+  const selection = useMemo(() => (data ? homeProperties(data) : []), [data]);
   const { reduced } = useStaticMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
@@ -202,6 +198,9 @@ export function AvailableHomesStrip() {
     else window.scrollTo({ top: target, behavior: "instant" });
   };
 
+  // لا عقارات معروضة بالرئيسية: القسم لا يظهر أصلاً
+  if (status === "ready" && selection.length === 0) return null;
+
   return (
     <section ref={sectionRef} className={`hstrip ${reduced ? "hstrip--static" : ""}`} aria-labelledby="hstrip-title">
       <div ref={pinRef} className="hstrip__inner">
@@ -211,12 +210,23 @@ export function AvailableHomesStrip() {
         <div ref={viewportRef} className="hstrip__viewport">
           {/* المتحرك: الأول أقصى اليسار فيدخل أولاً من اليمين؛ الثابت: ترتيب عربي عادي من اليمين */}
           <div ref={trackRef} className="hstrip__track" dir={reduced ? "rtl" : "ltr"}>
+            {status === "loading" &&
+              [0, 1, 2].map((i) => (
+                <div className="hstrip__item" key={`skeleton-${i}`} dir="rtl">
+                  <CardSkeletons count={1} />
+                </div>
+              ))}
             {selection.map(property => (
               <div className="hstrip__item" key={property.id} dir="rtl" onFocus={revealOnFocus}>
                 <PropertyCard property={property} gallery={false} />
               </div>
             ))}
           </div>
+          {status === "error" && (
+            <div className="container">
+              <LoadError onRetry={reload} />
+            </div>
+          )}
         </div>
       </div>
       <div className="container section-cta hstrip__cta">

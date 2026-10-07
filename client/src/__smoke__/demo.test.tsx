@@ -264,112 +264,134 @@ describe("صفحات الموقع العام", () => {
 });
 
 describe("لوحة المكتب", () => {
-  it("النظرة العامة تعرض الإحصائيات الحقيقية من الحالة", async () => {
+  /** كتابة قيمة في حقل React */
+  async function type(element: Element | null | undefined, value: string) {
+    expect(element, "الحقل غير موجود").toBeTruthy();
+    await act(async () => {
+      const proto = element instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(proto, "value")!.set!.call(element, value);
+      element!.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
+  const field = (label: string) =>
+    Array.from(container!.querySelectorAll(".adm-field")).find((f) => f.querySelector(".adm-field__label")?.textContent === label)
+      ?.querySelector("input, textarea") as HTMLInputElement | null;
+  const item = (title: string) =>
+    Array.from(container!.querySelectorAll(".adm-item")).find((li) => li.textContent!.includes(title)) as HTMLElement | undefined;
+  const toggleIn = (scope: Element, label: string) =>
+    Array.from(scope.querySelectorAll(".adm-toggle")).find((t) => t.textContent!.includes(label))!.querySelector("input")!;
+
+  it("اللوحة تفتح على العقارات، والتبويبات الثلاثة تعمل", async () => {
     await mount("/admin");
-    expect(text()).toContain("صباح الخير");
-    expect(byText(".stat-card", "إجمالي العقارات")?.textContent).toContain("3");
-    expect(text()).toContain("آخر التحديثات");
+    expect(window.location.pathname).toBe("/admin/properties");
+    expect(container!.querySelectorAll(".adm-item").length).toBe(3);
+    const tabs = Array.from(container!.querySelectorAll(".adm-tabs a")).map((a) => a.textContent);
+    expect(tabs).toEqual(["العقارات", "الرئيسية", "الخيارات"]);
+    await click(byText(".adm-tabs a", "الرئيسية"));
+    expect(text()).toContain("عدد العقارات بالرئيسية");
+    await click(byText(".adm-tabs a", "الخيارات"));
+    expect(text()).toContain("إضافة مدينة");
+    // لا روابط للصفحات التجريبية القديمة
+    expect(text()).not.toContain("الاستفسارات");
   });
 
-  it("التنقل بين صفحات اللوحة يعمل بروابط حقيقية", async () => {
-    await mount("/admin");
+  it("إضافة عقار: النشر يحتاج سعر وصورة، والمسودة لا تظهر بالموقع", async () => {
+    await mount("/admin/properties/new");
+    expect((field("الكود") as HTMLInputElement).value).toBe("AK-200");
+    await type(field("اسم العقار"), "شقة تجريبية للفحص");
+    await click(byText(".adm-savebar button", "حفظ ونشر"));
+    expect(text()).toContain("للنشر لازم سعر واحد على الأقل");
+    expect(window.location.pathname).toBe("/admin/properties/new");
+    await type(field("شهري"), "7000");
+    await click(byText(".adm-savebar button", "حفظ كمسودة"));
+    expect(window.location.pathname).toBe("/admin/properties");
+    expect(item("شقة تجريبية للفحص")?.textContent).toContain("مسودة");
+    await navigate("/properties");
+    expect(text()).not.toContain("شقة تجريبية للفحص");
+    // النشر من القائمة
     await navigate("/admin/properties");
-    expect(text()).toContain("كل العقارات");
-    await navigate("/admin/inquiries");
-    expect(text()).toContain("الاستفسارات");
-    await navigate("/admin/media");
-    expect(text()).toContain("مكتبة الصور");
-    await navigate("/admin/settings");
-    expect(text()).toContain("إعدادات الموقع");
-    await navigate("/admin/users");
-    expect(text()).toContain("المستخدمون");
-    // الصفحات خارج النطاق موسومة "قريباً" وليست معطّلة
-    expect(container!.querySelector(".scope-notice")).toBeTruthy();
-  });
-
-  it("إضافة عقار من اللوحة تنشره في الموقع العام", async () => {
-    await mount("/admin/properties");
-    await click(byText(".properties-admin-heading button", "إضافة عقار"));
-    expect(container!.querySelector(".add-modal")).toBeTruthy();
-
-    // الحفظ بدون بيانات يُظهر أخطاء التحقق
-    await click(byText(".modal-footer button", "حفظ ونشر"));
-    expect(text()).toContain("اكتب اسماً واضحاً للعقار");
-
-    const setValue = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      "value",
-    )!.set!;
-    const inputs = Array.from(container!.querySelectorAll(".modal-form-grid input"));
-    const fill = async (index: number, value: string) => {
-      await act(async () => {
-        setValue.call(inputs[index], value);
-        inputs[index].dispatchEvent(new Event("input", { bubbles: true }));
-      });
-    };
-    await fill(0, "شقة تجريبية للفحص");
-    await fill(2, "7500");
-    await fill(3, "الجميرا، دبي");
-    await fill(6, "1,100 قدم²");
-
-    await click(byText(".modal-footer button", "حفظ ونشر"));
-    expect(container!.querySelector(".add-modal")).toBeFalsy();
-    expect(text()).toContain("شقة تجريبية للفحص");
-
-    // العقار الجديد يظهر في الموقع العام
+    await click(toggleIn(item("شقة تجريبية للفحص")!, "منشور"));
     await navigate("/properties");
     expect(text()).toContain("شقة تجريبية للفحص");
     expect(text()).toContain("4 عقارات متاحة");
   });
 
-  it("تغيير حالة عقار وحذفه يعملان مع تأكيد", async () => {
+  it("الكود لا يتكرر", async () => {
+    await mount("/admin/properties/new");
+    await type(field("اسم العقار"), "عقار بكود مكرر");
+    await type(field("الكود"), "AK-102");
+    await click(byText(".adm-savebar button", "حفظ كمسودة"));
+    expect(text()).toContain("الكود AK-102 مستعمل لعقار آخر");
+    expect(window.location.pathname).toBe("/admin/properties/new");
+  });
+
+  it("تعديل عقار يظهر بالموقع العام", async () => {
+    await mount("/admin/properties/p-102");
+    await type(field("اسم العقار"), "شقة بانورامية — بعد التعديل");
+    await click(byText(".adm-savebar button", "حفظ ونشر"));
+    await navigate("/property/AK-102");
+    expect(text()).toContain("شقة بانورامية — بعد التعديل");
+  });
+
+  it("الحالة السريعة والحذف مع تأكيد", async () => {
     await mount("/admin/properties");
-    const statusSelect = container!.querySelector(".status-select select") as HTMLSelectElement;
-    await act(async () => {
-      statusSelect.value = "مؤجر";
-      statusSelect.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-    expect((container!.querySelector(".status-select select") as HTMLSelectElement).value).toBe("مؤجر");
-
-    // قائمة الإجراءات → حذف → نافذة تأكيد
-    await click(container!.querySelector(".table-actions .icon-button"));
-    await click(byText(".row-menu button", "حذف العقار"));
-    expect(container!.querySelector(".confirm-dialog")).toBeTruthy();
-    await click(byText(".confirm-dialog .modal-footer button", "حذف"));
-    expect(container!.querySelector(".confirm-dialog")).toBeFalsy();
-    expect(text()).toContain("PROPERTY COLLECTION / 2");
+    const villa = () => item("فيلا خاصة بتصميم معاصر")!;
+    await click(Array.from(villa().querySelectorAll(".adm-item__status button")).find((b) => b.textContent === "مؤجر"));
+    expect(villa().querySelector(".adm-item__status button.active")?.textContent).toBe("مؤجر");
+    await click(Array.from(villa().querySelectorAll("button")).find((b) => b.textContent!.includes("حذف")));
+    expect(document.querySelector(".confirm-dialog")).toBeTruthy();
+    await click(Array.from(document.querySelectorAll(".confirm-dialog .modal-footer button")).find((b) => b.textContent === "حذف"));
+    expect(item("فيلا خاصة بتصميم معاصر")).toBeUndefined();
+    expect(container!.querySelectorAll(".adm-item").length).toBe(2);
   });
 
-  it("الاستفسارات: الاختيار وتغيير الحالة يعملان", async () => {
-    await mount("/admin/inquiries");
-    expect(text()).toContain("خالد المنصوري");
-    const rows = container!.querySelectorAll(".inquiry-row");
-    await click(rows[1]);
-    expect(container!.querySelector(".inquiry-detail")?.textContent).toContain("Sara Haddad");
-    await click(byText(".inquiry-actions button", "تمت المتابعة"));
-    expect(container!.querySelector(".inquiry-detail")?.textContent).toContain("تمت المتابعة");
+  it("حد الرئيسية: عند الوصول للعدد يتعطّل «اعرض بالرئيسية» برسالة", async () => {
+    await mount("/admin/home");
+    await click(container!.querySelector('.adm-count button[aria-label="إنقاص العدد"]'));
+    await click(container!.querySelector('.adm-count button[aria-label="إنقاص العدد"]'));
+    await click(container!.querySelector('.adm-count button[aria-label="إنقاص العدد"]'));
+    expect((container!.querySelector(".adm-count input") as HTMLInputElement).value).toBe("3");
+    expect(container!.querySelectorAll(".adm-order__item").length).toBe(3);
+    // عقار رابع (مسودة) لا يقدر يدخل الرئيسية
+    await navigate("/admin/properties/new");
+    await type(field("اسم العقار"), "عقار رابع");
+    await click(byText(".adm-savebar button", "حفظ كمسودة"));
+    const fourth = item("عقار رابع")!;
+    expect(toggleIn(fourth, "اعرض بالرئيسية").disabled).toBe(true);
+    expect(fourth.textContent).toContain("الرئيسية ممتلئة (3)");
   });
 
-  it("نموذج التواصل يصل إلى استفسارات اللوحة", async () => {
-    await mount("/contact");
-    const setValue = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      "value",
-    )!.set!;
-    const inputs = container!.querySelectorAll(".contact-form input");
-    await act(async () => {
-      setValue.call(inputs[0], "عميل الفحص");
-      inputs[0].dispatchEvent(new Event("input", { bubbles: true }));
-      setValue.call(inputs[1], "+971501112233");
-      inputs[1].dispatchEvent(new Event("input", { bubbles: true }));
-    });
-    await act(async () => {
-      (container!.querySelector(".contact-form") as HTMLFormElement).dispatchEvent(
-        new Event("submit", { bubbles: true, cancelable: true }),
-      );
-    });
-    await navigate("/admin/inquiries");
-    expect(text()).toContain("عميل الفحص");
+  it("الخيارات: مدينة جديدة لا يظهر فلترها إلا بعد عقار منشور لها، والمستعمل لا يُحذف", async () => {
+    await mount("/admin/options");
+    await click(byText(".adm-add", "إضافة مدينة"));
+    await type(field("الاسم بالعربي"), "الشارقة");
+    await type(field("الاسم بالإنجليزي"), "Sharjah");
+    await click(byText(".adm-editor__actions button", "حفظ"));
+    expect(container!.querySelectorAll(".adm-option").length).toBe(2);
+    const row = (name: string) => Array.from(container!.querySelectorAll(".adm-option")).find((r) => r.textContent!.includes(name))!;
+    expect((row("دبي").querySelector(".adm-icon-button--danger") as HTMLButtonElement).disabled).toBe(true);
+    expect((row("الشارقة").querySelector(".adm-icon-button--danger") as HTMLButtonElement).disabled).toBe(false);
+    // الموقع: لا فلتر مدينة لأن الشارقة بلا عقار منشور
+    await navigate("/properties");
+    await click(container!.querySelector(".filter-toggle"));
+    const legends = () => Array.from(container!.querySelectorAll(".filter-drawer legend")).map((l) => l.textContent);
+    expect(legends()).not.toContain("المدينة");
+    // عقار منشور بالشارقة ← يظهر فلتر المدينة
+    await navigate("/admin/properties/p-095");
+    await click(Array.from(container!.querySelectorAll(".adm-chips button")).find((b) => b.textContent === "الشارقة"));
+    await click(byText(".adm-savebar button", "حفظ ونشر"));
+    await navigate("/properties");
+    await click(container!.querySelector(".filter-toggle"));
+    expect(legends()).toContain("المدينة");
+    expect(Array.from(container!.querySelectorAll(".filter-drawer .choice-chips button")).map((b) => b.textContent)).toContain("الشارقة");
+  });
+
+  it("حذف كل العقارات التجريبية", async () => {
+    await mount("/admin/properties");
+    await click(byText(".adm-danger-zone button", "حذف كل العقارات التجريبية"));
+    await click(Array.from(document.querySelectorAll(".confirm-dialog .modal-footer button")).find((b) => b.textContent === "حذف الكل"));
+    expect(container!.querySelectorAll(".adm-item").length).toBe(0);
+    expect(text()).toContain("أضف أول عقار");
   });
 });
 

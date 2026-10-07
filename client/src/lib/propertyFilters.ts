@@ -1,4 +1,4 @@
-import type { City, Property, PropertyType, RentalTerm } from "@/data/properties";
+import type { Property } from "@/lib/catalog/view";
 
 /**
  * منطق البحث والفلترة. كل الفلاتر تُخزَّن في رابط الصفحة (query string)
@@ -22,9 +22,9 @@ export type SortKey = "newest" | "priceAsc" | "priceDesc" | "areaDesc";
 
 export type Filters = {
   q: string;
-  term: RentalTerm | "";
-  type: PropertyType | "";
-  city: City | "";
+  term: string;
+  type: string;
+  city: string;
   /** "0" استوديو، "4" تعني 4 غرف فأكثر */
   beds: string;
   minPrice: string;
@@ -57,9 +57,9 @@ export function filtersFromParams(params: URLSearchParams): Filters {
   const sort = params.get("sort") as SortKey | null;
   return {
     q: params.get("q") ?? "",
-    term: (params.get("term") as RentalTerm) ?? "",
-    type: (params.get("type") as PropertyType) ?? "",
-    city: (params.get("city") as City) ?? "",
+    term: params.get("term") ?? "",
+    type: params.get("type") ?? "",
+    city: params.get("city") ?? "",
     beds: params.get("beds") ?? "",
     minPrice: params.get("min") ?? "",
     maxPrice: params.get("max") ?? "",
@@ -95,7 +95,7 @@ export function activeFilterCount(filters: Filters): number {
   return count;
 }
 
-const termOrder = (term: RentalTerm) => (term === "شهري" ? 0 : 1);
+const termOrder = (term: string) => (term === "شهري" ? 0 : 1);
 
 /** هل فلتر السعر مستعمل */
 export const priceFilterActive = (filters: Filters) => Boolean(filters.minPrice || filters.maxPrice);
@@ -113,14 +113,17 @@ export function applyFilters(
 
   const filtered = list.filter((property) => {
     if (filters.fav && !favorites.includes(property.id)) return false;
-    if (filters.term && property.term !== filters.term) return false;
+    // العقار قد يكون له سعر شهري وسنوي معاً: يطابق أي منهما
+    if (filters.term && !property.prices.some((price) => price.term === filters.term)) return false;
     if (filters.type && property.type !== filters.type) return false;
     if (filters.city && property.city !== filters.city) return false;
     if (beds !== null) {
       // "4" تعني 4 غرف فأكثر
       if (beds >= 4 ? property.beds < 4 : property.beds !== beds) return false;
     }
-    if (property.priceValue < min || property.priceValue > max) return false;
+    // السعر المقارَن: سعر نوع الإيجار المختار إن وُجد، وإلا السعر المعروض
+    const price = (filters.term && property.prices.find((p) => p.term === filters.term)?.amount) || property.priceValue;
+    if (price < min || price > max) return false;
     if (query) {
       const haystack = `${property.title} ${property.location} ${property.city} ${property.id} ${property.type}`.toLowerCase();
       if (!haystack.includes(query)) return false;
