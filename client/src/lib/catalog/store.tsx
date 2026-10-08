@@ -83,6 +83,8 @@ export function CatalogProvider({ children, backend: given }: { children: ReactN
     };
   }, [backend, attempt]);
 
+  const reload = useCallback(() => setAttempt((n) => n + 1), []);
+
   const current = () => {
     if (!dataRef.current) throw new CatalogError("network", "البيانات لم تُحمّل بعد");
     return dataRef.current;
@@ -259,7 +261,7 @@ export function CatalogProvider({ children, backend: given }: { children: ReactN
       status,
       data,
       backendKind: backend.kind,
-      reload: () => setAttempt((n) => n + 1),
+      reload,
       saveProperty,
       deleteProperty,
       setPublished,
@@ -280,7 +282,7 @@ export function CatalogProvider({ children, backend: given }: { children: ReactN
       usageCount,
       nextCode,
     }),
-    [status, data, backend, saveProperty, deleteProperty, setPublished, setStatus_, setOnHome, reorderHome, setHomeCount, saveContact, deleteDemo, saveOption, deleteOption, reorderOptions, uploadAreaCover, usageCount, nextCode],
+    [status, data, backend, reload, saveProperty, deleteProperty, setPublished, setStatus_, setOnHome, reorderHome, setHomeCount, saveContact, deleteDemo, saveOption, deleteOption, reorderOptions, uploadAreaCover, usageCount, nextCode],
   );
 
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;

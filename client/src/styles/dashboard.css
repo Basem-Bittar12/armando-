@@ -1,19 +1,3 @@
-/* ==========================================================================
-   هياكل التحميل (skeleton) للموقع العام + لوحة التحكم — ألوان الباليت فقط
-   ========================================================================== */
-@keyframes skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
-.skeleton-block, .skeleton-line { background: var(--sandstone); animation: skeleton-pulse 1.4s ease-in-out infinite; }
-.skeleton-line { display: block; height: 14px; border-radius: 2px; width: 100%; }
-.skeleton-line--mid { width: 70%; }
-.skeleton-line--short { width: 40%; }
-.skeleton-card .property-card__body { gap: 10px; }
-.skeleton-card .property-card__image-wrap { background: var(--sandstone); }
-.detail-loading { display: grid; gap: 14px; padding-top: 32px; padding-bottom: 80px; }
-.detail-loading__image { height: min(60vw, 420px); }
-.load-error { margin: 32px 0; }
-.detail-other-prices { margin: -6px 0 0; color: var(--date); font-size: 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
-.detail-other-prices strong { color: var(--espresso-deep); font-weight: 400; font-size: 18px; }
-@media (prefers-reduced-motion: reduce) { .skeleton-block, .skeleton-line { animation: none; } }
 
 /* ==========================================================================
    لوحة التحكم (adm-*) — للتلفون أولاً: تبويبات ثابتة أسفل الشاشة، أزرار 44px+، لا نص تحت 13px
@@ -39,7 +23,7 @@
 
 /* التبويبات أسفل الشاشة (تلفون) */
 .adm-tabs {
-  position: fixed; inset: auto 0 0 0; z-index: 30; display: grid; grid-template-columns: repeat(3, 1fr);
+  position: fixed; inset: auto 0 0 0; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr);
   background: var(--espresso-deep); padding-bottom: env(safe-area-inset-bottom);
 }
 .adm-tabs a { min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: rgba(239,226,208,.72); font-size: 13px; }
@@ -93,7 +77,7 @@
 .adm-item__badges { margin: 2px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .badge { font-size: 13px; padding: 2px 8px; border: 1px solid var(--sandstone); color: var(--date); }
 .badge--on { background: var(--sandstone); border-color: var(--sandstone); color: var(--espresso-deep); }
-.adm-item__status { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--sandstone); }
+.adm-item__status { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--sandstone); }
 .adm-item__status button { min-height: 44px; border: 0; background: transparent; color: var(--espresso-deep); font-size: 15px; }
 .adm-item__status button + button { border-inline-start: 1px solid var(--sandstone); }
 .adm-item__status button.active { background: var(--espresso); color: var(--almond); }
@@ -143,6 +127,7 @@
   position: fixed; inset: auto 0 calc(64px + env(safe-area-inset-bottom)) 0; z-index: 25; display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px;
   padding: 10px 16px; background: var(--almond); border-top: 1px solid var(--sandstone); box-shadow: 0 -10px 24px -18px rgba(47,34,26,.4);
 }
+.adm-savebar--single { grid-template-columns: 1fr; }
 
 /* الصور */
 .adm-images { display: grid; gap: 12px; }
@@ -268,3 +253,43 @@
 @media (max-width: 899px) { .adm-list { grid-template-columns: minmax(0, 1fr); } }
 .adm-search input { width: 100%; }
 .adm-count { width: 100%; max-width: 208px; }
+
+/* ==========================================================================
+   الدخول، «المزيد»، الاستفسارات، التواصل، المساعدة — نفس عناصر اللوحة وألوان الباليت فقط
+   ========================================================================== */
+.adm-login { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 24px 16px; background: var(--almond); }
+.adm-login__card { width: 100%; max-width: 400px; display: grid; gap: 18px; }
+.adm-login__brand { display: grid; justify-items: center; gap: 10px; text-align: center; }
+.adm-login__brand h1 { margin: 0; font-size: 24px; font-weight: 400; }
+.adm-login__brand p { margin: 0; color: var(--date); font-size: 14px; line-height: 1.7; }
+.adm-login form { display: grid; gap: 14px; }
+.adm-login .adm-button { width: 100%; }
+.adm-login__error { margin: 0; padding: 10px 12px; border: 1px solid var(--date); color: var(--date); font-size: 14px; line-height: 1.6; }
+
+.adm-menu { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.adm-menu a, .adm-menu button {
+  width: 100%; min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  border: 1px solid var(--sandstone); background: transparent; color: var(--espresso-deep); font-size: 16px; text-align: start;
+}
+.adm-menu small { margin-inline-start: auto; color: var(--date); font-size: 13px; }
+.adm-menu a:focus-visible, .adm-menu button:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 2px; }
+.adm-side__logout { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; margin-top: 8px; background: transparent; border: 0; color: rgba(239,226,208,.72); font-size: 14px; }
+
+.adm-inquiry { border: 1px solid var(--sandstone); padding: 14px; display: grid; gap: 10px; }
+.adm-inquiry.is-new { border-color: var(--espresso); }
+.adm-inquiry__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.adm-inquiry__head strong { font-size: 17px; font-weight: 400; }
+.adm-inquiry__head time { color: var(--date); font-size: 13px; }
+.adm-inquiry__meta { margin: 0; color: var(--date); font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+.adm-inquiry__message { margin: 0; font-size: 15px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+.adm-inquiry__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.adm-inquiry__actions .adm-button { flex: 1 1 140px; }
+
+.adm-social { display: grid; gap: 10px; }
+.adm-social__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; border: 1px solid var(--sandstone); padding: 10px; }
+.adm-social__row .adm-grid { grid-template-columns: minmax(0, 1fr); }
+
+.adm-help { display: grid; gap: 16px; }
+.adm-help h2 { margin: 0 0 8px; font-size: 19px; font-weight: 400; }
+.adm-help ol, .adm-help ul { margin: 0; padding-inline-start: 22px; display: grid; gap: 8px; line-height: 1.8; }
+.adm-help p { margin: 0; line-height: 1.8; }

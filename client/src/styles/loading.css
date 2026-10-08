@@ -1,0 +1,16 @@
+/* ==========================================================================
+   هياكل التحميل (skeleton) للموقع العام + لوحة التحكم — ألوان الباليت فقط
+   ========================================================================== */
+@keyframes skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+.skeleton-block, .skeleton-line { background: var(--sandstone); animation: skeleton-pulse 1.4s ease-in-out infinite; }
+.skeleton-line { display: block; height: 14px; border-radius: 2px; width: 100%; }
+.skeleton-line--mid { width: 70%; }
+.skeleton-line--short { width: 40%; }
+.skeleton-card .property-card__body { gap: 10px; }
+.skeleton-card .property-card__image-wrap { background: var(--sandstone); }
+.detail-loading { display: grid; gap: 14px; padding-top: 32px; padding-bottom: 80px; }
+.detail-loading__image { height: min(60vw, 420px); }
+.load-error { margin: 32px 0; }
+.detail-other-prices { margin: -6px 0 0; color: var(--date); font-size: 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.detail-other-prices strong { color: var(--espresso-deep); font-weight: 400; font-size: 18px; }
+@media (prefers-reduced-motion: reduce) { .skeleton-block, .skeleton-line { animation: none; } }

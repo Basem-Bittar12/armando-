@@ -284,18 +284,28 @@ describe("لوحة المكتب", () => {
   const toggleIn = (scope: Element, label: string) =>
     Array.from(scope.querySelectorAll(".adm-toggle")).find((t) => t.textContent!.includes(label))!.querySelector("input")!;
 
-  it("اللوحة تفتح على العقارات، والتبويبات الثلاثة تعمل", async () => {
+  it("اللوحة تفتح على العقارات، والتبويبات الأربعة و«المزيد» تعمل", async () => {
     await mount("/admin");
     expect(window.location.pathname).toBe("/admin/properties");
     expect(container!.querySelectorAll(".adm-item").length).toBe(3);
     const tabs = Array.from(container!.querySelectorAll(".adm-tabs a")).map((a) => a.textContent);
-    expect(tabs).toEqual(["العقارات", "الرئيسية", "الخيارات"]);
+    expect(tabs).toEqual(["العقارات", "الرئيسية", "الاستفسارات", "المزيد"]);
     await click(byText(".adm-tabs a", "الرئيسية"));
     expect(text()).toContain("عدد العقارات بالرئيسية");
-    await click(byText(".adm-tabs a", "الخيارات"));
+    await click(byText(".adm-tabs a", "الاستفسارات"));
+    expect(text()).toContain("ما وصل أي طلب بعد");
+    await click(byText(".adm-tabs a", "المزيد"));
+    await click(byText(".adm-menu a", "الخيارات"));
     expect(text()).toContain("إضافة مدينة");
-    // لا روابط للصفحات التجريبية القديمة
-    expect(text()).not.toContain("الاستفسارات");
+    await click(byText(".adm-tabs a", "المزيد"));
+    await click(byText(".adm-menu a", "معلومات التواصل"));
+    expect((field("رقم واتساب") as HTMLInputElement).value).toBe("971502465851");
+    await click(byText(".adm-tabs a", "المزيد"));
+    await click(byText(".adm-menu a", "المساعدة"));
+    expect(text()).toContain("إضافة عقار");
+    // لا روابط لصفحات غير حقيقية (مستخدمون، مكتبة صور، إنجليزي)
+    expect(text()).not.toContain("المستخدمون");
+    expect(text()).not.toContain("مكتبة الصور");
   });
 
   it("إضافة عقار: النشر يحتاج سعر وصورة، والمسودة لا تظهر بالموقع", async () => {

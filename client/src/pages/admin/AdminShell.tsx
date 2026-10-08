@@ -1,15 +1,29 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Building2, ExternalLink, House, SlidersHorizontal } from "lucide-react";
+import { Building2, CircleHelp, Download, ExternalLink, House, Inbox, LogOut, Menu, Phone, SlidersHorizontal } from "lucide-react";
 import { pageMeta } from "@/config/site";
 import { useMeta } from "@/hooks/useMeta";
 import { useCatalog } from "@/lib/catalog/store";
 import { LoadError } from "@/components/site/CatalogState";
+import { useAuth } from "@/lib/auth";
+import { downloadBackup } from "./backup";
 
+/** القائمة الجانبية (لابتوب): كل الأقسام */
 const NAV = [
   { href: "/admin/properties", label: "العقارات", icon: Building2 },
   { href: "/admin/home", label: "الرئيسية", icon: House },
+  { href: "/admin/inquiries", label: "الاستفسارات", icon: Inbox },
   { href: "/admin/options", label: "الخيارات", icon: SlidersHorizontal },
+  { href: "/admin/contact", label: "التواصل", icon: Phone },
+  { href: "/admin/help", label: "المساعدة", icon: CircleHelp },
+] as const;
+
+/** التبويبات أسفل الشاشة (تلفون): الأكثر استعمالاً + «المزيد» للباقي */
+const TABS = [
+  { href: "/admin/properties", label: "العقارات", icon: Building2, also: [] as string[] },
+  { href: "/admin/home", label: "الرئيسية", icon: House, also: [] as string[] },
+  { href: "/admin/inquiries", label: "الاستفسارات", icon: Inbox, also: [] as string[] },
+  { href: "/admin/more", label: "المزيد", icon: Menu, also: ["/admin/options", "/admin/contact", "/admin/help"] },
 ] as const;
 
 /**
@@ -20,7 +34,8 @@ const NAV = [
 export function AdminShell({ title, actions, children }: { title: string; actions?: ReactNode; children: ReactNode }) {
   useMeta({ ...pageMeta.admin, noIndex: true });
   const [location] = useLocation();
-  const { status, reload, backendKind } = useCatalog();
+  const { status, reload, backendKind, data } = useCatalog();
+  const auth = useAuth();
   const isActive = (href: string) => location === href || location.startsWith(`${href}/`);
 
   return (
@@ -40,6 +55,14 @@ export function AdminShell({ title, actions, children }: { title: string; action
         <a className="adm-side__site" href="/" target="_blank" rel="noreferrer">
           <ExternalLink size={18} /> عرض الموقع
         </a>
+        <button type="button" className="adm-side__logout" onClick={() => data && downloadBackup(data)} disabled={!data}>
+          <Download size={18} /> نسخة احتياطية
+        </button>
+        {auth.status === "admin" && (
+          <button type="button" className="adm-side__logout" onClick={() => auth.signOut()} title={auth.email}>
+            <LogOut size={18} /> خروج
+          </button>
+        )}
       </aside>
 
       <div className="adm-main">
@@ -55,7 +78,7 @@ export function AdminShell({ title, actions, children }: { title: string; action
 
         {backendKind === "local" && (
           <p className="adm-demo-note">
-            وضع تجريبي: التعديلات تظهر بالموقع فوراً، لكنها تُنسى عند تحديث الصفحة — تُحفظ فعلياً بعد ربط Supabase.
+            وضع تجريبي (Supabase غير مربوط): التعديلات تظهر بالموقع فوراً، لكنها تُنسى عند تحديث الصفحة.
           </p>
         )}
 
@@ -73,12 +96,15 @@ export function AdminShell({ title, actions, children }: { title: string; action
       </div>
 
       <nav className="adm-tabs" aria-label="أقسام اللوحة">
-        {NAV.map(({ href, label, icon: Icon }) => (
-          <Link key={href} href={href} className={isActive(href) ? "active" : ""} aria-current={isActive(href) ? "page" : undefined}>
-            <Icon size={22} />
-            <span>{label}</span>
-          </Link>
-        ))}
+        {TABS.map(({ href, label, icon: Icon, also }) => {
+          const active = isActive(href) || also.some(isActive);
+          return (
+            <Link key={href} href={href} className={active ? "active" : ""} aria-current={active ? "page" : undefined}>
+              <Icon size={22} />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );

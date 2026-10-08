@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Redirect, Route, Switch, useLocation } from "wouter";
+import { lazy, Suspense, useEffect } from "react";
+import { Route, Switch, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -14,10 +14,16 @@ import PropertyDetail from "./pages/PropertyDetail";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
-import PropertiesList from "./pages/admin/PropertiesList";
-import PropertyEdit from "./pages/admin/PropertyEdit";
-import HomeOrder from "./pages/admin/HomeOrder";
-import Options from "./pages/admin/Options";
+// لوحة التحكم قطعة منفصلة: زائر الموقع لا يحمّل كودها ولا تنسيقها
+const AdminApp = lazy(() => import("./pages/admin/AdminApp"));
+
+function AdminRoute() {
+  return (
+    <Suspense fallback={<div className="adm-loading" aria-busy="true" />}>
+      <AdminApp />
+    </Suspense>
+  );
+}
 
 /** يعيد الصفحة إلى الأعلى عند الانتقال بين المسارات (وليس عند تغيير الفلاتر) */
 function ScrollToTop() {
@@ -38,13 +44,8 @@ function Routes() {
       <Route path="/property/:id" component={PropertyDetail} />
       <Route path="/contact" component={Contact} />
 
-      <Route path="/admin">
-        <Redirect to="/admin/properties" replace />
-      </Route>
-      <Route path="/admin/properties" component={PropertiesList} />
-      <Route path="/admin/properties/:id" component={PropertyEdit} />
-      <Route path="/admin/home" component={HomeOrder} />
-      <Route path="/admin/options" component={Options} />
+      <Route path="/admin" component={AdminRoute} />
+      <Route path="/admin/*" component={AdminRoute} />
 
       <Route component={NotFound} />
     </Switch>
