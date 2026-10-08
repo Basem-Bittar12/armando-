@@ -4,6 +4,8 @@
  * التشغيل: npx tsx scripts/seed-demo.ts
  */
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { serviceClient } from "./env";
 import { uploadImageSet } from "./images";
 import { demoProperties } from "./demo-properties";
@@ -26,6 +28,23 @@ const idOf = (list: { id: string; name_ar: string }[], name: string, label: stri
   if (!found) throw new Error(`${label} غير موجود: ${name}`);
   return found.id;
 };
+
+/**
+ * صورة العقار التجريبي من Unsplash. إن تعذّر تحميلها (بدون إنترنت أو شبكة مقفلة) نستعمل فريمات
+ * الغرفة المكتملة من قصة الهيرو الموجودة بالمشروع، حتى يبقى للعقار التجريبي صور.
+ */
+const FALLBACK_FRAMES = ["084", "078", "070", "062"];
+async function loadImage(url: string, index: number): Promise<Buffer> {
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (response.ok) return Buffer.from(await response.arrayBuffer());
+  } catch {
+    // نكمل بالبديل
+  }
+  const frame = FALLBACK_FRAMES[index % FALLBACK_FRAMES.length];
+  console.log(`  · تعذّر تحميل ${url.slice(0, 60)}… — استعملت فريم الهيرو ${frame}`);
+  return readFileSync(join(process.cwd(), "client/public/hero-frames/desktop", `${frame}.webp`));
+}
 
 let homeOrder = 1;
 for (const demo of demoProperties) {
@@ -81,9 +100,7 @@ for (const demo of demoProperties) {
   }
 
   for (const [index, url] of demo.gallery.entries()) {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`تحميل الصورة ${url}: ${response.status}`);
-    const set = await uploadImageSet(db, Buffer.from(await response.arrayBuffer()), property.id, randomUUID());
+    const set = await uploadImageSet(db, await loadImage(url, index), property.id, randomUUID());
     await one(db.from("property_images").insert({ property_id: property.id, sort_order: index, ...set }).select("id"), "سطر الصورة");
   }
   console.log(`✓ ${demo.code} — ${demo.title} (${demo.gallery.length} صور)`);

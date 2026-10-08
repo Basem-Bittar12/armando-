@@ -55,6 +55,14 @@ const REGIONS = [
 ];
 
 export async function connectDb(): Promise<pg.Client> {
+  // رابط مباشر (Supabase المحلي، أو connection string من لوحة Supabase) إن وُجد
+  const direct = process.env.SUPABASE_DB_URL?.trim();
+  if (direct) {
+    const client = new pg.Client({ connectionString: direct });
+    await client.connect();
+    console.log("✓ متصل بالقاعدة عبر SUPABASE_DB_URL");
+    return client;
+  }
   const candidates = [
     { host: `db.${env.ref}.supabase.co`, user: "postgres" },
     ...["aws-0", "aws-1"].flatMap((prefix) =>

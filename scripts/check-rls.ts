@@ -54,6 +54,29 @@ async function attack(who: string, client: SupabaseClient) {
   const city2 = await client.from("cities").insert({ name_ar: "هجوم" }).select("id");
   expect(`${who}: إضافة مدينة مرفوضة`, !!city2.error || (city2.data ?? []).length === 0, city2.error?.message ?? "");
 
+  // الدوال (RPC): حفظ عقار وترتيب الخيارات للمسؤول فقط
+  const rpcSave = await client.rpc("save_property", {
+    p: { id: draft!.id, code: "HACK-1", title: "هجوم", city_id: city!.id, type_id: type!.id, status: "متاح", is_published: true },
+    prices: [],
+    amenity_ids: [],
+    images: [],
+  });
+  expect(`${who}: دالة حفظ العقار مرفوضة`, !!rpcSave.error, rpcSave.error?.message ?? "نجحت!");
+  const rpcOrder = await client.rpc("reorder_options", { kind: "cities", ids: [city!.id] });
+  expect(`${who}: دالة ترتيب الخيارات مرفوضة`, !!rpcOrder.error, rpcOrder.error?.message ?? "نجحت!");
+
+  // الاستفسارات: الإضافة مسموحة، القراءة والتعديل لا، وفخّ السبام يرفض
+  const inquiry = await client.from("inquiries").insert({ name: "فحص الحماية", phone: "+971500000000", message: "rls-check" });
+  expect(`${who}: إرسال استفسار مسموح`, !inquiry.error, inquiry.error?.message ?? "");
+  const spam = await client.from("inquiries").insert({ name: "روبوت", phone: "+971500000000", website: "http://spam.example" });
+  expect(`${who}: استفسار بحقل الفخ مرفوض`, !!spam.error, spam.error?.message ?? "انقبل!");
+  const forged = await client.from("inquiries").insert({ name: "تزوير", phone: "+971500000000", status: "مغلق" });
+  expect(`${who}: استفسار بحالة مزوّرة مرفوض`, !!forged.error, forged.error?.message ?? "انقبل!");
+  const readInquiries = await client.from("inquiries").select("id");
+  expect(`${who}: قراءة الاستفسارات ممنوعة`, !!readInquiries.error || (readInquiries.data ?? []).length === 0, readInquiries.error?.message ?? "0 صفوف");
+  const updInquiries = await client.from("inquiries").update({ status: "مغلق" }).neq("status", "x").select("id");
+  expect(`${who}: تعديل الاستفسارات ممنوع`, !!updInquiries.error || (updInquiries.data ?? []).length === 0, updInquiries.error?.message ?? "0 صفوف");
+
   // التخزين
   const tiny = new Blob([new Uint8Array([82, 73, 70, 70])], { type: "image/webp" });
   const up = await client.storage.from("property-images").upload(`rls-test/${Date.now()}.webp`, tiny);
@@ -88,6 +111,7 @@ try {
 } finally {
   await admin.auth.admin.deleteUser(created.user.id);
   await admin.from("properties").delete().eq("id", draft.id);
+  await admin.from("inquiries").delete().eq("message", "rls-check");
 }
 
 console.log(results.join("\n"));
