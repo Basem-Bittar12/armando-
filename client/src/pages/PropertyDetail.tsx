@@ -16,6 +16,7 @@ import SwipeGallery from "@/components/site/SwipeGallery";
 import PropertyLightbox from "@/components/site/PropertyLightbox";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
 import { Ltr } from "@/components/site/pageContext";
+import { srcsetFor } from "@/lib/imageSrcset";
 
 function NotFoundProperty({ id }: { id: string }) {
   useMeta(pageMeta.notFound);
@@ -175,7 +176,8 @@ export default function PropertyDetail() {
                 {property.gallery.map((image, index) => (
                   <img
                     key={image + index}
-                    src={image}
+                    {...srcsetFor(image)}
+                    sizes="(max-width: 1100px) 66vw, 760px"
                     alt={index === activeImage ? property.title : ""}
                     aria-hidden={index !== activeImage}
                     className={index === activeImage ? "is-active" : ""}
@@ -192,7 +194,7 @@ export default function PropertyDetail() {
                     onClick={() => setActiveImage(index)}
                     aria-label={`عرض الصورة ${index + 1}`}
                   >
-                    <img src={image} alt="" loading="lazy" />
+                    <img {...srcsetFor(image)} sizes="120px" alt="" loading="lazy" />
                   </button>
                 ))}
               </div>

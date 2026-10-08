@@ -72,6 +72,11 @@ export default function Contact() {
       toast.error("راجع الحقول المطلوبة قبل الإرسال");
       return;
     }
+    // الحقل المخفي معبّى = روبوت: نُظهر النجاح بلا إرسال حتى لا نعطيه أي إشارة
+    if (website) {
+      setSent(true);
+      return;
+    }
     // الطلب ينحفظ بقائمة «الاستفسارات» باللوحة، والمكتب يتصل بالزائر
     setSending(true);
     try {

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { Property } from "@/lib/catalog/view";
 import { useFavorites } from "@/store/Favorites";
 import CardGallery from "./CardGallery";
+import { srcsetFor } from "@/lib/imageSrcset";
 
 /** نوع العقار ومدة الإيجار ككلام عادي: "شقة للإيجار الشهري" */
 export const rentalLabel = (property: Pick<Property, "type" | "term">) =>
@@ -37,7 +38,14 @@ export function PropertyCard({ property, gallery = true }: { property: Property;
         {gallery && property.gallery.length > 1 ? (
           <CardGallery images={property.gallery} href={`/property/${property.id}`} alt={property.title} />
         ) : (
-          <img src={property.image} alt="" className="property-card__image" loading="lazy" decoding="async" />
+          <img
+            {...srcsetFor(property.image)}
+            sizes="(max-width: 760px) 80vw, 360px"
+            alt=""
+            className="property-card__image"
+            loading="lazy"
+            decoding="async"
+          />
         )}
         {property.new && (
           <div className="property-card__chips">

@@ -16,7 +16,10 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed-demo.ts",
     "db:check-rls": "tsx scripts/check-rls.ts",
-    "admin:create": "tsx scripts/create-admin.ts"
+    "admin:create": "tsx scripts/create-admin.ts",
+    "storage:orphans": "tsx scripts/orphan-files.ts",
+    "test:e2e": "playwright test --project=chromium-desktop --project=chromium-iphone",
+    "test:e2e:webkit": "docker run --rm --network host -v \"$PWD\":\"$PWD\" -w \"$PWD\" -e E2E_NO_SERVER=1 mcr.microsoft.com/playwright:v1.56.1-noble npx playwright test --project=webkit-iphone"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { srcsetFor } from "@/lib/imageSrcset";
 
 /** تمرير الشريط إلى صورة — scrollTo إن وُجد (مع حركة اختيارية)، وإلا scrollLeft مباشرة */
 function scrollToSlide(track: HTMLElement, child: HTMLElement, smooth: boolean) {
@@ -72,10 +73,10 @@ export function SwipeGallery({
         <div className="swipe-gallery__slide" key={image + i}>
           {onSelect ? (
             <button type="button" onClick={() => onSelect(i)} aria-label={`تكبير الصورة ${i + 1}`}>
-              <img src={image} alt={i === index ? alt : ""} loading={i === 0 ? "eager" : "lazy"} decoding="async" draggable={false} />
+              <img {...srcsetFor(image)} sizes="100vw" alt={i === index ? alt : ""} loading={i === 0 ? "eager" : "lazy"} decoding="async" draggable={false} />
             </button>
           ) : (
-            <img src={image} alt={i === index ? alt : ""} loading="lazy" decoding="async" draggable={false} />
+            <img {...srcsetFor(image)} sizes="100vw" alt={i === index ? alt : ""} loading="lazy" decoding="async" draggable={false} />
           )}
         </div>
       ))}
