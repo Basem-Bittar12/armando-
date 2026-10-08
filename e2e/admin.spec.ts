@@ -16,6 +16,12 @@ test.describe("لوحة التحكم", () => {
       if (files?.length) await db.storage.from("property-images").remove(files.map((file) => `${row.id}/${file.name}`));
       await db.from("properties").delete().eq("id", row.id);
     }
+    const { data: areas } = await db.from("areas").select("id,cover_path").like("name_ar", "منطقة اختبار%");
+    for (const area of areas ?? []) {
+      if (area.cover_path) await db.storage.from("area-covers").remove([area.cover_path]);
+      await db.from("areas").delete().eq("id", area.id);
+    }
+    await db.from("cities").delete().like("name_ar", "مدينة اختبار%");
   });
 
   test("كل مسارات /admin محمية بالدخول، والتسجيل العام غير موجود", async ({ page }) => {
@@ -112,6 +118,56 @@ test.describe("لوحة التحكم", () => {
       await page.locator(".adm-side").getByRole("button", { name: "خروج" }).click();
     }
     await expect(page.getByLabel("كلمة السر")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("الخيارات: مدينة ومنطقة بصورة غلاف، إيقاف، والمدينة المستعملة ما بتنحذف", async ({ page }) => {
+    test.setTimeout(90_000);
+    const errors = watchConsole(page);
+    const admin = testAdmin();
+    const db = service();
+    const stamp = Date.now() % 100000;
+    const city = `مدينة اختبار ${stamp}`;
+    const area = `منطقة اختبار ${stamp}`;
+
+    await page.goto("/admin/options");
+    await page.getByLabel("الإيميل").fill(admin.email);
+    await page.getByLabel("كلمة السر").fill(admin.password);
+    await page.getByRole("button", { name: "دخول" }).click();
+    await expect(page).toHaveURL(/\/admin\/options$/);
+
+    // مدينة جديدة
+    await page.getByRole("button", { name: "إضافة مدينة" }).click();
+    await page.getByLabel("الاسم بالعربي").fill(city);
+    await page.getByRole("button", { name: "حفظ", exact: true }).click();
+    await expect(page.locator(".adm-option", { hasText: city })).toBeVisible();
+
+    // منطقة تابعة لها
+    await page.getByRole("tab", { name: /المناطق/ }).click();
+    await page.getByRole("button", { name: "إضافة منطقة" }).click();
+    await page.getByLabel("الاسم بالعربي").fill(area);
+    await page.getByRole("radio", { name: city }).click();
+    await page.getByRole("button", { name: "حفظ", exact: true }).click();
+    const areaRow = page.locator(".adm-option", { hasText: area });
+    await expect(areaRow).toBeVisible();
+
+    // صورة الغلاف
+    await areaRow.getByRole("button", { name: `تعديل ${area}` }).click();
+    await page.locator(".adm-cover input[type=file]").setInputFiles(join("e2e", "fixtures", "room-a.webp"));
+    await expect(page.locator(".adm-cover img")).toBeVisible({ timeout: 30_000 });
+    const { data: saved } = await db.from("areas").select("id,cover_path,city_id,cities(name_ar)").eq("name_ar", area).single();
+    expect(saved!.cover_path).toMatch(/\.webp$/);
+    expect((saved as unknown as { cities: { name_ar: string } }).cities.name_ar).toBe(city);
+    await page.getByRole("button", { name: "إلغاء" }).click();
+
+    // إيقاف المنطقة: تختفي من القراءة العامة
+    await areaRow.locator("label.adm-toggle").click();
+    await expect(areaRow).toContainText("موقوف");
+    await expect.poll(async () => (await db.from("areas").select("is_active").eq("id", saved!.id).single()).data?.is_active).toBe(false);
+
+    // المدينة صارت مستعملة (عليها منطقة): زر الحذف معطّل
+    await page.getByRole("tab", { name: /المدن/ }).click();
+    await expect(page.locator(".adm-option", { hasText: city }).getByRole("button", { name: /مستعمل/ })).toBeDisabled();
     expect(errors).toEqual([]);
   });
 });
