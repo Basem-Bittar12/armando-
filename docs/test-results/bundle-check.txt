@@ -1,0 +1,2 @@
+فحص 13 ملف، الملفات الرئيسية: assets/index-BNWlGoLy.js, assets/index-CZoZhHbz.css
+✓ لا مفاتيح سرية بملفات الموقع، واللوحة خارج الملف الرئيسي

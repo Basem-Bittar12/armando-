@@ -1,13 +1,13 @@
 
 Running 8 tests using 1 worker
 
-  ✓  1 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام / (5.3s)
-  ✓  2 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /properties (4.7s)
-  ✓  3 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-102 (4.8s)
-  ✓  4 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-087 (5.1s)
+  ✓  1 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام / (4.8s)
+  ✓  2 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /properties (5.0s)
+  ✓  3 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-102 (5.0s)
+  ✓  4 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-087 (4.7s)
   ✓  5 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /contact (4.4s)
-  ✓  6 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /no-such-page (4.4s)
-  ✓  7 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /admin (4.3s)
-  ✓  8 [chromium-desktop] › e2e/audit.spec.ts:123:3 › تدقيق الجودة › صفحات اللوحة (26.8s)
+  ✓  6 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /no-such-page (4.3s)
+  ✓  7 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /admin (4.4s)
+  ✓  8 [chromium-desktop] › e2e/audit.spec.ts:123:3 › تدقيق الجودة › صفحات اللوحة (27.0s)
 
   8 passed (1.0m)
