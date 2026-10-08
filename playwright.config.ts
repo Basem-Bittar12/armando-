@@ -10,6 +10,8 @@ const port = Number(process.env.E2E_PORT ?? 4173);
 
 export default defineConfig({
   testDir: "e2e",
+  // التدقيق (audit.spec.ts) يشتغل لحاله: npm run test:audit
+  testIgnore: process.env.E2E_AUDIT ? [] : ["**/audit.spec.ts"],
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,

@@ -21,7 +21,8 @@
     "test:e2e": "playwright test --project=chromium-desktop --project=chromium-iphone",
     "test:e2e:webkit": "docker run --rm --network host -v \"$PWD\":\"$PWD\" -w \"$PWD\" -e E2E_NO_SERVER=1 mcr.microsoft.com/playwright:v1.56.1-noble npx playwright test --project=webkit-iphone",
     "build:netlify": "vite build && tsx scripts/sitemap.ts && tsx scripts/check-bundle.ts",
-    "check:bundle": "tsx scripts/check-bundle.ts"
+    "check:bundle": "tsx scripts/check-bundle.ts",
+    "test:audit": "E2E_AUDIT=1 playwright test e2e/audit.spec.ts --project=chromium-desktop"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

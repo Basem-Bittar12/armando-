@@ -1406,6 +1406,7 @@ bdi { unicode-bidi: isolate; }
   scrollbar-width: none; overscroll-behavior-x: contain;
 }
 .card-gallery__track::-webkit-scrollbar { display: none; }
+.card-gallery__track:focus-visible { outline: 2px solid var(--terracotta); outline-offset: -2px; }
 .card-gallery__slide { flex: 0 0 100%; height: 100%; scroll-snap-align: start; scroll-snap-stop: always; display: block; }
 .card-gallery__dots {
   position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px;

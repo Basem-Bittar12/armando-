@@ -32,7 +32,8 @@ export function CardGallery({ images, href, alt }: { images: string[]; href: str
 
   return (
     <div className="card-gallery">
-      <div className="card-gallery__track" ref={trackRef} onScroll={onScroll}>
+      {/* قابل للتركيز ليتصفح مستخدم لوحة المفاتيح الصور بالأسهم */}
+      <div className="card-gallery__track" ref={trackRef} onScroll={onScroll} tabIndex={0} role="group" aria-label={`صور ${alt}`}>
         {images.map((image, i) => {
           const set = srcsetFor(image);
           return (

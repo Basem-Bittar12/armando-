@@ -1,12 +1,18 @@
 /**
  * إضافة مسؤول للوحة التحكم: ينشئ حساب Supabase Auth (بكلمة سر عشوائية لا تُعرض لأحد) ويضيفه لجدول admins.
- * صاحب الإيميل يضع كلمة سره بنفسه من «نسيت كلمة السر» في صفحة دخول اللوحة.
- * التشغيل: npx tsx scripts/create-admin.ts name@example.com
+ * كلمة السر: الوسيط الثاني (8 أحرف على الأقل)، أو عشوائية تُغيَّر لاحقاً من لوحة Supabase.
+ * التشغيل: npx tsx scripts/create-admin.ts name@example.com "كلمة-سر-قوية"
+ * (كلمة السر لا تُطبع ولا تُحفظ بأي ملف)
  */
 import { randomBytes } from "node:crypto";
 import { serviceClient } from "./env";
 
 const email = process.argv[2]?.trim().toLowerCase();
+const givenPassword = process.argv[3];
+if (givenPassword !== undefined && givenPassword.length < 8) {
+  console.error("✗ كلمة السر لازم تكون 8 أحرف على الأقل");
+  process.exit(1);
+}
 if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
   console.error("الاستعمال: npx tsx scripts/create-admin.ts name@example.com");
   process.exit(1);
@@ -17,7 +23,7 @@ let userId: string | undefined;
 
 const { data: created, error } = await db.auth.admin.createUser({
   email,
-  password: randomBytes(24).toString("base64url"),
+  password: givenPassword ?? randomBytes(24).toString("base64url"),
   email_confirm: true,
 });
 if (created?.user) {

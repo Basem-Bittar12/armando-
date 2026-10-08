@@ -1,0 +1,13 @@
+
+Running 8 tests using 1 worker
+
+  ✓  1 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام / (5.0s)
+  ✓  2 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /properties (4.9s)
+  ✓  3 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-102 (5.8s)
+  ✓  4 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-087 (4.8s)
+  ✓  5 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /contact (4.6s)
+  ✓  6 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /no-such-page (4.5s)
+  ✓  7 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /admin (4.5s)
+  ✓  8 [chromium-desktop] › e2e/audit.spec.ts:123:3 › تدقيق الجودة › صفحات اللوحة (27.2s)
+
+  8 passed (1.1m)

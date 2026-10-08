@@ -30,6 +30,25 @@ test.describe("الموقع العام", () => {
     expect(errors).toEqual([]);
   });
 
+  test("قصة الهيرو على مقاسات التلفون الشائعة: الكنباية والطاولة كاملتان", async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "يفتح مقاساته بنفسه — مرة واحدة تكفي");
+    const sizes = [[360, 640], [360, 740], [360, 800], [375, 667], [390, 664], [390, 844], [412, 915], [414, 896], [430, 932]];
+    for (const [width, height] of sizes) {
+      const context = await browser.newContext({ viewport: { width, height }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+      const page = await context.newPage();
+      const lines: string[] = [];
+      page.on("console", (message) => {
+        if (message.text().includes("mobile split")) lines.push(message.text());
+      });
+      await page.goto("/");
+      await expect.poll(() => lines.length, { message: `${width}x${height}: قياس الهيرو` }).toBeGreaterThan(0);
+      expect(lines.filter((line) => line.includes("sofa is cut")), `${width}x${height}`).toEqual([]);
+      // الصفحة تبدأ من أول القصة ولا سكرول أفقي
+      expect(await page.evaluate(() => [window.scrollY, document.documentElement.scrollWidth - document.documentElement.clientWidth])).toEqual([0, 0]);
+      await context.close();
+    }
+  });
+
   test("الشريط يفتح صفحة العقار ومعرض الصور", async ({ page, isMobile }) => {
     const errors = watchConsole(page);
     await page.goto("/");
