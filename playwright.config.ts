@@ -16,7 +16,7 @@ export default defineConfig({
   // اختبار اللوحة يعدّل بيانات مشتركة (حد الرئيسية): تشغيل متتالٍ أضمن
   workers: 1,
   retries: 0,
-  reporter: [["list"], ["json", { outputFile: "docs/test-results/e2e-last-run.json" }]],
+  reporter: [["list"], ["json", { outputFile: "test-results/e2e-last-run.json" }]],
   globalSetup: "./e2e/global-setup.ts",
   globalTeardown: "./e2e/global-teardown.ts",
   use: {

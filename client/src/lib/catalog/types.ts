@@ -105,6 +105,8 @@ export type CatalogData = {
 export type NewImage = {
   id: string;
   blobs: { 640: Blob; 1080: Blob; 1600: Blob };
+  /** نسخة JPEG بعرض 1200 لمعاينة الرابط (واتساب) — اختيارية */
+  og?: Blob;
   /** معاينة محلية */
   preview: string;
 };

@@ -3,10 +3,10 @@
  * المتجر (store.tsx) يحسب الحالة الجديدة ويتحقق من القواعد، ثم يطلب من المصدر حفظها.
  * يُختار Supabase تلقائياً متى وُجد VITE_SUPABASE_URL وVITE_SUPABASE_ANON_KEY.
  */
-import { AREA_COVERS_BUCKET, IMAGES_BUCKET, getSupabase, publicUrl, supabaseConfigured } from "@/lib/supabase";
+import { getSupabase, supabaseConfigured } from "@/lib/supabase";
 import { demoCatalog } from "./demoSeed";
+import { OPTION_COLUMNS, PROPERTY_COLUMNS, areaFromDb, imageFromDb, must, toCatalogError, type DbImage } from "./supabaseShared";
 import {
-  CatalogError,
   type AreaRow,
   type CatalogData,
   type FullProperty,
@@ -98,73 +98,12 @@ export function localBackend(): CatalogBackend {
 }
 
 // ---------------------------------------------------------------------------
-// Supabase
+// Supabase: القراءة وإرسال الاستفسار هنا؛ الكتابة بملف supabaseAdmin.ts (lazy)
 // ---------------------------------------------------------------------------
-
-type DbError = { message: string; code?: string; details?: string | null; hint?: string | null } | null;
-
-/** خطأ Supabase → رسالة يفهمها صاحب الموقع */
-function toCatalogError(error: DbError | Error, fallback = "صار خطأ بالحفظ — جرّب مرة ثانية"): CatalogError {
-  if (error instanceof CatalogError) return error;
-  const message = error?.message ?? "";
-  const code = (error as { code?: string } | null)?.code;
-  if (/home_limit_reached/.test(message)) return new CatalogError("home_limit", "وصلت لحد عقارات الرئيسية. شيل عقاراً منها أو كبّر العدد من صفحة «الرئيسية».");
-  if (code === "23505" && /code/.test(message)) return new CatalogError("code_taken", "هذا الكود مستعمل لعقار آخر");
-  if (code === "23503") return new CatalogError("in_use", "هذا الخيار مستعمل بعقار — أوقفه بدل الحذف");
-  if (/area_city_mismatch/.test(message)) return new CatalogError("invalid", "المنطقة ليست تابعة لمدينة العقار");
-  if (code === "42501" || /not_admin|row-level security/.test(message)) return new CatalogError("invalid", "ما عندك صلاحية — سجّل دخول من جديد");
-  if (/Failed to fetch|NetworkError|Load failed/i.test(message)) return new CatalogError("network", "ما في اتصال بالإنترنت — جرّب مرة ثانية");
-  console.error("[Catalog]", error);
-  return new CatalogError("invalid", fallback);
-}
-
-async function must<T>(query: PromiseLike<{ data: T; error: DbError }>): Promise<T> {
-  const { data, error } = await query;
-  if (error) throw toCatalogError(error);
-  return data;
-}
-
-const OPTION_COLUMNS: Record<OptionKind, string[]> = {
-  cities: ["id", "name_ar", "name_en", "sort_order", "is_active"],
-  areas: ["id", "city_id", "name_ar", "name_en", "cover_path", "sort_order", "is_active"],
-  property_types: ["id", "name_ar", "name_en", "sort_order", "is_active"],
-  rental_terms: ["id", "name_ar", "name_en", "unit_ar", "unit_en", "sort_order", "is_active"],
-  amenities: ["id", "name_ar", "name_en", "sort_order", "is_active"],
-};
-
-const PROPERTY_COLUMNS = [
-  "id", "code", "title", "description", "city_id", "area_id", "type_id", "bedrooms", "bathrooms", "area_sqft", "floor",
-  "year_built", "furnished", "min_rent_period", "max_guests", "map_url", "permit_no", "available_from", "status",
-  "is_new", "is_published", "show_on_home", "home_order", "is_demo", "updated_at",
-] as const;
-/** حقول تقبلها التعديلات السريعة من القائمة */
-const PATCHABLE = new Set(["is_published", "status", "show_on_home", "home_order", "is_new"]);
-
-const pick = (row: Record<string, unknown>, keys: readonly string[]) =>
-  Object.fromEntries(keys.filter((key) => key in row).map((key) => [key, row[key]]));
-
-type DbImage = { id: string; sort_order: number; path_640: string; path_1080: string; path_1600: string; width: number | null; height: number | null };
-
-const imageFromDb = (row: DbImage): ImageRow => ({
-  id: row.id,
-  sort_order: row.sort_order,
-  src_640: publicUrl(IMAGES_BUCKET, row.path_640),
-  src_1080: publicUrl(IMAGES_BUCKET, row.path_1080),
-  src_1600: publicUrl(IMAGES_BUCKET, row.path_1600),
-  paths: { 640: row.path_640, 1080: row.path_1080, 1600: row.path_1600 },
-  width: row.width,
-  height: row.height,
-});
-
-const areaFromDb = (row: Omit<AreaRow, "cover_url">): AreaRow => ({
-  ...row,
-  cover_url: row.cover_path ? publicUrl(AREA_COVERS_BUCKET, row.cover_path) : null,
-});
-
-const imagePaths = (image: ImageRow) => (image.paths ? [image.paths[640], image.paths[1080], image.paths[1600]] : []);
 
 export function supabaseBackend(): CatalogBackend {
   const db = getSupabase();
+  const ops = () => import("./supabaseAdmin").then((module) => module.adminOps(db));
 
   return {
     kind: "supabase",
@@ -206,126 +145,18 @@ export function supabaseBackend(): CatalogBackend {
       };
     },
 
-    async saveProperty(property, newImages, removedImages) {
-      // 1) رفع الصور الجديدة أولاً (ثلاث نسخ لكل صورة)
-      const uploaded: string[] = [];
-      const fresh = new Map<string, ImageRow["paths"]>();
-      try {
-        for (const image of newImages) {
-          const paths = { 640: "", 1080: "", 1600: "" } as NonNullable<ImageRow["paths"]>;
-          for (const width of [640, 1080, 1600] as const) {
-            const path = `${property.id}/${image.id}-${width}.webp`;
-            const { error } = await db.storage
-              .from(IMAGES_BUCKET)
-              .upload(path, image.blobs[width], { contentType: "image/webp", cacheControl: "31536000", upsert: false });
-            if (error) throw new CatalogError("storage", `ما قدرت أرفع الصورة: ${error.message}`);
-            uploaded.push(path);
-            paths[width] = path;
-          }
-          fresh.set(image.id, paths);
-        }
-
-        // 2) حفظ العقار وأسعاره ومرافقه وترتيب صوره بعملية واحدة
-        const images = property.images.map((image, index) => {
-          const paths = fresh.get(image.id) ?? image.paths;
-          if (!paths) throw new CatalogError("invalid", "صورة بدون ملف — احذفها وأضفها من جديد");
-          return { id: image.id, sort_order: index, path_640: paths[640], path_1080: paths[1080], path_1600: paths[1600], width: image.width ?? null, height: image.height ?? null };
-        });
-        await must(
-          db.rpc("save_property", {
-            p: pick(property as unknown as Record<string, unknown>, PROPERTY_COLUMNS.filter((key) => key !== "is_demo" && key !== "updated_at")),
-            prices: property.prices,
-            amenity_ids: property.amenity_ids,
-            images,
-          }),
-        );
-      } catch (error) {
-        // الحفظ فشل: نشيل الصور اللي انرفعت حتى ما تضل ملفات يتيمة
-        if (uploaded.length) await db.storage.from(IMAGES_BUCKET).remove(uploaded);
-        throw toCatalogError(error as Error);
-      }
-
-      // 3) حذف ملفات الصور المشالة (بعد نجاح الحفظ فقط)
-      const stale = removedImages.flatMap(imagePaths);
-      if (stale.length) {
-        const { error } = await db.storage.from(IMAGES_BUCKET).remove(stale);
-        if (error) console.warn("[Catalog] old image files not removed (see scripts/orphan-files.ts)", error.message);
-      }
-
-      return {
-        ...property,
-        images: property.images.map((image, index) => {
-          const paths = fresh.get(image.id) ?? image.paths!;
-          return imageFromDb({ id: image.id, sort_order: index, path_640: paths[640], path_1080: paths[1080], path_1600: paths[1600], width: image.width ?? null, height: image.height ?? null });
-        }),
-        updated_at: new Date().toISOString(),
-      };
-    },
-
-    async deleteProperty(property) {
-      // السطر أولاً (الأسعار والصور والمرافق تنحذف معه)، ثم كل ملفات مجلد العقار
-      const deleted = await must(db.from("properties").delete().eq("id", property.id).select("id"));
-      if (!deleted?.length) throw new CatalogError("invalid", "ما انحذف العقار — يمكن ما عندك صلاحية");
-      const known = property.images.flatMap(imagePaths);
-      const { data: listed } = await db.storage.from(IMAGES_BUCKET).list(property.id, { limit: 1000 });
-      const files = Array.from(new Set([...known, ...(listed ?? []).map((file) => `${property.id}/${file.name}`)]));
-      if (files.length) {
-        const { error } = await db.storage.from(IMAGES_BUCKET).remove(files);
-        if (error) console.warn("[Catalog] image files not removed (see scripts/orphan-files.ts)", error.message);
-      }
-    },
-
-    async patchProperties(patches) {
-      const onlyOrder = patches.length > 1 && patches.every(({ patch }) => Object.keys(patch).every((key) => key === "home_order"));
-      if (onlyOrder) {
-        const ids = [...patches].sort((a, b) => (a.patch.home_order ?? 0) - (b.patch.home_order ?? 0)).map((item) => item.id);
-        await must(db.rpc("reorder_home", { ids }));
-        return;
-      }
-      for (const { id, patch } of patches) {
-        const fields = Object.fromEntries(Object.entries(patch).filter(([key]) => PATCHABLE.has(key)));
-        const rows = await must(db.from("properties").update(fields).eq("id", id).select("id"));
-        if (!rows?.length) throw new CatalogError("invalid", "ما انحفظ التعديل — سجّل دخول من جديد");
-      }
-    },
-
-    async saveSettings(patch) {
-      const rows = await must(db.from("settings").update(patch).eq("id", 1).select("id"));
-      if (!rows?.length) throw new CatalogError("invalid", "ما انحفظت الإعدادات — سجّل دخول من جديد");
-    },
-
-    async saveOption(kind, row) {
-      const saved = await must(
-        db.from(kind).upsert(pick(row as unknown as Record<string, unknown>, OPTION_COLUMNS[kind])).select(OPTION_COLUMNS[kind].join(",")).single(),
-      );
-      return kind === "areas" ? areaFromDb(saved as unknown as AreaRow) : (saved as unknown as OptionRow);
-    },
-
-    async deleteOption(kind, id) {
-      const rows = await must(db.from(kind).delete().eq("id", id).select("id"));
-      if (!rows?.length) throw new CatalogError("invalid", "ما انحذف — سجّل دخول من جديد");
-    },
-
-    async reorderOptions(kind, ids) {
-      await must(db.rpc("reorder_options", { kind, ids }));
-    },
-
-    async uploadAreaCover(area, image) {
-      const path = `${area.id}/${image.id}.webp`;
-      const { error } = await db.storage
-        .from(AREA_COVERS_BUCKET)
-        .upload(path, image.blobs[1080], { contentType: "image/webp", cacheControl: "31536000", upsert: false });
-      if (error) throw new CatalogError("storage", `ما قدرت أرفع الصورة: ${error.message}`);
-      try {
-        const rows = await must(db.from("areas").update({ cover_path: path }).eq("id", area.id).select("id"));
-        if (!rows?.length) throw new CatalogError("invalid", "ما انحفظت الصورة — سجّل دخول من جديد");
-      } catch (saveError) {
-        await db.storage.from(AREA_COVERS_BUCKET).remove([path]);
-        throw saveError;
-      }
-      if (area.cover_path) await db.storage.from(AREA_COVERS_BUCKET).remove([area.cover_path]);
-      return { url: publicUrl(AREA_COVERS_BUCKET, path), path };
-    },
+    // الكتابة: تُحمَّل عند أول استعمال (لوحة التحكم فقط)
+    saveProperty: (...args) => ops().then((o) => o.saveProperty(...args)),
+    deleteProperty: (...args) => ops().then((o) => o.deleteProperty(...args)),
+    patchProperties: (...args) => ops().then((o) => o.patchProperties(...args)),
+    saveSettings: (...args) => ops().then((o) => o.saveSettings(...args)),
+    saveOption: (...args) => ops().then((o) => o.saveOption(...args)),
+    deleteOption: (...args) => ops().then((o) => o.deleteOption(...args)),
+    reorderOptions: (...args) => ops().then((o) => o.reorderOptions(...args)),
+    uploadAreaCover: (...args) => ops().then((o) => o.uploadAreaCover(...args)),
+    listInquiries: () => ops().then((o) => o.listInquiries()),
+    setInquiryStatus: (...args) => ops().then((o) => o.setInquiryStatus(...args)),
+    deleteInquiry: (...args) => ops().then((o) => o.deleteInquiry(...args)),
 
     async submitInquiry(input) {
       // بدون .select(): الزائر يقدر يضيف بس ما يقدر يقرأ
@@ -339,22 +170,6 @@ export function supabaseBackend(): CatalogBackend {
         website: input.website ?? "",
       });
       if (error) throw toCatalogError(error, "ما وصل الطلب — جرّب مرة ثانية أو راسلنا على واتساب");
-    },
-
-    async listInquiries() {
-      return (await must(
-        db.from("inquiries").select("id,name,phone,rental_term,city,message,property_code,status,created_at").order("created_at", { ascending: false }).limit(500),
-      )) as Inquiry[];
-    },
-
-    async setInquiryStatus(id, status) {
-      const rows = await must(db.from("inquiries").update({ status }).eq("id", id).select("id"));
-      if (!rows?.length) throw new CatalogError("invalid", "ما انحفظت الحالة — سجّل دخول من جديد");
-    },
-
-    async deleteInquiry(id) {
-      const rows = await must(db.from("inquiries").delete().eq("id", id).select("id"));
-      if (!rows?.length) throw new CatalogError("invalid", "ما انحذف — سجّل دخول من جديد");
     },
   };
 }

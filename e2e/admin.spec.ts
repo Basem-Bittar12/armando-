@@ -63,7 +63,7 @@ test.describe("لوحة التحكم", () => {
     await page.getByRole("button", { name: "حفظ ونشر" }).click();
     await expect(page).toHaveURL(/\/admin\/properties$/, { timeout: 30_000 });
 
-    // بالقاعدة: العقار وسعره ومرفقه وصورتان بثلاث نسخ WebP مرفوعة
+    // بالقاعدة: العقار وسعره ومرفقه وصورتان بثلاث نسخ WebP مرفوعة + JPEG للمشاركة
     const { data: saved } = await db
       .from("properties")
       .select("id,is_published,show_on_home,property_prices(amount),property_amenities(amenity_id),property_images(path_640,path_1080,path_1600,sort_order)")
@@ -75,7 +75,9 @@ test.describe("لوحة التحكم", () => {
     expect(saved!.property_images).toHaveLength(2);
     const { data: files } = await db.storage.from("property-images").list(saved!.id);
     expect((files ?? []).map((file) => file.name).filter((name) => name.endsWith(".webp"))).toHaveLength(6);
-    for (const file of files ?? []) expect(file.metadata?.mimetype).toBe("image/webp");
+    for (const file of files ?? []) expect(file.metadata?.mimetype).toBe(file.name.endsWith(".jpg") ? "image/jpeg" : "image/webp");
+    // صورة مشاركة JPEG لكل صورة (معاينة واتساب)
+    expect((files ?? []).filter((file) => file.name.endsWith("-og.jpg"))).toHaveLength(2);
 
     // عرضه بالرئيسية من القائمة
     const item = page.locator(".adm-item", { hasText: title });

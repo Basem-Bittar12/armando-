@@ -65,6 +65,13 @@ export async function resizeImage(file: File): Promise<NewImage> {
     context.drawImage(source, 0, 0, canvas.width, canvas.height);
     blobs[target] = await encodeWebp(canvas);
   }
+  // صورة المشاركة: JPEG (كل المتصفحات تُخرجه) لأن معاينة واتساب لا تعرض WebP دائماً
+  const ogScale = Math.min(1, 1200 / width);
+  const ogCanvas = document.createElement("canvas");
+  ogCanvas.width = Math.round(width * ogScale);
+  ogCanvas.height = Math.round(height * ogScale);
+  ogCanvas.getContext("2d")!.drawImage(source, 0, 0, ogCanvas.width, ogCanvas.height);
+  const og = (await canvasToBlob(ogCanvas, "image/jpeg", QUALITY)) ?? undefined;
   if ("close" in source) source.close();
-  return { id: newId(), blobs, preview: URL.createObjectURL(blobs[640]) };
+  return { id: newId(), blobs, og, preview: URL.createObjectURL(blobs[640]) };
 }

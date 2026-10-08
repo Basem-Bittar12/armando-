@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { indexing } from "@/config/site";
 
 /**
  * يضبط عنوان الصفحة ووسوم الميتا الأساسية عند فتح كل صفحة.
@@ -40,7 +41,7 @@ export function useMeta({ title, description, image, noIndex }: MetaInput) {
     document.title = title;
 
     setMetaTag("name", "description", description);
-    setMetaTag("name", "robots", noIndex ? "noindex, nofollow" : "index, follow");
+    setMetaTag("name", "robots", noIndex || !indexing ? "noindex, nofollow" : "index, follow");
 
     setMetaTag("property", "og:title", title);
     setMetaTag("property", "og:description", description);

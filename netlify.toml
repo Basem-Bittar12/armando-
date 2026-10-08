@@ -1,0 +1,13 @@
+# Netlify: الموقع (Vite) + معاينة روابط العقارات (Edge Function) + خريطة الموقع وقت البناء.
+# متغيرات البيئة المطلوبة بإعدادات الموقع على Netlify: VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY فقط.
+# مفتاح service_role ممنوع هنا (الفحص بعد البناء يوقف النشر إن وُجد بالملفات).
+[build]
+  command = "npm run build:netlify"
+  publish = "dist/public"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[edge_functions]]
+  path = "/property/*"
+  function = "property-og"

@@ -17,5 +17,9 @@ export async function uploadImageSet(client: SupabaseClient, source: Buffer, fol
     if (error) throw new Error(`رفع ${path}: ${error.message}`);
     paths[width] = path;
   }
+  // صورة المشاركة JPEG (معاينة واتساب)
+  const og = await sharp(source).rotate().resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 82 }).toBuffer();
+  const { error: ogError } = await client.storage.from(IMAGES_BUCKET).upload(`${folder}/${name}-og.jpg`, og, { contentType: "image/jpeg", upsert: true });
+  if (ogError) throw new Error(`رفع صورة المشاركة: ${ogError.message}`);
   return { path_640: paths[640], path_1080: paths[1080], path_1600: paths[1600], width: meta.width ?? null, height: meta.height ?? null };
 }
