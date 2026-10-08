@@ -73,7 +73,15 @@ export function SwipeGallery({
         <div className="swipe-gallery__slide" key={image + i}>
           {onSelect ? (
             <button type="button" onClick={() => onSelect(i)} aria-label={`تكبير الصورة ${i + 1}`}>
-              <img {...srcsetFor(image)} sizes="100vw" alt={i === index ? alt : ""} loading={i === 0 ? "eager" : "lazy"} decoding="async" draggable={false} />
+              <img
+                {...srcsetFor(image)}
+                sizes="100vw"
+                alt={i === index ? alt : ""}
+                loading={i === 0 ? "eager" : "lazy"}
+                fetchPriority={i === 0 ? "high" : "auto"}
+                decoding="async"
+                draggable={false}
+              />
             </button>
           ) : (
             <img {...srcsetFor(image)} sizes="100vw" alt={i === index ? alt : ""} loading="lazy" decoding="async" draggable={false} />

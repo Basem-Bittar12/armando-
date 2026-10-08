@@ -6,6 +6,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabase, supabaseConfigured } from "@/lib/supabase";
+import { setAccessTokenProvider } from "@/lib/supabaseConfig";
 import { useCatalog } from "@/lib/catalog/store";
 
 type AuthState =
@@ -42,6 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!supabaseConfigured) return;
     const auth = getSupabase().auth;
+    // قراءات الكتالوج (REST) تستعمل جلسة المسؤول إن وُجدت
+    setAccessTokenProvider(() => auth.getSession().then(({ data }) => data.session?.access_token ?? null));
     let alive = true;
     auth.getSession().then(({ data }) => {
       if (alive) void resolve(data.session);
@@ -53,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     return () => {
       alive = false;
+      setAccessTokenProvider(null);
       listener.subscription.unsubscribe();
     };
   }, [resolve, reload]);

@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { CatalogProvider } from "./lib/catalog/store";
@@ -56,7 +55,6 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
           <CatalogProvider>
             <FavoritesProvider>
             <Toaster position="top-center" />
@@ -65,7 +63,6 @@ export default function App() {
             <RevealObserver />
             </FavoritesProvider>
           </CatalogProvider>
-        </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

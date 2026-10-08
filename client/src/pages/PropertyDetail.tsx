@@ -181,6 +181,7 @@ export default function PropertyDetail() {
                     alt={index === activeImage ? property.title : ""}
                     aria-hidden={index !== activeImage}
                     className={index === activeImage ? "is-active" : ""}
+                    fetchPriority={index === 0 ? "high" : "auto"}
                     decoding="async"
                   />
                 ))}

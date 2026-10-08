@@ -1,7 +1,7 @@
 /**
  * أدوات مشتركة لمصدر Supabase: تحويل الأخطاء لرسائل مفهومة، وتحويل الصفوف لشكل الكتالوج.
  */
-import { AREA_COVERS_BUCKET, IMAGES_BUCKET, publicUrl } from "@/lib/supabase";
+import { AREA_COVERS_BUCKET, IMAGES_BUCKET, publicUrl } from "@/lib/supabaseConfig";
 import { CatalogError, type AreaRow, type ImageRow, type OptionKind } from "./types";
 
 export type DbError = { message: string; code?: string; details?: string | null; hint?: string | null } | null;

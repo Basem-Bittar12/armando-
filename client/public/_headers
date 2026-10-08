@@ -1,2 +1,6 @@
 /*
   X-Robots-Tag: noindex, nofollow
+
+# ملفات البناء بأسماء فيها hash: تخزين دائم بالمتصفح
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

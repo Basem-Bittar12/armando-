@@ -1,3 +1,4 @@
+import compression from "compression";
 import express from "express";
 import { createServer } from "http";
 import path from "path";
@@ -16,6 +17,10 @@ async function startServer() {
       ? path.resolve(__dirname, "public")
       : path.resolve(__dirname, "..", "dist", "public");
 
+  // ضغط gzip مثل Netlify (لقياس الأداء محلياً بشكل واقعي)
+  app.use(compression());
+  // ملفات assets بأسماء فيها hash: تخزين طويل بالمتصفح
+  app.use("/assets", express.static(path.join(staticPath, "assets"), { immutable: true, maxAge: "1y" }));
   app.use(express.static(staticPath));
 
   // Handle client-side routing - serve index.html for all routes

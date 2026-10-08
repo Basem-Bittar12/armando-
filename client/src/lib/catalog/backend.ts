@@ -3,10 +3,11 @@
  * المتجر (store.tsx) يحسب الحالة الجديدة ويتحقق من القواعد، ثم يطلب من المصدر حفظها.
  * يُختار Supabase تلقائياً متى وُجد VITE_SUPABASE_URL وVITE_SUPABASE_ANON_KEY.
  */
-import { getSupabase, supabaseConfigured } from "@/lib/supabase";
+import { rest, supabaseConfigured, type RestError } from "@/lib/supabaseConfig";
 import { demoCatalog } from "./demoSeed";
-import { OPTION_COLUMNS, PROPERTY_COLUMNS, areaFromDb, imageFromDb, must, toCatalogError, type DbImage } from "./supabaseShared";
+import { OPTION_COLUMNS, PROPERTY_COLUMNS, areaFromDb, imageFromDb, toCatalogError, type DbImage } from "./supabaseShared";
 import {
+  CatalogError,
   type AreaRow,
   type CatalogData,
   type FullProperty,
@@ -102,46 +103,44 @@ export function localBackend(): CatalogBackend {
 // ---------------------------------------------------------------------------
 
 export function supabaseBackend(): CatalogBackend {
-  const db = getSupabase();
-  const ops = () => import("./supabaseAdmin").then((module) => module.adminOps(db));
+  // supabase-js والكتابة يُحمَّلان مع أول تعديل من اللوحة فقط
+  const ops = () => Promise.all([import("@/lib/supabase"), import("./supabaseAdmin")]).then(([supabase, module]) => module.adminOps(supabase.getSupabase()));
 
   return {
     kind: "supabase",
 
     async load() {
+      const read = <T,>(path: string) => rest<T>(path).catch((error: RestError) => Promise.reject(toCatalogError(error)));
+      const options = (kind: keyof typeof OPTION_COLUMNS) => read<unknown[]>(`${kind}?select=${OPTION_COLUMNS[kind].join(",")}`);
+      const propertySelect = `${PROPERTY_COLUMNS.join(",")},property_prices(rental_term_id,amount),property_images(id,sort_order,path_640,path_1080,path_1600,width,height),property_amenities(amenity_id)`;
       const [cities, areas, types, terms, amenities, properties, settings] = await Promise.all([
-        must(db.from("cities").select(OPTION_COLUMNS.cities.join(","))),
-        must(db.from("areas").select(OPTION_COLUMNS.areas.join(","))),
-        must(db.from("property_types").select(OPTION_COLUMNS.property_types.join(","))),
-        must(db.from("rental_terms").select(OPTION_COLUMNS.rental_terms.join(","))),
-        must(db.from("amenities").select(OPTION_COLUMNS.amenities.join(","))),
-        must(
-          db
-            .from("properties")
-            .select(
-              `${PROPERTY_COLUMNS.join(",")},property_prices(rental_term_id,amount),property_images(id,sort_order,path_640,path_1080,path_1600,width,height),property_amenities(amenity_id)`,
-            ),
-        ),
-        must(db.from("settings").select("home_count,phone,whatsapp,email,address,hours,social").eq("id", 1).single()),
+        options("cities"),
+        options("areas"),
+        options("property_types"),
+        options("rental_terms"),
+        options("amenities"),
+        read<unknown[]>(`properties?select=${propertySelect}`),
+        read<Settings[]>("settings?select=home_count,phone,whatsapp,email,address,hours,social&id=eq.1"),
       ]);
+      if (!settings[0]) throw new CatalogError("network", "الإعدادات غير موجودة");
       type DbProperty = FullProperty & {
         property_prices: { rental_term_id: string; amount: number }[];
         property_images: DbImage[];
         property_amenities: { amenity_id: string }[];
       };
       return {
-        cities: cities as unknown as OptionRow[],
-        areas: (areas as unknown as Omit<AreaRow, "cover_url">[]).map(areaFromDb),
-        property_types: types as unknown as OptionRow[],
-        rental_terms: terms as unknown as CatalogData["rental_terms"],
-        amenities: amenities as unknown as OptionRow[],
-        properties: (properties as unknown as DbProperty[]).map(({ property_prices, property_images, property_amenities, ...row }) => ({
+        cities: cities as OptionRow[],
+        areas: (areas as Omit<AreaRow, "cover_url">[]).map(areaFromDb),
+        property_types: types as OptionRow[],
+        rental_terms: terms as CatalogData["rental_terms"],
+        amenities: amenities as OptionRow[],
+        properties: (properties as DbProperty[]).map(({ property_prices, property_images, property_amenities, ...row }) => ({
           ...row,
           prices: property_prices.map((price) => ({ rental_term_id: price.rental_term_id, amount: Number(price.amount) })),
           images: [...property_images].sort((a, b) => a.sort_order - b.sort_order).map(imageFromDb),
           amenity_ids: property_amenities.map((item) => item.amenity_id),
         })),
-        settings: settings as unknown as Settings,
+        settings: settings[0],
       };
     },
 
@@ -159,17 +158,20 @@ export function supabaseBackend(): CatalogBackend {
     deleteInquiry: (...args) => ops().then((o) => o.deleteInquiry(...args)),
 
     async submitInquiry(input) {
-      // بدون .select(): الزائر يقدر يضيف بس ما يقدر يقرأ
-      const { error } = await db.from("inquiries").insert({
-        name: input.name,
-        phone: input.phone,
-        rental_term: input.rental_term || null,
-        city: input.city || null,
-        message: input.message || null,
-        property_code: input.property_code || null,
-        website: input.website ?? "",
-      });
-      if (error) throw toCatalogError(error, "ما وصل الطلب — جرّب مرة ثانية أو راسلنا على واتساب");
+      // return=minimal: الزائر يقدر يضيف بس ما يقدر يقرأ
+      await rest("inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify({
+          name: input.name,
+          phone: input.phone,
+          rental_term: input.rental_term || null,
+          city: input.city || null,
+          message: input.message || null,
+          property_code: input.property_code || null,
+          website: input.website ?? "",
+        }),
+      }).catch((error: RestError) => Promise.reject(toCatalogError(error, "ما وصل الطلب — جرّب مرة ثانية أو راسلنا على واتساب")));
     },
   };
 }

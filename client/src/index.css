@@ -207,7 +207,7 @@ input::placeholder, textarea::placeholder { color: var(--date); opacity: 1; }
 .detail-gallery__main { display: block; border: 0; padding: 0; background: var(--almond); width: 100%; height: 570px; position: relative; overflow: hidden; }
 .detail-gallery__main img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .65s var(--ease-quiet), transform .65s var(--ease-quiet); }
 .detail-gallery__main img.is-active { opacity: 1; }
-.detail-gallery__count { z-index: 1; position: absolute; bottom: 14px; left: 14px; background: rgba(47,34,26,.62); color: var(--almond); font-size: 10px; padding: 5px 9px; backdrop-filter: blur(6px); }
+.detail-gallery__count { z-index: 1; position: absolute; bottom: 14px; left: 14px; background: rgba(47,34,26,.82); color: var(--almond); font-size: 10px; padding: 5px 9px; backdrop-filter: blur(6px); }
 .gallery-thumbs { display: flex; gap: 10px; margin-top: 12px; }
 .gallery-thumbs button { border: 0; padding: 0; background: transparent; line-height: 0; }
 .gallery-thumbs img { width: 78px; height: 62px; object-fit: cover; opacity: .6; transition: opacity .2s ease; }
@@ -1252,8 +1252,8 @@ bdi { unicode-bidi: isolate; }
   content: ""; position: absolute; z-index: -1; pointer-events: none;
   inset: 0 auto 0 0; width: min(720px, 70%);
   background: var(--sandstone); opacity: .06;
-  -webkit-mask: url("/images/window-light.png") left center / contain no-repeat;
-  mask: url("/images/window-light.png") left center / contain no-repeat;
+  -webkit-mask: url("/images/window-light.webp") left center / contain no-repeat;
+  mask: url("/images/window-light.webp") left center / contain no-repeat;
 }
 
 /* ==========================================================================
