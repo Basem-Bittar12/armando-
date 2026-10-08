@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useSearchParams } from "wouter";
 import { ChevronDown, Heart, Menu, Phone, X } from "lucide-react";
 import { toast } from "sonner";
-import { contact, englishReady, mainNav } from "@/config/site";
+import { englishReady, mainNav } from "@/config/site";
+import { useSiteContact } from "@/hooks/useSiteContact";
 import { useFavorites } from "@/store/Favorites";
 import Logo from "./Logo";
 import WhatsAppButton from "./WhatsAppButton";
@@ -25,6 +26,7 @@ const englishSoon = () => toast.info("النسخة الإنجليزية قيد �
  */
 export function Header() {
   const [location] = useLocation();
+  const contact = useSiteContact();
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [condensed, setCondensed] = useState(false);
@@ -196,7 +198,7 @@ export function Header() {
 
           <div className="mobile-drawer__contact">
             <a href={`tel:${contact.phoneHref}`}>
-              <Phone size={17} /> <Ltr>{contact.phoneDisplay}</Ltr>
+              <Phone size={17} /> <Ltr>{contact.phone}</Ltr>
             </a>
             {contact.email && <a href={`mailto:${contact.email}`}>{contact.email}</a>}
           </div>

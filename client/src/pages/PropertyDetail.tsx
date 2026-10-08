@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import { ChevronRight, Heart, MapPin, Phone, Share2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { brand, contact, pageMeta, whatsappTemplates } from "@/config/site";
+import { brand, pageMeta, whatsappTemplates } from "@/config/site";
+import { useSiteContact } from "@/hooks/useSiteContact";
 import { useCatalog } from "@/lib/catalog/store";
 import { publishedProperties } from "@/lib/catalog/view";
 import { useFavorites } from "@/store/Favorites";
@@ -47,6 +48,7 @@ export default function PropertyDetail() {
   const params = useParams<{ id: string }>();
   const { data, status, reload } = useCatalog();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const contact = useSiteContact();
   const properties = useMemo(() => (data ? publishedProperties(data) : []), [data]);
   const property = properties.find((item) => item.id === params.id);
 

@@ -2,6 +2,7 @@
  * البيانات التجريبية بنفس شكل جداول Supabase — تُستعمل حين لا يكون Supabase مربوطاً (التطوير والاختبارات).
  * نفس الخيارات المبدئية في supabase/migrations/0003_options_seed.sql ونفس عقارات دبي الثلاثة (is_demo).
  */
+import { contact, social } from "@/config/site";
 import type { CatalogData, FullProperty, ImageRow } from "./types";
 
 const unsplash = (photo: string) => (width: number) =>
@@ -159,6 +160,14 @@ export function demoCatalog(): CatalogData {
       option("am-gated", "مجمع مغلق", "Gated community", 11),
     ],
     properties,
-    settings: { home_count: 6 },
+    settings: {
+      home_count: 6,
+      phone: contact.phoneDisplay,
+      whatsapp: contact.whatsapp,
+      email: contact.email,
+      address: contact.address,
+      hours: contact.hours,
+      social: [...social],
+    },
   });
 }

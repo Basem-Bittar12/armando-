@@ -13,7 +13,12 @@ export type OptionRow = {
   is_active: boolean;
 };
 export type CityRow = OptionRow;
-export type AreaRow = OptionRow & { city_id: string; cover_url: string | null };
+export type AreaRow = OptionRow & {
+  city_id: string;
+  cover_url: string | null;
+  /** مسار الغلاف داخل bucket area-covers (Supabase فقط) */
+  cover_path?: string | null;
+};
 export type PropertyTypeRow = OptionRow;
 export type RentalTermRow = OptionRow & { unit_ar: string; unit_en: string };
 export type AmenityRow = OptionRow;
@@ -28,6 +33,10 @@ export type ImageRow = {
   src_640: string;
   src_1080: string;
   src_1600: string;
+  /** مسارات الملفات داخل bucket property-images (Supabase فقط) — للحذف وحفظ الترتيب */
+  paths?: { 640: string; 1080: string; 1600: string };
+  width?: number | null;
+  height?: number | null;
 };
 
 export type PriceRow = { rental_term_id: string; amount: number };
@@ -67,7 +76,20 @@ export type FullProperty = PropertyRow & {
   amenity_ids: string[];
 };
 
-export type Settings = { home_count: number };
+export type SocialLink = { label: string; href: string };
+
+/** معلومات التواصل — تُعدَّل من اللوحة وتظهر بكل الموقع */
+export type SiteContact = {
+  phone: string;
+  /** رقم واتساب دولي بدون + أو مسافات */
+  whatsapp: string;
+  email: string | null;
+  address: string;
+  hours: string | null;
+  social: SocialLink[];
+};
+
+export type Settings = SiteContact & { home_count: number };
 
 export type CatalogData = {
   cities: CityRow[];
@@ -107,3 +129,30 @@ export class CatalogError extends Error {
     super(message);
   }
 }
+
+export type InquiryStatus = "جديد" | "تم التواصل" | "مغلق";
+export const INQUIRY_STATUSES: InquiryStatus[] = ["جديد", "تم التواصل", "مغلق"];
+
+/** استفسار من نموذج «تواصل معنا» */
+export type Inquiry = {
+  id: string;
+  name: string;
+  phone: string;
+  rental_term: string | null;
+  city: string | null;
+  message: string | null;
+  property_code: string | null;
+  status: InquiryStatus;
+  created_at: string;
+};
+
+export type InquiryInput = {
+  name: string;
+  phone: string;
+  rental_term?: string | null;
+  city?: string | null;
+  message?: string | null;
+  property_code?: string | null;
+  /** فخّ السبام: حقل مخفي يتركه الإنسان فاضياً */
+  website?: string;
+};

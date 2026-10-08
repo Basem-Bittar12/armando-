@@ -3,18 +3,22 @@
  * كود لا يتكرر، حد عقارات الرئيسية، الخيار المستعمل لا يُحذف. الصفحات العامة ولوحة التحكم تقرأ منه.
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { localBackend, type CatalogBackend } from "./backend";
+import { createBackend, type CatalogBackend } from "./backend";
 import {
   CatalogError,
   type AreaRow,
   type CatalogData,
   type FullProperty,
   type ImageRow,
+  type Inquiry,
+  type InquiryInput,
+  type InquiryStatus,
   type NewImage,
   type OptionKind,
   type OptionRow,
   type PropertyInput,
   type PropertyRow,
+  type SiteContact,
 } from "./types";
 
 type Status = "loading" | "ready" | "error";
@@ -36,6 +40,11 @@ type CatalogContextValue = {
   deleteOption: (kind: OptionKind, id: string) => Promise<void>;
   reorderOptions: (kind: OptionKind, ids: string[]) => Promise<void>;
   uploadAreaCover: (areaId: string, image: NewImage) => Promise<void>;
+  saveContact: (contact: SiteContact) => Promise<void>;
+  submitInquiry: (input: InquiryInput) => Promise<void>;
+  listInquiries: () => Promise<Inquiry[]>;
+  setInquiryStatus: (id: string, status: InquiryStatus) => Promise<void>;
+  deleteInquiry: (id: string) => Promise<void>;
   /** كم عقاراً يستعمل هذا الخيار */
   usageCount: (kind: OptionKind, id: string) => number;
   nextCode: () => string;
@@ -47,7 +56,7 @@ const newId = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 export function CatalogProvider({ children, backend: given }: { children: ReactNode; backend?: CatalogBackend }) {
-  const backendRef = useRef<CatalogBackend>(given ?? localBackend());
+  const backendRef = useRef<CatalogBackend>(given ?? createBackend());
   const backend = backendRef.current;
   const [status, setStatus] = useState<Status>("loading");
   const [data, setData] = useState<CatalogData | null>(null);
@@ -183,7 +192,25 @@ export function CatalogProvider({ children, backend: given }: { children: ReactN
     const value = Math.min(24, Math.max(1, Math.round(count)));
     await backend.saveSettings({ home_count: value });
     const after = current();
-    commit({ ...after, settings: { home_count: value } });
+    commit({ ...after, settings: { ...after.settings, home_count: value } });
+  }, [backend]);
+
+  const saveContact = useCallback(async (contact: SiteContact) => {
+    const clean: SiteContact = {
+      phone: contact.phone.trim(),
+      whatsapp: contact.whatsapp.replace(/\D/g, ""),
+      email: contact.email?.trim() || null,
+      address: contact.address.trim(),
+      hours: contact.hours?.trim() || null,
+      social: contact.social.map((item) => ({ label: item.label.trim(), href: item.href.trim() })).filter((item) => item.label && item.href),
+    };
+    if (!clean.whatsapp || clean.whatsapp.length < 8) throw new CatalogError("invalid", "رقم واتساب لازم يكون دولي بدون + (مثل 971501234567)");
+    if (clean.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean.email)) throw new CatalogError("invalid", "البريد الإلكتروني غير صحيح");
+    const badLink = clean.social.find((item) => !/^https:\/\//i.test(item.href));
+    if (badLink) throw new CatalogError("invalid", `رابط ${badLink.label} لازم يبدأ بـ https://`);
+    await backend.saveSettings(clean);
+    const after = current();
+    commit({ ...after, settings: { ...after.settings, ...clean } });
   }, [backend]);
 
   const deleteDemo = useCallback(async () => {
@@ -220,9 +247,11 @@ export function CatalogProvider({ children, backend: given }: { children: ReactN
   }, [backend]);
 
   const uploadAreaCover = useCallback(async (areaId: string, image: NewImage) => {
-    const url = await backend.uploadAreaCover(areaId, image);
+    const area = current().areas.find((item) => item.id === areaId);
+    if (!area) throw new CatalogError("invalid", "المنطقة غير موجودة");
+    const { url, path } = await backend.uploadAreaCover(area, image);
     const after = current();
-    commit({ ...after, areas: after.areas.map((area) => (area.id === areaId ? { ...area, cover_url: url } : area)) });
+    commit({ ...after, areas: after.areas.map((item) => (item.id === areaId ? { ...item, cover_url: url, cover_path: path } : item)) });
   }, [backend]);
 
   const value = useMemo<CatalogContextValue>(
@@ -243,10 +272,15 @@ export function CatalogProvider({ children, backend: given }: { children: ReactN
       deleteOption,
       reorderOptions,
       uploadAreaCover,
+      saveContact,
+      submitInquiry: (input) => backend.submitInquiry(input),
+      listInquiries: () => backend.listInquiries(),
+      setInquiryStatus: (id, value) => backend.setInquiryStatus(id, value),
+      deleteInquiry: (id) => backend.deleteInquiry(id),
       usageCount,
       nextCode,
     }),
-    [status, data, backend, saveProperty, deleteProperty, setPublished, setStatus_, setOnHome, reorderHome, setHomeCount, deleteDemo, saveOption, deleteOption, reorderOptions, uploadAreaCover, usageCount, nextCode],
+    [status, data, backend, saveProperty, deleteProperty, setPublished, setStatus_, setOnHome, reorderHome, setHomeCount, saveContact, deleteDemo, saveOption, deleteOption, reorderOptions, uploadAreaCover, usageCount, nextCode],
   );
 
   return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;

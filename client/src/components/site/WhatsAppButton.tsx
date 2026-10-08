@@ -1,4 +1,5 @@
-import { whatsappHref, whatsappTemplates } from "@/config/site";
+import { whatsappTemplates } from "@/config/site";
+import { useSiteContact } from "@/hooks/useSiteContact";
 import type { Property } from "@/lib/catalog/view";
 import { usePageWhatsAppMessage } from "./pageContext";
 import WhatsAppIcon from "./WhatsAppIcon";
@@ -24,6 +25,7 @@ export function WhatsAppButton({
   className?: string;
 }) {
   const pageMessage = usePageWhatsAppMessage();
+  const { whatsappHref } = useSiteContact();
   const text =
     message ??
     (property

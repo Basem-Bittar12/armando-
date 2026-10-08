@@ -323,6 +323,8 @@ input::placeholder, textarea::placeholder { color: var(--date); opacity: 1; }
    ========================================================================== */
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* فخّ السبام بنموذج التواصل: مخفي بصرياً (ليس display:none حتى لا تتجاوزه الروبوتات)، بلا إزاحة تسبب سكرول أفقي بـRTL */
+.hp-field { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 :where(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--terracotta); outline-offset: 2px; }
 .brand-link { display: inline-flex; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }

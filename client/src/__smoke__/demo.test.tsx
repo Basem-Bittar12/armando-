@@ -218,7 +218,7 @@ describe("صفحات الموقع العام", () => {
     expect(text()).toContain("العودة إلى الرئيسية");
   });
 
-  it("نموذج التواصل يتحقق من الحقول ثم يفتح واتساب بالرسالة", async () => {
+  it("نموذج التواصل يتحقق من الحقول ثم يحفظ الطلب ويجهّز رسالة واتساب", async () => {
     const opened: string[] = [];
     const originalOpen = window.open;
     window.open = ((url: string) => {
@@ -253,9 +253,12 @@ describe("صفحات الموقع العام", () => {
         new Event("submit", { bubbles: true, cancelable: true }),
       );
     });
-    expect(text()).toContain("رسالتك جاهزة على واتساب");
-    expect(opened.length).toBe(1);
-    const sentText = decodeURIComponent(opened[0]);
+    // الطلب ينحفظ (قائمة الاستفسارات)، وواتساب اختياري برسالة جاهزة
+    expect(text()).toContain("وصلنا طلبك");
+    expect(opened.length).toBe(0);
+    const sentLink = container!.querySelector<HTMLAnchorElement>(".contact-form--sent a.whatsapp-button");
+    expect(sentLink?.href).toMatch(/^https:\/\/wa\.me\/\d+\?text=/);
+    const sentText = decodeURIComponent(sentLink!.href);
     expect(sentText).toContain("الاسم: باسم الكادي");
     expect(sentText).toContain("+971500000000");
     expect(sentText).not.toContain("نوع الإيجار");

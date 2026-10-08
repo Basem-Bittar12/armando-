@@ -1,5 +1,6 @@
 import { Link } from "wouter";
-import { brand, contact, social, whatsappHref } from "@/config/site";
+import { brand } from "@/config/site";
+import { useSiteContact } from "@/hooks/useSiteContact";
 import Logo from "./Logo";
 import { Address, Ltr } from "./pageContext";
 import WhatsAppIcon from "./WhatsAppIcon";
@@ -7,6 +8,8 @@ import WhatsAppIcon from "./WhatsAppIcon";
 /** الفوتر — عربي بالكامل على أرضية Espresso، مع الشعار الرسمي ثنائي اللغة (نسخة Inverse) */
 export function Footer() {
   const year = new Date().getFullYear();
+  const contact = useSiteContact();
+  const { social, whatsappHref } = contact;
 
   return (
     <footer className="site-footer">
@@ -29,7 +32,7 @@ export function Footer() {
             <WhatsAppIcon size={17} /> واتساب
           </a>
           <a href={`tel:${contact.phoneHref}`}>
-            <Ltr>{contact.phoneDisplay}</Ltr>
+            <Ltr>{contact.phone}</Ltr>
           </a>
           {contact.email && (
             <a href={`mailto:${contact.email}`}>{contact.email}</a>
@@ -39,7 +42,7 @@ export function Footer() {
           </span>
         </div>
 
-        {/* يظهر عمود الحسابات فقط عند إضافة روابط حقيقية في config/site.ts */}
+        {/* يظهر عمود الحسابات فقط عند إضافة روابط حقيقية من اللوحة (صفحة «التواصل») */}
         {social.length > 0 && (
           <div>
             <span className="footer-label">تابعنا</span>

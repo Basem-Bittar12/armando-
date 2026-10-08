@@ -1,7 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 const plugins = [react(), tailwindcss()];
 
@@ -19,6 +19,11 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+  },
+  // اختبارات الوحدة تعمل دائماً على البيانات التجريبية بالذاكرة (حتى لو .env.local فيه Supabase)
+  test: {
+    env: { VITE_SUPABASE_URL: "", VITE_SUPABASE_ANON_KEY: "" },
+    include: ["src/**/*.test.{ts,tsx}"],
   },
   server: {
     port: 3000,

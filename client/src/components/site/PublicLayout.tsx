@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Phone } from "lucide-react";
 import { useLocation } from "wouter";
-import { contact } from "@/config/site";
+import { useSiteContact } from "@/hooks/useSiteContact";
 import Header from "./Header";
 import Footer from "./Footer";
 import WhatsAppButton from "./WhatsAppButton";
@@ -17,6 +17,7 @@ type MobileBar = "always" | "after-hero" | { showAfter: number; content: ReactNo
 
 /** شريط الموبايل الثابت: بديل فقاعة واتساب العائمة (اللابتوب لا يعرضه) */
 function MobileActionBar({ mode }: { mode: MobileBar }) {
+  const contact = useSiteContact();
   const [visible, setVisible] = useState(mode === "always");
   // مفتاح ثابت للتأثير: الصفحة تمرر كائناً جديداً في كل رسم
   const modeKey = typeof mode === "object" ? `after:${mode.showAfter}` : mode;
