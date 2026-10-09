@@ -116,3 +116,6 @@ client/public/__manus__/version.json
 e2e/.admin.json
 /test-results/
 /playwright-report/
+
+# Local Supabase stack keys (copy into .env.local to use the local stack)
+.env.localstack

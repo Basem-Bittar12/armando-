@@ -1,0 +1,52 @@
+(node:824) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:836) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:847) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:847) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+◇ injected env (3) from .env.local
+✓ زائر: قراءة العقارات — 3 عقار
+✓ زائر: لا يرى المسودات
+✓ زائر: المسودة مخفية
+✓ زائر: قراءة الخيارات المفعّلة فقط
+✓ زائر: إضافة عقار مرفوضة — new row violates row-level security policy for table "properties"
+✓ زائر: تعديل عقار منشور مرفوض — 0 صفوف
+✓ زائر: حذف عقار مرفوض — 0 صفوف
+✓ زائر: تعديل سعر مرفوض — 0 صفوف
+✓ زائر: تعديل الإعدادات مرفوض — 0 صفوف
+✓ زائر: إضافة مدينة مرفوضة — new row violates row-level security policy for table "cities"
+✓ زائر: دالة حفظ العقار مرفوضة — permission denied for function save_property
+✓ زائر: دالة ترتيب الخيارات مرفوضة — permission denied for function reorder_options
+✓ زائر: إرسال استفسار مسموح
+✓ زائر: استفسار بحقل الفخ مرفوض — new row for relation "inquiries" violates check constraint "inquiries_website_check"
+✓ زائر: استفسار بحالة مزوّرة مرفوض — new row violates row-level security policy for table "inquiries"
+✓ زائر: قراءة الاستفسارات ممنوعة — 0 صفوف
+✓ زائر: تعديل الاستفسارات ممنوع — 0 صفوف
+✓ زائر: رفع صورة مرفوض — new row violates row-level security policy
+✓ زائر: حذف صورة مرفوض — 0 محذوف، الصورة ما زالت: 200
+✓ مستخدم الفحص سجّل دخول
+✓ مستخدم غير مسؤول: قراءة العقارات — 3 عقار
+✓ مستخدم غير مسؤول: لا يرى المسودات
+✓ مستخدم غير مسؤول: المسودة مخفية
+✓ مستخدم غير مسؤول: قراءة الخيارات المفعّلة فقط
+✓ مستخدم غير مسؤول: إضافة عقار مرفوضة — new row violates row-level security policy for table "properties"
+✓ مستخدم غير مسؤول: تعديل عقار منشور مرفوض — 0 صفوف
+✓ مستخدم غير مسؤول: حذف عقار مرفوض — 0 صفوف
+✓ مستخدم غير مسؤول: تعديل سعر مرفوض — 0 صفوف
+✓ مستخدم غير مسؤول: تعديل الإعدادات مرفوض — 0 صفوف
+✓ مستخدم غير مسؤول: إضافة مدينة مرفوضة — new row violates row-level security policy for table "cities"
+✓ مستخدم غير مسؤول: دالة حفظ العقار مرفوضة — not_admin
+✓ مستخدم غير مسؤول: دالة ترتيب الخيارات مرفوضة — not_admin
+✓ مستخدم غير مسؤول: إرسال استفسار مسموح
+✓ مستخدم غير مسؤول: استفسار بحقل الفخ مرفوض — new row for relation "inquiries" violates check constraint "inquiries_website_check"
+✓ مستخدم غير مسؤول: استفسار بحالة مزوّرة مرفوض — new row violates row-level security policy for table "inquiries"
+✓ مستخدم غير مسؤول: قراءة الاستفسارات ممنوعة — 0 صفوف
+✓ مستخدم غير مسؤول: تعديل الاستفسارات ممنوع — 0 صفوف
+✓ مستخدم غير مسؤول: رفع صورة مرفوض — new row violates row-level security policy
+✓ مستخدم غير مسؤول: حذف صورة مرفوض — 0 محذوف، الصورة ما زالت: 200
+✓ مستخدم غير مسؤول: لا يقدر يجعل نفسه مسؤولاً — new row violates row-level security policy for table "admins"
+✓ التسجيل العام مقفل — Signups not allowed for this instance
+
+✓ كل فحوص الحماية نجحت
