@@ -13,6 +13,8 @@ gsap.registerPlugin(ScrollTrigger);
 const LOG = "[FeaturedStrip]";
 /** تمرير لكل كارت ليعبر الشاشة كاملة: موبايل ≈ 1000px، لابتوب ≈ 2800px (أبطأ بطلب العميل؛ نفس سرعة الموبايل تقريباً) */
 const SCROLL_PER_CARD = { mobile: 1000, desktop: 2800 };
+/** أقصى فراغ قبل أول كارت وبعد آخر كارت بالصف المتحرك */
+const STRIP_EDGE_MAX = 40;
 /** بعد آخر حركة أفقية من الزائر بهذه المدة، يعود سكرول الصفحة ليقود الصف */
 const USER_IDLE_MS = 180;
 
@@ -23,7 +25,7 @@ const USER_IDLE_MS = 180;
  *  - السحب بالإصبع يمين/يسار (أو التراكباد / سحب الماوس): الصف نفسه نافذة سكرول أفقية حقيقية
  *    (سحب المتصفح الأصلي بزخمه الطبيعي) يعمل من أي مكان. وهو مثبّت يلحقه موضع الصفحة (فيبقيان متطابقين)؛
  *    قبل التثبيت أو بعده يتحرك الصف وحده والصفحة لا تتحرك.
- * بلا فراغ قبل أو بعد: هامش الصف = هامش المحتوى. بعد آخر كارت يفك التثبيت ويظهر «عرض كل البيوت».
+ * بلا فراغ كبير قبل أو بعد: هامش الصف = هامش المحتوى على التلفون، وبحد أقصى 40px على الشاشات العريضة. بعد آخر كارت يفك التثبيت ويظهر «عرض كل البيوت».
  * النسخة الثابتة (تقليل الحركة / توفير البيانات): صف يتسحب بالإصبع (scroll-snap) بلا تثبيت.
  */
 export function AvailableHomesStrip() {
@@ -55,7 +57,9 @@ export function AvailableHomesStrip() {
       const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
       const content = items.reduce((sum, item) => sum + item.offsetWidth, 0) + gap * Math.max(0, items.length - 1);
       const fits = content + 32 <= vw;
-      const pad = fits ? Math.floor((vw - content) / 2) : Math.round(gutter);
+      // هامش الصف عند البداية والنهاية: هامش المحتوى على التلفون، وبحد أقصى 40px على الشاشات العريضة
+      // (هامش المحتوى هناك يصل 340px فيبقى فراغ كبير قبل أول كارت وبعد آخر كارت)
+      const pad = fits ? Math.floor((vw - content) / 2) : Math.round(Math.min(gutter, STRIP_EDGE_MAX));
       track.style.paddingLeft = track.style.paddingRight = `${pad}px`;
       section.classList.toggle("hstrip--fits", fits);
       const cardW = items[0]?.offsetWidth ?? 0;
