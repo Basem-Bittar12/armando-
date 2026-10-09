@@ -46,7 +46,9 @@ async function loadImage(url: string, index: number): Promise<Buffer> {
   return readFileSync(join(process.cwd(), "client/public/hero-frames/desktop", `${frame}.webp`));
 }
 
-let homeOrder = 1;
+// العقارات الجديدة تدخل آخر ترتيب الرئيسية
+const { data: lastHome } = await db.from("properties").select("home_order").eq("show_on_home", true).order("home_order", { ascending: false }).limit(1).maybeSingle();
+let homeOrder = (lastHome?.home_order ?? 0) + 1;
 for (const demo of demoProperties) {
   const { data: existing } = await db.from("properties").select("id").eq("code", demo.code).maybeSingle();
   if (existing) {

@@ -1,6 +1,7 @@
 /**
- * عقارات دبي الوهمية الثلاثة (منقولة كما هي من بيانات الواجهة القديمة) — تُرفع كعقارات تجريبية is_demo.
- * لا معلومات جديدة عن الشركة؛ الصور من Unsplash كما كانت.
+ * عقارات دبي الوهمية — تُرفع كعقارات تجريبية is_demo. الثلاثة الأولى منقولة كما هي من الواجهة القديمة،
+ * والعقاران AK-110 وAK-118 أُضيفا ليكتمل شريط الرئيسية بخمسة كروت (بيانات تجريبية تُحذف قبل الإطلاق).
+ * لا معلومات جديدة عن الشركة؛ الصور من Unsplash.
  */
 const INTERIOR_A = "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=85";
 const INTERIOR_B = "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=85";
@@ -104,6 +105,61 @@ export const demoProperties: DemoProperty[] = [
       INTERIOR_B,
       INTERIOR_A,
       INTERIOR_C,
+    ],
+  },
+  {
+    code: "AK-110",
+    title: "تاون هاوس عصري بحديقة",
+    description:
+      "تاون هاوس بتصميم عصري في البرشاء على ثلاثة طوابق، مع حديقة أمامية ومساحات معيشة مفتوحة يدخلها الضوء الطبيعي. غرف نوم واسعة وموقف خاص، ضمن مجمع هادئ قريب من الخدمات.",
+    city: "دبي",
+    area: "البرشاء",
+    type: "تاون هاوس",
+    bedrooms: 3,
+    bathrooms: 4,
+    areaSqft: 2650,
+    floor: null,
+    yearBuilt: 2020,
+    furnished: false,
+    minRent: "سنة واحدة",
+    status: "متاح",
+    isNew: true,
+    prices: [{ term: "سنوي", amount: 150000 }],
+    amenities: ["حديقة خاصة", "موقف سيارة", "مجمع مغلق", "أمن 24 ساعة", "شرفة"],
+    gallery: [
+      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1600573472550-8090b5e0745e?auto=format&fit=crop&w=1600&q=85",
+    ],
+  },
+  {
+    code: "AK-118",
+    title: "شقة مشرقة بغرفة نوم واحدة",
+    description:
+      "شقة بغرفة نوم واحدة في الخليج التجاري، بنوافذ واسعة وإضاءة طبيعية طوال اليوم. صالة مريحة، مطبخ مجهز، وشرفة صغيرة. متاحة للإيجار الشهري أو السنوي.",
+    city: "دبي",
+    area: "الخليج التجاري",
+    type: "شقة",
+    bedrooms: 1,
+    bathrooms: 1,
+    areaSqft: 820,
+    floor: "15",
+    yearBuilt: 2018,
+    furnished: true,
+    minRent: "شهر واحد",
+    status: "متاح",
+    isNew: false,
+    prices: [
+      { term: "شهري", amount: 7200 },
+      { term: "سنوي", amount: 78000 },
+    ],
+    amenities: ["موقف سيارة", "مسبح مشترك", "صالة رياضية", "شرفة", "قريب من المترو"],
+    gallery: [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=85",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=85",
     ],
   },
 ];
