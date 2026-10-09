@@ -36,7 +36,7 @@ export const OPTION_COLUMNS: Record<OptionKind, string[]> = {
 };
 
 export const PROPERTY_COLUMNS = [
-  "id", "code", "title", "description", "city_id", "area_id", "type_id", "bedrooms", "bathrooms", "area_sqft", "floor",
+  "id", "code", "title", "description", "title_en", "description_en", "city_id", "area_id", "type_id", "bedrooms", "bathrooms", "area_sqft", "floor",
   "year_built", "furnished", "min_rent_period", "max_guests", "map_url", "permit_no", "available_from", "status",
   "is_new", "is_published", "show_on_home", "home_order", "is_demo", "updated_at",
 ] as const;

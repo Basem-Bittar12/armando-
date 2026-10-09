@@ -18,6 +18,8 @@ const INTERIOR_B = "photo-1600585154526-990dced4db0d";
 const INTERIOR_C = "photo-1616486338812-3dadae4b4ace";
 
 const base = {
+  title_en: "",
+  description_en: "",
   max_guests: null,
   map_url: null,
   permit_no: null,

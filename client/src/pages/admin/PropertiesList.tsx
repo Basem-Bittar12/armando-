@@ -140,6 +140,7 @@ function PropertiesListBody() {
                       <span className={p.is_published ? "badge badge--on" : "badge"}>{p.is_published ? "منشور" : "مسودة"}</span>
                       {p.show_on_home && <span className="badge badge--on">بالرئيسية</span>}
                       {p.is_demo && <span className="badge">تجريبي</span>}
+                      {!p.title_en.trim() && <span className="badge">ناقص إنجليزي</span>}
                     </p>
                   </div>
                 </div>

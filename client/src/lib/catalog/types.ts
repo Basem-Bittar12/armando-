@@ -46,6 +46,9 @@ export type PropertyRow = {
   code: string;
   title: string;
   description: string;
+  /** للنسخة الإنجليزية (اختياري؛ فاضي = تُعرض العربية) */
+  title_en: string;
+  description_en: string;
   city_id: string;
   area_id: string | null;
   type_id: string;

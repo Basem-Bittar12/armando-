@@ -59,7 +59,9 @@ test.describe("لوحة التحكم", () => {
     await expect(page).toHaveURL(/\/admin\/properties\/new$/);
     await page.getByLabel("اسم العقار").fill(title);
     await page.getByLabel("الكود").fill(code);
-    await page.getByLabel("الوصف").fill("وصف قصير لعقار الاختبار.");
+    await page.getByLabel("الوصف", { exact: true }).fill("وصف قصير لعقار الاختبار.");
+    await page.getByLabel("الاسم بالإنجليزي").fill(`Test apartment ${code}`);
+    await page.getByLabel("الوصف بالإنجليزي").fill("Short description for the test property.");
     await page.getByRole("radio", { name: "فيلا" }).click();
     await page.getByLabel("شهري").fill("12345");
     await page.getByRole("button", { name: "موقف سيارة" }).click();
@@ -72,10 +74,12 @@ test.describe("لوحة التحكم", () => {
     // بالقاعدة: العقار وسعره ومرفقه وصورتان بثلاث نسخ WebP مرفوعة + JPEG للمشاركة
     const { data: saved } = await db
       .from("properties")
-      .select("id,is_published,show_on_home,property_prices(amount),property_amenities(amenity_id),property_images(path_640,path_1080,path_1600,sort_order)")
+      .select("id,is_published,show_on_home,title_en,description_en,property_prices(amount),property_amenities(amenity_id),property_images(path_640,path_1080,path_1600,sort_order)")
       .eq("code", code)
       .single();
     expect(saved!.is_published).toBe(true);
+    expect(saved!.title_en).toBe(`Test apartment ${code}`);
+    expect(saved!.description_en).toBe("Short description for the test property.");
     expect(saved!.property_prices).toEqual([{ amount: 12345 }]);
     expect(saved!.property_amenities).toHaveLength(1);
     expect(saved!.property_images).toHaveLength(2);
@@ -87,6 +91,8 @@ test.describe("لوحة التحكم", () => {
 
     // عرضه بالرئيسية من القائمة
     const item = page.locator(".adm-item", { hasText: title });
+    // فيه اسم إنجليزي: بلا شارة «ناقص إنجليزي»
+    await expect(item.locator(".badge", { hasText: "ناقص إنجليزي" })).toHaveCount(0);
     // المفتاح نفسه مخفي تحت شكله: نضغط على النص مثل المستخدم
     await item.locator("label.adm-toggle", { hasText: "اعرض بالرئيسية" }).click();
     await expect(item.getByRole("switch", { name: "اعرض بالرئيسية" })).toBeChecked();

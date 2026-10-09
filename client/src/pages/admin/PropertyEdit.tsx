@@ -44,6 +44,8 @@ function PropertyForm({ id }: { id: string | null }) {
       code: catalog.nextCode(),
       title: "",
       description: "",
+      title_en: "",
+      description_en: "",
       city_id: city?.id ?? "",
       area_id: null,
       type_id: type?.id ?? "",
@@ -167,6 +169,19 @@ function PropertyForm({ id }: { id: string | null }) {
           </Field>
           <Field label="الوصف" wide>
             <textarea className="adm-input adm-textarea" rows={5} value={form.description} onChange={(e) => set({ description: e.target.value })} />
+          </Field>
+        </div>
+      </section>
+
+      <section className="adm-section">
+        <h2>بالإنجليزي (اختياري)</h2>
+        <p className="adm-note">للنسخة الإنجليزية من الموقع. باقي المعلومات (السعر، المنطقة، النوع، المرافق) بتطلع بالإنجليزي لحالها. إذا تركتها فاضية بيطلع الاسم والوصف العربي.</p>
+        <div className="adm-grid">
+          <Field label="الاسم بالإنجليزي" wide>
+            <TextInput value={form.title_en} dir="ltr" lang="en" maxLength={200} placeholder="e.g. Sea-view apartment" onChange={(e) => set({ title_en: e.target.value })} />
+          </Field>
+          <Field label="الوصف بالإنجليزي" wide>
+            <textarea className="adm-input adm-textarea" rows={5} dir="ltr" lang="en" maxLength={5000} value={form.description_en} onChange={(e) => set({ description_en: e.target.value })} />
           </Field>
         </div>
       </section>
