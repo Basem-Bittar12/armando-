@@ -10,7 +10,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { testAdmin, watchConsole } from "./support";
 
-const PUBLIC = ["/", "/properties", "/property/AK-102", "/property/AK-087", "/contact", "/no-such-page", "/admin"];
+const PUBLIC = ["/", "/properties", "/property/AK-102", "/property/AK-087", "/contact", "/no-such-page", "/admin", "/en", "/en/properties", "/en/property/AK-102", "/en/contact", "/en/no-such-page"];
 const ADMIN = [
   "/admin/properties",
   "/admin/properties/new",

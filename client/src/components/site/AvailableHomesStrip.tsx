@@ -33,6 +33,7 @@ export function AvailableHomesStrip() {
   const { data, status, reload } = useCatalog();
   const lang = useLang();
   const t = useT();
+  const dir = lang === "en" ? "ltr" : "rtl";
   // المنشور + المعروض بالرئيسية + غير المؤجّر، بترتيبه وبحد العدد من الإعدادات
   const selection = useMemo(() => (data ? homeProperties(data, lang) : []), [data, lang]);
   const { reduced } = useStaticMotion();
@@ -223,16 +224,16 @@ export function AvailableHomesStrip() {
           <h2 id="hstrip-title">{t("اختيارات تستحق الانتباه", "Homes worth a closer look")}</h2>
         </div>
         <div ref={viewportRef} className="hstrip__viewport">
-          {/* المتحرك: الأول أقصى اليسار فيدخل أولاً من اليمين؛ الثابت: ترتيب عربي عادي من اليمين */}
-          <div ref={trackRef} className="hstrip__track" dir={reduced ? "rtl" : "ltr"}>
+          {/* المتحرك: الأول أقصى اليسار فيدخل أولاً من اليمين؛ الثابت: ترتيب اللغة العادي (العربي من اليمين) */}
+          <div ref={trackRef} className="hstrip__track" dir={reduced ? dir : "ltr"}>
             {status === "loading" &&
               [0, 1, 2].map((i) => (
-                <div className="hstrip__item" key={`skeleton-${i}`} dir="rtl">
+                <div className="hstrip__item" key={`skeleton-${i}`} dir={dir}>
                   <CardSkeletons count={1} />
                 </div>
               ))}
             {selection.map(property => (
-              <div className="hstrip__item" key={property.id} dir="rtl" onFocus={revealOnFocus}>
+              <div className="hstrip__item" key={property.id} dir={dir} onFocus={revealOnFocus}>
                 <PropertyCard property={property} gallery={false} />
               </div>
             ))}

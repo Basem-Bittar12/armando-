@@ -45,6 +45,20 @@ export type Property = {
 const number = new Intl.NumberFormat("en-US");
 
 /** اسم الخيار بلغة الصفحة (الإنجليزي إن وُجد، وإلا العربي) */
+/** مدة الإيجار الأدنى نص حر بالعربي؛ بالإنجليزي نترجم الصيغ الشائعة («3 أشهر»، «شهر»، «سنة»…) ونترك غيرها كما هو */
+export function minRentLabel(lang: Lang, value: string) {
+  if (lang !== "en") return value;
+  const text = value.trim().replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+  if (/^(شهر|شهر واحد)$/.test(text)) return "1 month";
+  if (/^(شهران|شهرين)$/.test(text)) return "2 months";
+  if (/^(سنة|سنة واحدة|عام)$/.test(text)) return "1 year";
+  const match = text.match(/^(\d+)\s*(أشهر|اشهر|شهور|شهر|سنوات|سنة|سنين|أسابيع|اسابيع|أسبوع|اسبوع|أيام|ايام|يوم)$/);
+  if (!match) return value;
+  const n = Number(match[1]);
+  const unit = /شه/.test(match[2]) ? "month" : /سن/.test(match[2]) ? "year" : /سب/.test(match[2]) ? "week" : "day";
+  return `${n} ${unit}${n === 1 ? "" : "s"}`;
+}
+
 const nameOf = (lang: Lang, row: { name_ar: string; name_en: string } | undefined) => (row ? pickLang(lang, row.name_ar, row.name_en) : "");
 
 export function toPublic(p: FullProperty, data: CatalogData, lang: Lang = "ar"): Property {
@@ -65,7 +79,7 @@ export function toPublic(p: FullProperty, data: CatalogData, lang: Lang = "ar"):
   const details: { label: string; value: string }[] = [];
   if (p.floor) details.push({ label: en ? "Floor" : "الطابق", value: /^\d+$/.test(p.floor) ? (en ? `Floor ${p.floor}` : `الطابق ${p.floor}`) : p.floor });
   if (p.year_built) details.push({ label: en ? "Year built" : "سنة البناء", value: String(p.year_built) });
-  if (p.min_rent_period) details.push({ label: en ? "Minimum rental period" : "الحد الأدنى للإيجار", value: p.min_rent_period });
+  if (p.min_rent_period) details.push({ label: en ? "Minimum rental period" : "الحد الأدنى للإيجار", value: minRentLabel(lang, p.min_rent_period) });
   details.push({ label: en ? "Furnishing" : "التأثيث", value: p.furnished ? (en ? "Fully furnished" : "مفروش بالكامل") : en ? "Unfurnished" : "غير مفروش" });
   if (p.max_guests) details.push({ label: en ? "Maximum guests" : "أقصى عدد ضيوف", value: String(p.max_guests) });
   if (p.permit_no) details.push({ label: en ? "Permit number" : "رقم التصريح", value: p.permit_no });

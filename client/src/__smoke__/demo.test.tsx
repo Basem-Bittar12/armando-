@@ -422,6 +422,61 @@ describe("قائمة الموبايل", () => {
   });
 });
 
+describe("النسخة الإنجليزية وزر اللغة", () => {
+  it("زر واحد بكل صفحة: EN بالعربي وعربي بالإنجليزي، ويفتح نفس الصفحة باللغة الأخرى", async () => {
+    for (const [path, other] of [["/", "/en"], ["/properties", "/en/properties"], ["/property/AK-102", "/en/property/AK-102"], ["/contact", "/en/contact"]]) {
+      await mount(path);
+      const switches = Array.from(container!.querySelectorAll<HTMLAnchorElement>("a.header-lang"));
+      expect(switches.length).toBeGreaterThan(0);
+      switches.forEach((link) => {
+        expect(link.textContent).toBe("EN");
+        expect(link.getAttribute("href")).toBe(other);
+      });
+      act(() => root?.unmount());
+      container?.remove();
+
+      await mount(other);
+      expect(document.documentElement.dir).toBe("ltr");
+      expect(document.documentElement.lang).toBe("en");
+      Array.from(container!.querySelectorAll<HTMLAnchorElement>("a.header-lang")).forEach((link) => {
+        expect(link.textContent).toBe("عربي");
+        expect(link.getAttribute("href")).toBe(path);
+      });
+      act(() => root?.unmount());
+      container?.remove();
+    }
+    // الرجوع للعربي يعيد الاتجاه
+    await mount("/");
+    expect(document.documentElement.dir).toBe("rtl");
+  });
+
+  it("الصفحات الإنجليزية بنصوص إنجليزية وروابط تبقى تحت /en", async () => {
+    await mount("/en");
+    expect(text()).toContain("Properties");
+    expect(text()).toContain("Homes worth a closer look");
+    expect(text()).not.toContain("اختيارات تستحق الانتباه");
+    const internal = Array.from(container!.querySelectorAll<HTMLAnchorElement>(".public-shell a[href^='/']"))
+      .map((a) => a.getAttribute("href")!)
+      .filter((href) => !container!.querySelector(`a.header-lang[href="${href}"]`));
+    expect(internal.length).toBeGreaterThan(0);
+    internal.forEach((href) => expect(href, href).toMatch(/^\/en(\/|$|\?)/));
+
+    await mount("/en/property/AK-102");
+    expect(text()).toContain("Property details");
+    expect(text()).toContain("AED");
+  });
+
+  it("مدة الإيجار الأدنى تُترجم للإنجليزي، وغير المعروف يبقى كما هو", async () => {
+    const { minRentLabel } = await import("../lib/catalog/view");
+    expect(minRentLabel("en", "3 أشهر")).toBe("3 months");
+    expect(minRentLabel("en", "٦ أشهر")).toBe("6 months");
+    expect(minRentLabel("en", "شهر")).toBe("1 month");
+    expect(minRentLabel("en", "سنة")).toBe("1 year");
+    expect(minRentLabel("en", "حسب الاتفاق")).toBe("حسب الاتفاق");
+    expect(minRentLabel("ar", "3 أشهر")).toBe("3 أشهر");
+  });
+});
+
 describe("صور الكرت من برا (CardGallery)", () => {
   it("نقاط بعدد الصور وبحد أقصى 4، وبعد الصورة الرابعة تبقى آخر نقطة معلَّمة", async () => {
     const { CardGallery } = await import("../components/site/CardGallery");

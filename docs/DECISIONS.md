@@ -58,3 +58,14 @@ Password-reset emails need SMTP, which is postponed ("anything that needs emails
 
 ## D17. Lighthouse measured locally, approximating Netlify
 Scores come from Lighthouse 12 (mobile) against the production build served with gzip on localhost, with Supabase local. Google Fonts are blocked from this machine, so font timing is not representative. Re-run on the Netlify preview once it exists.
+
+## D18. English site lives under `/en`, language comes from the URL only
+Arabic stays on the existing URLs (`/`, `/properties`, `/property/AK-102`); English is the same pages under `/en`. One button in the header on every page switches to the same page in the other language (label "EN" on Arabic pages, "عربي" on English pages). No cookie or browser-language redirect: every page has one fixed URL per language, which is what WhatsApp sharing and search engines need. Filter values are not carried across (they are names in the page's language); the path is. The dashboard stays Arabic only.
+Data: English title/description/area names are used when filled, otherwise the Arabic text shows (never an empty field). Layout mirrors through CSS logical properties; the hero story and the strip motion are the same in both languages.
+Reverse: set `englishReady = false` in `client/src/config/site.ts` (hides the button; `/en` pages still resolve).
+
+## D19. English text for demo homes and the office address
+The five demo homes got English titles/descriptions (translations of their Arabic text; they are demo content to be deleted before launch). The office address in settings got an English version translated word for word from the Arabic one ("Office 3126, Aspin Commercial Tower, Sheikh Zayed Road, Dubai"); it is editable in the dashboard (Contact info → English). Free-text "minimum rental period" is translated only for common patterns ("3 أشهر" → "3 months"); anything else shows as typed.
+
+## D20. English marketing copy is a draft
+Hero story, page titles and section headings in English are faithful translations of the Arabic copy, marked as a draft for the owner to approve (`heroStoryEn`, `pageMetaEn` in `client/src/config/site.ts`).

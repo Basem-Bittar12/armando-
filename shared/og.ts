@@ -11,19 +11,26 @@ export type OgProperty = {
   /** «8,500 درهم / شهري» أو null بدون سعر */
   price: string | null;
   image: string | null;
+  lang: OgLang;
 };
+
+/** لغة الرابط: /en/property/… إنجليزي، وغيره عربي */
+export type OgLang = "ar" | "en";
 
 const escape = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const SITE_NAME = "أرماندو القاضي لبيوت العطلات";
+const SITE_NAME: Record<OgLang, string> = { ar: "أرماندو القاضي لبيوت العطلات", en: "Armando Alkadi Holiday Homes" };
+
+/** الإنجليزي إن وُجد، وإلا العربي (نفس قاعدة الموقع) */
+const pick = (lang: OgLang, ar: string | undefined, en: string | null | undefined) => (lang === "en" && en?.trim() ? en.trim() : ar ?? "");
 
 /** يجلب العقار المنشور بالكود عبر REST العام (المفتاح العام + RLS: المنشور فقط) */
-export async function fetchOgProperty(supabaseUrl: string, anonKey: string, code: string): Promise<OgProperty | null> {
+export async function fetchOgProperty(supabaseUrl: string, anonKey: string, code: string, lang: OgLang = "ar"): Promise<OgProperty | null> {
   if (!/^[A-Za-z0-9-]{2,20}$/.test(code)) return null;
   const base = supabaseUrl.replace(/\/$/, "");
   const select =
-    "code,title,description,cities(name_ar),areas(name_ar),property_prices(amount,rental_terms(unit_ar,sort_order)),property_images(path_1080,sort_order)";
+    "code,title,title_en,description,description_en,cities(name_ar,name_en),areas(name_ar,name_en),property_prices(amount,rental_terms(unit_ar,unit_en,sort_order)),property_images(path_1080,sort_order)";
   const response = await fetch(
     `${base}/rest/v1/properties?select=${encodeURIComponent(select)}&code=eq.${encodeURIComponent(code.toUpperCase())}&is_published=eq.true&limit=1`,
     { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}`, Accept: "application/json" } },
@@ -32,10 +39,12 @@ export async function fetchOgProperty(supabaseUrl: string, anonKey: string, code
   const rows = (await response.json()) as {
     code: string;
     title: string;
+    title_en: string | null;
     description: string;
-    cities: { name_ar: string } | null;
-    areas: { name_ar: string } | null;
-    property_prices: { amount: number; rental_terms: { unit_ar: string; sort_order: number } | null }[];
+    description_en: string | null;
+    cities: { name_ar: string; name_en: string } | null;
+    areas: { name_ar: string; name_en: string } | null;
+    property_prices: { amount: number; rental_terms: { unit_ar: string; unit_en: string; sort_order: number } | null }[];
     property_images: { path_1080: string; sort_order: number }[];
   }[];
   const row = rows[0];
@@ -52,25 +61,31 @@ export async function fetchOgProperty(supabaseUrl: string, anonKey: string, code
   }
   return {
     code: row.code,
-    title: row.title,
-    description: row.description,
-    location: [row.areas?.name_ar, row.cities?.name_ar].filter(Boolean).join("، "),
-    price: price ? `${new Intl.NumberFormat("en-US").format(Number(price.amount))} ${price.rental_terms?.unit_ar ?? "درهم"}` : null,
+    title: pick(lang, row.title, row.title_en),
+    description: pick(lang, row.description, row.description_en),
+    location: [pick(lang, row.areas?.name_ar, row.areas?.name_en), pick(lang, row.cities?.name_ar, row.cities?.name_en)]
+      .filter(Boolean)
+      .join(lang === "en" ? ", " : "، "),
+    price: price
+      ? `${new Intl.NumberFormat("en-US").format(Number(price.amount))} ${price.rental_terms ? pick(lang, price.rental_terms.unit_ar, price.rental_terms.unit_en) : lang === "en" ? "AED" : "درهم"}`
+      : null,
     image,
+    lang,
   };
 }
 
 /** وسوم المعاينة: العنوان + السعر + الموقع + صورة الغلاف */
 export function buildOgTags(property: OgProperty, pageUrl: string): { title: string; tags: string } {
-  const title = `${property.title} — ${property.code} | ${SITE_NAME}`;
+  const siteName = SITE_NAME[property.lang];
+  const title = `${property.title} — ${property.code} | ${siteName}`;
   const summary = [property.price, property.location].filter(Boolean).join(" · ");
   const description = [summary, property.description.replace(/\s+/g, " ").slice(0, 160)].filter(Boolean).join(" — ");
   const meta = (attr: "property" | "name", key: string, content: string) => `<meta ${attr}="${key}" content="${escape(content)}" />`;
   const tags = [
     meta("name", "description", description),
     meta("property", "og:type", "website"),
-    meta("property", "og:site_name", SITE_NAME),
-    meta("property", "og:locale", "ar_AE"),
+    meta("property", "og:site_name", siteName),
+    meta("property", "og:locale", property.lang === "en" ? "en_AE" : "ar_AE"),
     meta("property", "og:url", pageUrl),
     meta("property", "og:title", `${property.title}${property.price ? ` · ${property.price}` : ""}`),
     meta("property", "og:description", description),
@@ -85,8 +100,9 @@ export function buildOgTags(property: OgProperty, pageUrl: string): { title: str
 }
 
 /** يستبدل <title> ووصف الصفحة الافتراضي ويضيف الوسوم قبل </head> */
-export function injectOg(html: string, og: { title: string; tags: string }): string {
+export function injectOg(html: string, og: { title: string; tags: string }, lang: OgLang = "ar"): string {
   return html
+    .replace('<html lang="ar" dir="rtl">', lang === "en" ? '<html lang="en" dir="ltr">' : '<html lang="ar" dir="rtl">')
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${escape(og.title)}</title>`)
     .replace(/<meta\s+name="description"[\s\S]*?\/>\s*/, "")
     .replace("</head>", `    ${og.tags}\n  </head>`);

@@ -147,4 +147,42 @@ test.describe("الموقع العام", () => {
     expect(spam).toEqual([]);
     expect(errors).toEqual([]);
   });
+
+  test("زر اللغة: عربي ← EN ← عربي بنفس الصفحة، والاتجاه والنصوص تتبدّل", async ({ page, isMobile }) => {
+    const errors = watchConsole(page);
+    await page.goto("/property/AK-102");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    const toEnglish = page.locator(isMobile ? "a.header-lang--mobile" : "a.header-lang:not(.header-lang--mobile)");
+    await expect(toEnglish).toHaveText("EN");
+    await toEnglish.click();
+
+    await expect(page).toHaveURL(/\/en\/property\/AK-102$/);
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.getByRole("heading", { name: "Property details" })).toBeVisible();
+    // رسالة واتساب بالإنجليزي وبرابط الصفحة الإنجليزية
+    const href = (await page.locator("a.whatsapp-button").first().getAttribute("href"))!;
+    expect(decodeURIComponent(href.split("?text=")[1])).toContain("/en/property/AK-102");
+
+    const toArabic = page.locator(isMobile ? "a.header-lang--mobile" : "a.header-lang:not(.header-lang--mobile)");
+    await expect(toArabic).toHaveText("عربي");
+    await toArabic.click();
+    await expect(page).toHaveURL(/\/property\/AK-102$/);
+    expect(new URL(page.url()).pathname).toBe("/property/AK-102");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(page.getByRole("heading", { name: "تفاصيل العقار" })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("الصفحة الإنجليزية تفتح مباشرة من الرابط (مشاركة) باتجاه صحيح من أول رسم", async ({ page }) => {
+    const errors = watchConsole(page);
+    await page.goto("/en/properties");
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+    await expect(page.locator(".property-card").first()).toBeVisible();
+    await expect(page.locator("a.header-lang").first()).toHaveText("عربي");
+    // روابط الصفحة تبقى بالإنجليزي
+    const href = await page.locator(".property-card__link").first().getAttribute("href");
+    expect(href).toMatch(/^\/en\/property\//);
+    expect(errors).toEqual([]);
+  });
 });

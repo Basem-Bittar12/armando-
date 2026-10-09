@@ -63,6 +63,8 @@ for (const demo of demoProperties) {
         code: demo.code,
         title: demo.title,
         description: demo.description,
+        title_en: demo.titleEn,
+        description_en: demo.descriptionEn,
         city_id: cityId,
         area_id: idOf(areas.filter((a) => a.city_id === cityId), demo.area, "المنطقة"),
         type_id: idOf(types, demo.type, "النوع"),

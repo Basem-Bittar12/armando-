@@ -18,7 +18,12 @@
     <link rel="manifest" href="/site.webmanifest" />
     <!-- أول فريم من الهيرو يظهر فوراً: نحمّله مبكراً في الرئيسية فقط، وحسب اتجاه الشاشة -->
     <script>
-      if (location.pathname === "/") {
+      // النسخة الإنجليزية (/en…): الاتجاه واللغة من أول رسم، قبل تحميل React
+      if (/^\/en(\/|$)/.test(location.pathname)) {
+        document.documentElement.lang = "en";
+        document.documentElement.dir = "ltr";
+      }
+      if (location.pathname === "/" || location.pathname === "/en" || location.pathname === "/en/") {
         var heroFrame = document.createElement("link");
         heroFrame.rel = "preload";
         heroFrame.as = "image";

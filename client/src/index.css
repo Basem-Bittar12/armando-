@@ -1469,6 +1469,9 @@ bdi { unicode-bidi: isolate; }
 /* أسهم الاتجاه (رجوع، التالي/السابق) تنعكس مع اتجاه الصفحة */
 [dir="ltr"] .public-shell :is(.lucide-chevron-left, .lucide-chevron-right, .lucide-arrow-left, .lucide-arrow-right),
 [dir="ltr"] .lightbox :is(.lucide-chevron-left, .lucide-chevron-right) { transform: scaleX(-1); }
+/* سطر الحقوق والشريط الثابت (تقليل الحركة) باتجاه الإنجليزي */
+[dir="ltr"] .footer-bottom { direction: ltr; }
+[dir="ltr"] .hstrip--static .hstrip__viewport { direction: ltr; }
 
 /* زر اللغة (EN / عربي): دائرة بنفس شكل زر المفضلة؛ على التلفون جنب زر القائمة */
 .header-lang {

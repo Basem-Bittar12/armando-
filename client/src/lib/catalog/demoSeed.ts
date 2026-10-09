@@ -37,6 +37,9 @@ const properties: FullProperty[] = [
     title: "شقة بانورامية بإطلالة على المدينة",
     description:
       "شقة بانورامية في قلب وسط مدينة دبي، بإطلالة مفتوحة على أفق المدينة. مساحات معيشة واسعة، نوافذ ممتدة من الأرض حتى السقف، وتشطيبات معاصرة بألوان هادئة. على بعد دقائق من دبي مول ومحطة المترو.",
+    title_en: "Panoramic apartment with city views",
+    description_en:
+      "A panoramic apartment in the heart of Downtown Dubai with open views of the city skyline. Spacious living areas, floor-to-ceiling windows and contemporary finishes in calm tones. Minutes from Dubai Mall and the metro station.",
     city_id: "city-dubai",
     area_id: "area-downtown",
     type_id: "type-apartment",
@@ -67,6 +70,9 @@ const properties: FullProperty[] = [
     title: "فيلا خاصة بتصميم معاصر",
     description:
       "فيلا مستقلة بتصميم معاصر في البرشاء، تتوزع على طابقين مع حديقة خاصة ومسبح. مساحات استقبال منفصلة، مطبخ مجهز، وغرفة خادمة. مناسبة للعائلات الباحثة عن الخصوصية مع قرب المدارس والمراكز التجارية.",
+    title_en: "Private villa with contemporary design",
+    description_en:
+      "A standalone villa with contemporary design in Al Barsha, set over two floors with a private garden and pool. Separate reception areas, a fitted kitchen and a maid's room. Ideal for families looking for privacy close to schools and shopping centres.",
     city_id: "city-dubai",
     area_id: "area-barsha",
     type_id: "type-villa",
@@ -97,6 +103,9 @@ const properties: FullProperty[] = [
     title: "استوديو أنيق مفروش بالكامل",
     description:
       "استوديو مفروش بالكامل في الخليج التجاري، جاهز للسكن الفوري. تصميم ذكي يستثمر كامل المساحة، مع مطبخ مدمج وإطلالة على القناة المائية.",
+    title_en: "Elegant fully furnished studio",
+    description_en:
+      "A fully furnished studio in Business Bay, ready to move in. A smart layout that makes the most of every metre, with a built-in kitchen and a view of the canal.",
     city_id: "city-dubai",
     area_id: "area-business-bay",
     type_id: "type-studio",

@@ -11,3 +11,7 @@
 [[edge_functions]]
   path = "/property/*"
   function = "property-og"
+
+[[edge_functions]]
+  path = "/en/property/*"
+  function = "property-og"

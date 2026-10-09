@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { indexing } from "@/config/site";
+import { otherLangPath, useLang } from "@/i18n/lang";
 
 /**
  * يضبط عنوان الصفحة ووسوم الميتا الأساسية عند فتح كل صفحة.
@@ -17,15 +18,21 @@ function setMetaTag(attr: "name" | "property", key: string, content: string) {
   element.setAttribute("content", content);
 }
 
-function setCanonical(href: string) {
-  let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+function setLink(selector: string, attrs: Record<string, string>, href: string) {
+  let link = document.head.querySelector<HTMLLinkElement>(selector);
   if (!link) {
     link = document.createElement("link");
-    link.setAttribute("rel", "canonical");
+    for (const [key, value] of Object.entries(attrs)) link.setAttribute(key, value);
     document.head.appendChild(link);
   }
   link.setAttribute("href", href);
 }
+
+const setCanonical = (href: string) => setLink('link[rel="canonical"]', { rel: "canonical" }, href);
+
+/** روابط الصفحة نفسها باللغتين (hreflang) — لمحركات البحث بعد الإطلاق */
+const setAlternate = (hreflang: string, href: string) =>
+  setLink(`link[rel="alternate"][hreflang="${hreflang}"]`, { rel: "alternate", hreflang }, href);
 
 export type MetaInput = {
   title: string;
@@ -37,6 +44,7 @@ export type MetaInput = {
 };
 
 export function useMeta({ title, description, image, noIndex }: MetaInput) {
+  const lang = useLang();
   useEffect(() => {
     document.title = title;
 
@@ -47,7 +55,7 @@ export function useMeta({ title, description, image, noIndex }: MetaInput) {
     setMetaTag("property", "og:description", description);
     setMetaTag("property", "og:type", "website");
     setMetaTag("property", "og:url", window.location.href);
-    setMetaTag("property", "og:locale", "ar_AE");
+    setMetaTag("property", "og:locale", lang === "en" ? "en_AE" : "ar_AE");
 
     setMetaTag("name", "twitter:card", image ? "summary_large_image" : "summary");
     setMetaTag("name", "twitter:title", title);
@@ -58,6 +66,12 @@ export function useMeta({ title, description, image, noIndex }: MetaInput) {
       setMetaTag("name", "twitter:image", image);
     }
 
-    setCanonical(window.location.origin + window.location.pathname);
-  }, [title, description, image, noIndex]);
+    const { origin, pathname } = window.location;
+    setCanonical(origin + pathname);
+    if (!noIndex) {
+      const other = origin + otherLangPath(pathname, lang);
+      setAlternate("ar", lang === "ar" ? origin + pathname : other);
+      setAlternate("en", lang === "en" ? origin + pathname : other);
+    }
+  }, [title, description, image, noIndex, lang]);
 }

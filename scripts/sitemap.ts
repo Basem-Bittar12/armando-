@@ -34,12 +34,14 @@ if (supabaseUrl && anonKey) {
 }
 
 const base = site || "https://example.invalid";
-const urls = [
+const pages = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },
   { loc: "/properties", changefreq: "daily", priority: "0.9" },
   { loc: "/contact", changefreq: "monthly", priority: "0.5" },
   ...properties.map((p) => ({ loc: `/property/${encodeURIComponent(p.code)}`, lastmod: p.updated_at.slice(0, 10), changefreq: "weekly", priority: "0.8" })),
 ];
+// كل صفحة بالعربي (الرابط العادي) وبالإنجليزي (تحت /en)
+const urls = [...pages, ...pages.map((u) => ({ ...u, loc: u.loc === "/" ? "/en" : `/en${u.loc}` }))];
 const xml = [
   '<?xml version="1.0" encoding="UTF-8"?>',
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
