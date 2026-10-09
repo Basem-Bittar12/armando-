@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 import { CheckCircle2, Clock3, Mail, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
-import { pageMeta, whatsappTemplates } from "@/config/site";
+import { pageMetaFor, whatsappTemplatesFor } from "@/config/site";
+import { pickLang, useLang, useT } from "@/i18n/lang";
 import { useSiteContact } from "@/hooks/useSiteContact";
 import { useCatalog, bySort } from "@/lib/catalog/store";
 import { useMeta } from "@/hooks/useMeta";
@@ -27,13 +28,15 @@ const initialForm: FormState = {
 };
 
 export default function Contact() {
-  useMeta(pageMeta.contact);
+  const lang = useLang();
+  const t = useT();
+  useMeta(pageMetaFor(lang).contact);
   const { data, submitInquiry } = useCatalog();
   const contact = useSiteContact();
   const { whatsappHref } = contact;
   // خيارات النموذج من الخيارات المفعّلة
-  const rentalTerms = data ? bySort(data.rental_terms.filter((t) => t.is_active)).map((t) => t.name_ar) : [];
-  const cities = data ? bySort(data.cities.filter((c) => c.is_active)).map((c) => c.name_ar) : [];
+  const rentalTerms = data ? bySort(data.rental_terms.filter((term) => term.is_active)).map((term) => pickLang(lang, term.name_ar, term.name_en)) : [];
+  const cities = data ? bySort(data.cities.filter((c) => c.is_active)).map((c) => pickLang(lang, c.name_ar, c.name_en)) : [];
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [sent, setSent] = useState(false);
@@ -45,15 +48,15 @@ export default function Contact() {
 
   const validate = () => {
     const next: Partial<Record<keyof FormState, string>> = {};
-    if (form.name.trim().length < 3) next.name = "الرجاء كتابة الاسم الكامل";
+    if (form.name.trim().length < 3) next.name = t("الرجاء كتابة الاسم الكامل", "Please enter your full name");
     const digits = form.phone.replace(/\D/g, "");
-    if (digits.length < 9) next.phone = "الرجاء إدخال رقم هاتف صحيح";
+    if (digits.length < 9) next.phone = t("الرجاء إدخال رقم هاتف صحيح", "Please enter a valid phone number");
     setErrors(next);
     return next;
   };
 
   // الرسالة الجاهزة: الزائر يرسلها بنفسه من واتساب، فتصل للمكتب فعلاً
-  const message = whatsappTemplates.contactForm({
+  const message = whatsappTemplatesFor(lang).contactForm({
     name: form.name.trim(),
     phone: form.phone.trim(),
     term: form.term,
@@ -69,7 +72,7 @@ export default function Contact() {
       const field = found.name ? nameRef.current : phoneRef.current;
       field?.scrollIntoView({ block: "center", behavior: "smooth" });
       field?.focus({ preventScroll: true });
-      toast.error("راجع الحقول المطلوبة قبل الإرسال");
+      toast.error(t("راجع الحقول المطلوبة قبل الإرسال", "Please check the required fields"));
       return;
     }
     // الحقل المخفي معبّى = روبوت: نُظهر النجاح بلا إرسال حتى لا نعطيه أي إشارة
@@ -91,8 +94,8 @@ export default function Contact() {
       setSent(true);
     } catch (error) {
       console.error("[Contact] inquiry not saved", error);
-      toast.error("ما وصل الطلب — جرّب مرة ثانية أو راسلنا مباشرة على واتساب", {
-        action: { label: "واتساب", onClick: () => window.open(whatsappHref(message), "_blank", "noopener") },
+      toast.error(t("ما وصل الطلب — جرّب مرة ثانية أو راسلنا مباشرة على واتساب", "Your request didn't go through — try again or message us on WhatsApp"), {
+        action: { label: t("واتساب", "WhatsApp"), onClick: () => window.open(whatsappHref(message), "_blank", "noopener") },
       });
     } finally {
       setSending(false);
@@ -106,19 +109,19 @@ export default function Contact() {
           {/* العنوان، ثم واتساب مباشرة (القناة الأساسية)، ثم جملة النموذج، ثم النموذج */}
           <div className="contact-intro">
             <h1>
-              لنبدأ
+              {t("لنبدأ", "Let's start")}
               <br />
-              المحادثة
+              {t("المحادثة", "the conversation")}
             </h1>
-            <WhatsAppButton label="تواصل عبر واتساب" className="contact-whatsapp" />
-            <p className="contact-or">أو اترك رقمك ومنتصل فيك</p>
+            <WhatsAppButton label={t("تواصل عبر واتساب", "Contact us on WhatsApp")} className="contact-whatsapp" />
+            <p className="contact-or">{t("أو اترك رقمك ومنتصل فيك", "Or leave your number and we will call you")}</p>
           </div>
 
           <div className="contact-info">
             <div className="contact-details">
               <div>
                 <span>
-                  <Phone size={14} /> اتصل بنا
+                  <Phone size={14} /> {t("اتصل بنا", "Call us")}
                 </span>
                 <a href={`tel:${contact.phoneHref}`}>
                   <Ltr>{contact.phone}</Ltr>
@@ -128,7 +131,7 @@ export default function Contact() {
               {contact.email && (
                 <div>
                   <span>
-                    <Mail size={14} /> راسلنا
+                    <Mail size={14} /> {t("راسلنا", "Email us")}
                   </span>
                   <a href={`mailto:${contact.email}`}>{contact.email}</a>
                 </div>
@@ -136,14 +139,14 @@ export default function Contact() {
               {contact.hours && (
                 <div>
                   <span>
-                    <Clock3 size={14} /> ساعات العمل
+                    <Clock3 size={14} /> {t("ساعات العمل", "Working hours")}
                   </span>
                   <strong>{contact.hours}</strong>
                 </div>
               )}
               <div>
                 <span>
-                  <MapPin size={14} /> المكتب
+                  <MapPin size={14} /> {t("المكتب", "Office")}
                 </span>
                 <strong>
                   <Address text={contact.address} />
@@ -155,13 +158,20 @@ export default function Contact() {
           {sent ? (
             <div className="contact-form contact-form--sent">
               <CheckCircle2 size={34} />
-              <h2>وصلنا طلبك</h2>
-              <p>
-                شكراً {form.name.trim()}. منتواصل معك على الرقم <Ltr>{form.phone.trim()}</Ltr>. إذا حابب تحكي معنا هلأ،
-                رسالتك جاهزة على واتساب.
-              </p>
+              <h2>{t("وصلنا طلبك", "We received your request")}</h2>
+              {lang === "en" ? (
+                <p>
+                  Thank you, {form.name.trim()}. We will contact you on <Ltr>{form.phone.trim()}</Ltr>. If you would like to talk now, your
+                  message is ready on WhatsApp.
+                </p>
+              ) : (
+                <p>
+                  شكراً {form.name.trim()}. منتواصل معك على الرقم <Ltr>{form.phone.trim()}</Ltr>. إذا حابب تحكي معنا هلأ،
+                  {t("رسالتك", "Your message")} جاهزة على واتساب.
+                </p>
+              )}
               <div className="contact-form__sent-actions">
-                <WhatsAppButton label="أرسلها على واتساب" message={message} />
+                <WhatsAppButton label={t("أرسلها على واتساب", "Send it on WhatsApp")} message={message} />
                 <button
                   className="outline-button"
                   onClick={() => {
@@ -170,26 +180,26 @@ export default function Contact() {
                     setSent(false);
                   }}
                 >
-                  إرسال طلب آخر
+                  {t("إرسال طلب آخر", "Send another request")}
                 </button>
               </div>
             </div>
           ) : (
             <form className="contact-form" onSubmit={submit} noValidate>
               <div className="form-heading">
-                <h2>ما الذي تبحث عنه؟</h2>
+                <h2>{t("ما الذي تبحث عنه؟", "What are you looking for?")}</h2>
               </div>
 
               <label>
                 <span>
-                  الاسم الكامل <span aria-hidden="true">*</span>
+                  {t("الاسم الكامل", "Full name")} <span aria-hidden="true">*</span>
                 </span>
                 <input
                   ref={nameRef}
                   aria-required="true"
                   value={form.name}
                   onChange={(event) => setForm({ ...form, name: event.target.value })}
-                  placeholder="اكتب اسمك"
+                  placeholder={t("اكتب اسمك", "Your name")}
                   aria-invalid={Boolean(errors.name)}
                 />
                 {errors.name && <small className="field-error">{errors.name}</small>}
@@ -197,7 +207,7 @@ export default function Contact() {
 
               <label>
                 <span>
-                  رقم الهاتف <span aria-hidden="true">*</span>
+                  {t("رقم الهاتف", "Phone number")} <span aria-hidden="true">*</span>
                 </span>
                 <input
                   ref={phoneRef}
@@ -216,24 +226,24 @@ export default function Contact() {
 
               <div className="form-row">
                 <label>
-                  نوع الإيجار
+                  {t("نوع الإيجار", "Rental type")}
                   <select
                     value={form.term}
                     onChange={(event) => setForm({ ...form, term: event.target.value })}
                   >
-                    <option value="">اختر</option>
+                    <option value="">{t("اختر", "Choose")}</option>
                     {rentalTerms.map((term) => (
                       <option key={term}>{term}</option>
                     ))}
                   </select>
                 </label>
                 <label>
-                  المنطقة
+                  {t("المنطقة", "Area")}
                   <select
                     value={form.city}
                     onChange={(event) => setForm({ ...form, city: event.target.value })}
                   >
-                    <option value="">اختر</option>
+                    <option value="">{t("اختر", "Choose")}</option>
                     {cities.map((city) => (
                       <option key={city}>{city}</option>
                     ))}
@@ -247,18 +257,18 @@ export default function Contact() {
                   rows={4}
                   value={form.message}
                   onChange={(event) => setForm({ ...form, message: event.target.value })}
-                  placeholder="شاركنا تفاصيل المساحة التي تتخيلها..."
+                  placeholder={t("شاركنا تفاصيل المساحة التي تتخيلها...", "Tell us about the place you have in mind...")}
                 />
               </label>
 
               {/* فخّ السبام: مخفي عن الزوار وقارئات الشاشة */}
               <label className="hp-field" aria-hidden="true">
-                الموقع الإلكتروني
+                {t("الموقع الإلكتروني", "Website")}
                 <input tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} name="website" />
               </label>
 
               <button className="primary-button primary-button--large" type="submit" disabled={sending}>
-                {sending ? "جاري الإرسال…" : "أرسل الطلب"}
+                {sending ? t("جاري الإرسال…", "Sending…") : t("أرسل الطلب", "Send request")}
               </button>
             </form>
           )}

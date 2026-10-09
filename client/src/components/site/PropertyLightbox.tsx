@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { whatsappTemplates } from "@/config/site";
+import { whatsappTemplatesFor } from "@/config/site";
 import type { Property } from "@/lib/catalog/view";
 import { pauseScroll, resumeScroll } from "@/lib/motion";
 import SwipeGallery from "./SwipeGallery";
 import WhatsAppButton from "./WhatsAppButton";
 import { Ltr } from "./pageContext";
+import { propertyUrl, useLang, useT } from "@/i18n/lang";
 
 /**
  * المعرض المكبّر لصور بيت: Espresso Deep كاملة، الصور بالسحب، العدّاد فوق بالمنتصف، إغلاق 44px،
@@ -29,7 +30,9 @@ export function PropertyLightbox({
   const [index, setIndex] = useState(startIndex);
   const closeRef = useRef<HTMLButtonElement>(null);
   const total = property.gallery.length;
-  const message = whatsappTemplates.property(property.title, property.id, `${window.location.origin}/property/${property.id}`);
+  const lang = useLang();
+  const t = useT();
+  const message = whatsappTemplatesFor(lang).property(property.title, property.id, propertyUrl(lang, property.id));
 
   const go = (next: number) => {
     const value = (next + total) % total;
@@ -63,12 +66,12 @@ export function PropertyLightbox({
   });
 
   return (
-    <div className="lightbox" role="dialog" aria-modal="true" aria-label={`صور ${property.title}`}>
+    <div className="lightbox" role="dialog" aria-modal="true" aria-label={t(`صور ${property.title}`, `Photos of ${property.title}`)}>
       <div className="lightbox__top">
         <span className="lightbox__count">
-          <Ltr>{index + 1}</Ltr> من <Ltr>{total}</Ltr>
+          <Ltr>{index + 1}</Ltr> {t("من", "of")} <Ltr>{total}</Ltr>
         </span>
-        <button ref={closeRef} className="lightbox__close icon-circle" onClick={onClose} aria-label="إغلاق">
+        <button ref={closeRef} className="lightbox__close icon-circle" onClick={onClose} aria-label={t("إغلاق", "Close")}>
           <X size={22} />
         </button>
       </div>
@@ -82,17 +85,17 @@ export function PropertyLightbox({
         }}
         alt={property.title}
       />
-      <button className="lightbox__nav lightbox__nav--prev" onClick={() => go(index + 1)} aria-label="الصورة التالية">
+      <button className="lightbox__nav lightbox__nav--prev" onClick={() => go(index + 1)} aria-label={t("الصورة التالية", "Next photo")}>
         <ChevronLeft size={24} />
       </button>
-      <button className="lightbox__nav lightbox__nav--next" onClick={() => go(index - 1)} aria-label="الصورة السابقة">
+      <button className="lightbox__nav lightbox__nav--next" onClick={() => go(index - 1)} aria-label={t("الصورة السابقة", "Previous photo")}>
         <ChevronRight size={24} />
       </button>
       <div className="lightbox__bottom">
-        <WhatsAppButton label="اسأل عن هذا العقار" message={message} variant="light" />
+        <WhatsAppButton label={t("اسأل عن هذا العقار", "Ask about this home")} message={message} variant="light" />
         {showDetailsLink && (
           <Link href={`/property/${property.id}`} className="lightbox__details" onClick={onClose}>
-            تفاصيل البيت
+            {t("تفاصيل البيت", "Home details")}
           </Link>
         )}
       </div>

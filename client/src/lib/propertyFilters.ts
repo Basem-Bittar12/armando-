@@ -1,4 +1,5 @@
 import type { Property } from "@/lib/catalog/view";
+import type { Lang } from "@/i18n/lang";
 
 /**
  * منطق البحث والفلترة. كل الفلاتر تُخزَّن في رابط الصفحة (query string)
@@ -9,9 +10,9 @@ import type { Property } from "@/lib/catalog/view";
 export const LAST_LISTING_KEY = "aahh:last-listing";
 
 /** آخر صفحة عقارات زارها الزائر (بفلاترها)، أو كل العقارات */
-export function lastListingHref(): string {
+export function lastListingHref(lang: Lang = "ar"): string {
   try {
-    const href = sessionStorage.getItem(LAST_LISTING_KEY);
+    const href = sessionStorage.getItem(`${LAST_LISTING_KEY}:${lang}`);
     return href && href.startsWith("/properties") ? href : "/properties";
   } catch {
     return "/properties";
@@ -51,6 +52,13 @@ export const sortLabels: Record<SortKey, string> = {
   priceAsc: "السعر: من الأقل",
   priceDesc: "السعر: من الأعلى",
   areaDesc: "الأكبر مساحة",
+};
+
+export const sortLabelsEn: Record<SortKey, string> = {
+  newest: "Newest first",
+  priceAsc: "Price: low to high",
+  priceDesc: "Price: high to low",
+  areaDesc: "Largest first",
 };
 
 export function filtersFromParams(params: URLSearchParams): Filters {
@@ -95,7 +103,6 @@ export function activeFilterCount(filters: Filters): number {
   return count;
 }
 
-const termOrder = (term: string) => (term === "شهري" ? 0 : 1);
 
 /** هل فلتر السعر مستعمل */
 export const priceFilterActive = (filters: Filters) => Boolean(filters.minPrice || filters.maxPrice);
@@ -133,7 +140,7 @@ export function applyFilters(
 
   const sorted = [...filtered];
   // الترتيب بالسعر: الشهري معاً ثم السنوي معاً، وكل مجموعة مرتبة بسعرها
-  const byTerm = (a: Property, b: Property) => termOrder(a.term) - termOrder(b.term);
+  const byTerm = (a: Property, b: Property) => a.termRank - b.termRank;
   switch (filters.sort) {
     case "priceAsc":
       sorted.sort((a, b) => byTerm(a, b) || a.priceValue - b.priceValue);

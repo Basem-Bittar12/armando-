@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { brand } from "@/config/site";
+import { useT } from "@/i18n/lang";
 
 /**
  * شعار المكتب — ملفات SVG الرسمية فقط من ملف الهوية، بلا إعادة رسم ولا تلوين ولا فلاتر.
@@ -17,10 +18,11 @@ const SOURCES: Record<Variant, string> = {
 };
 
 export function Logo({ variant = "monogram", asLink = true }: { variant?: Variant; asLink?: boolean }) {
+  const t = useT();
   const image = (
     <img
       src={SOURCES[variant]}
-      alt={`${brand.nameAr} — ${brand.name}`}
+      alt={t(`${brand.nameAr} — ${brand.name}`, `${brand.name} — ${brand.nameAr}`)}
       className={`brand-logo brand-logo--${variant}`}
       decoding="async"
     />
@@ -29,7 +31,7 @@ export function Logo({ variant = "monogram", asLink = true }: { variant?: Varian
   if (!asLink) return image;
 
   return (
-    <Link href="/" className="brand-link" aria-label={`${brand.nameAr} — الصفحة الرئيسية`}>
+    <Link href="/" className="brand-link" aria-label={t(`${brand.nameAr} — الصفحة الرئيسية`, `${brand.name} — Home`)}>
       {image}
     </Link>
   );

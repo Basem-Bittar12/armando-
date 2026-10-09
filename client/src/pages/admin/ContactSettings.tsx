@@ -25,6 +25,8 @@ function ContactBody() {
     email: settings.email,
     address: settings.address,
     hours: settings.hours,
+    address_en: settings.address_en ?? "",
+    hours_en: settings.hours_en ?? "",
     social: settings.social.map((item) => ({ ...item })),
   });
   const [saving, setSaving] = useState(false);
@@ -69,6 +71,19 @@ function ContactBody() {
           </Field>
           <Field label="ساعات العمل (اختياري)" hint="مثلاً: يومياً 9 صباحاً – 9 مساءً. فاضي = ما بتظهر">
             <TextInput value={form.hours ?? ""} onChange={(e) => set({ hours: e.target.value })} />
+          </Field>
+        </div>
+      </section>
+
+      <section className="adm-section">
+        <h2>بالإنجليزي (اختياري)</h2>
+        <p className="adm-note">للنسخة الإنجليزية من الموقع. إذا تركتها فاضية بيطلع العنوان وساعات العمل بالعربي.</p>
+        <div className="adm-grid">
+          <Field label="العنوان بالإنجليزي" wide>
+            <TextInput dir="ltr" lang="en" value={form.address_en ?? ""} onChange={(e) => set({ address_en: e.target.value })} />
+          </Field>
+          <Field label="ساعات العمل بالإنجليزي">
+            <TextInput dir="ltr" lang="en" value={form.hours_en ?? ""} onChange={(e) => set({ hours_en: e.target.value })} />
           </Field>
         </div>
       </section>

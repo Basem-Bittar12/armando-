@@ -6,6 +6,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import WhatsAppButton from "./WhatsAppButton";
 import { WhatsAppMessageProvider } from "./pageContext";
+import { useT } from "@/i18n/lang";
 
 /**
  * متى يظهر شريط الموبايل الثابت:
@@ -18,6 +19,7 @@ type MobileBar = "always" | "after-hero" | { showAfter: number; content: ReactNo
 /** شريط الموبايل الثابت: بديل فقاعة واتساب العائمة (اللابتوب لا يعرضه) */
 function MobileActionBar({ mode }: { mode: MobileBar }) {
   const contact = useSiteContact();
+  const t = useT();
   const [visible, setVisible] = useState(mode === "always");
   // مفتاح ثابت للتأثير: الصفحة تمرر كائناً جديداً في كل رسم
   const modeKey = typeof mode === "object" ? `after:${mode.showAfter}` : mode;
@@ -55,9 +57,9 @@ function MobileActionBar({ mode }: { mode: MobileBar }) {
         mode.content
       ) : (
         <>
-          <WhatsAppButton label="واتساب" className="mobile-action-bar__primary" />
+          <WhatsAppButton label={t("واتساب", "WhatsApp")} className="mobile-action-bar__primary" />
           <a href={`tel:${contact.phoneHref}`} className="outline-button mobile-action-bar__secondary">
-            <Phone size={17} /> اتصال
+            <Phone size={17} /> {t("اتصال", "Call")}
           </a>
         </>
       )}

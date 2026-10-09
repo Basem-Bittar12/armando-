@@ -1,4 +1,5 @@
-import { whatsappTemplates } from "@/config/site";
+import { whatsappTemplatesFor } from "@/config/site";
+import { propertyUrl, useLang } from "@/i18n/lang";
 import { useSiteContact } from "@/hooks/useSiteContact";
 import type { Property } from "@/lib/catalog/view";
 import { usePageWhatsAppMessage } from "./pageContext";
@@ -10,7 +11,7 @@ import WhatsAppIcon from "./WhatsAppIcon";
  * الشكل الافتراضي: خلفية Espresso وأيقونة/نص Almond (لا أخضر)؛ variant يغيّر الشكل في أماكن محددة.
  */
 export function WhatsAppButton({
-  label = "تواصل عبر واتساب",
+  label,
   property,
   intent = "inquiry",
   message,
@@ -25,13 +26,15 @@ export function WhatsAppButton({
   className?: string;
 }) {
   const pageMessage = usePageWhatsAppMessage();
+  const lang = useLang();
+  const templates = whatsappTemplatesFor(lang);
   const { whatsappHref } = useSiteContact();
   const text =
     message ??
     (property
       ? intent === "viewing"
-        ? whatsappTemplates.viewing(property.title, property.id)
-        : whatsappTemplates.property(property.title, property.id, `${window.location.origin}/property/${property.id}`)
+        ? templates.viewing(property.title, property.id)
+        : templates.property(property.title, property.id, propertyUrl(lang, property.id))
       : pageMessage);
 
   return (
@@ -42,7 +45,7 @@ export function WhatsAppButton({
       className={`whatsapp-button ${variant !== "solid" ? `whatsapp-button--${variant}` : ""} ${className}`.trim()}
     >
       <WhatsAppIcon size={18} />
-      {label}
+      {label ?? (lang === "en" ? "Contact us on WhatsApp" : "تواصل عبر واتساب")}
     </a>
   );
 }

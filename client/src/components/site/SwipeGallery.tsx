@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { srcsetFor } from "@/lib/imageSrcset";
+import { useT } from "@/i18n/lang";
 
 /** تمرير الشريط إلى صورة — scrollTo إن وُجد (مع حركة اختيارية)، وإلا scrollLeft مباشرة */
 function scrollToSlide(track: HTMLElement, child: HTMLElement, smooth: boolean) {
@@ -27,6 +28,7 @@ export function SwipeGallery({
   alt: string;
   className?: string;
 }) {
+  const t = useT();
   const trackRef = useRef<HTMLDivElement>(null);
   const current = useRef(index);
 
@@ -72,7 +74,7 @@ export function SwipeGallery({
       {images.map((image, i) => (
         <div className="swipe-gallery__slide" key={image + i}>
           {onSelect ? (
-            <button type="button" onClick={() => onSelect(i)} aria-label={`تكبير الصورة ${i + 1}`}>
+            <button type="button" onClick={() => onSelect(i)} aria-label={t(`تكبير الصورة ${i + 1}`, `Enlarge photo ${i + 1}`)}>
               <img
                 {...srcsetFor(image)}
                 sizes="100vw"

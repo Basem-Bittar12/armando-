@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "wouter";
 import { RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
-import { pageMeta, whatsappTemplates } from "@/config/site";
+import { pageMetaFor, whatsappTemplatesFor } from "@/config/site";
+import { propertyUrl, useLang, useT, type Lang } from "@/i18n/lang";
 import { useCatalog } from "@/lib/catalog/store";
 import { filterOptions, publishedProperties } from "@/lib/catalog/view";
 import { useFavorites } from "@/store/Favorites";
@@ -20,48 +21,55 @@ import {
   filtersFromParams,
   filtersToParams,
   sortLabels,
+  sortLabelsEn,
   type Filters,
   type SortKey,
 } from "@/lib/propertyFilters";
 
-const bedLabel = (beds: number) =>
-  beds === 0 ? "استوديو" : beds === 1 ? "غرفة" : beds === 2 ? "غرفتان" : beds >= 4 ? "4+ غرف" : `${beds} غرف`;
+const bedLabel = (beds: number, lang: Lang = "ar") =>
+  lang === "en"
+    ? beds === 0 ? "Studio" : beds === 1 ? "1 bedroom" : beds >= 4 ? "4+ bedrooms" : `${beds} bedrooms`
+    : beds === 0 ? "استوديو" : beds === 1 ? "غرفة" : beds === 2 ? "غرفتان" : beds >= 4 ? "4+ غرف" : `${beds} غرف`;
 
 /** خيارات غرف النوم من البيانات نفسها (4 فأكثر تُجمع بخيار واحد «4+ غرف») */
-const bedOptionsFrom = (beds: number[]) =>
-  Array.from(new Set(beds.map((value) => Math.min(value, 4)))).map((value) => ({ value: String(value), label: bedLabel(value) }));
+const bedOptionsFrom = (beds: number[], lang: Lang) =>
+  Array.from(new Set(beds.map((value) => Math.min(value, 4)))).map((value) => ({ value: String(value), label: bedLabel(value, lang) }));
 
 /** عدد أنواع العقار في صف الفلاتر السريع (البقية في لوحة «فلترة») */
 const QUICK_TYPES = 3;
 
-const countLabel = (count: number) => (count === 1 ? "عقار" : "عقارات");
+const countLabel = (count: number, lang: Lang = "ar") => (lang === "en" ? (count === 1 ? "home" : "homes") : count === 1 ? "عقار" : "عقارات");
 
 /** الفلاتر المختارة بكلام عادي — لرسالة واتساب الجاهزة */
-function describeFilters(filters: Filters) {
+function describeFilters(filters: Filters, lang: Lang) {
   const parts: string[] = [];
+  const en = lang === "en";
   if (filters.type) parts.push(filters.type);
-  if (filters.term) parts.push(`للإيجار ال${filters.term}`);
-  if (filters.city) parts.push(`في ${filters.city}`);
-  if (filters.beds) parts.push(bedLabel(Number(filters.beds)));
-  if (filters.minPrice && filters.maxPrice) parts.push(`بين ${filters.minPrice} و${filters.maxPrice} درهم`);
-  else if (filters.minPrice) parts.push(`من ${filters.minPrice} درهم`);
-  else if (filters.maxPrice) parts.push(`حتى ${filters.maxPrice} درهم`);
+  if (filters.term) parts.push(en ? `for ${filters.term.toLowerCase()} rent` : `للإيجار ال${filters.term}`);
+  if (filters.city) parts.push(en ? `in ${filters.city}` : `في ${filters.city}`);
+  if (filters.beds) parts.push(bedLabel(Number(filters.beds), lang));
+  if (filters.minPrice && filters.maxPrice) parts.push(en ? `between ${filters.minPrice} and ${filters.maxPrice} AED` : `بين ${filters.minPrice} و${filters.maxPrice} درهم`);
+  else if (filters.minPrice) parts.push(en ? `from ${filters.minPrice} AED` : `من ${filters.minPrice} درهم`);
+  else if (filters.maxPrice) parts.push(en ? `up to ${filters.maxPrice} AED` : `حتى ${filters.maxPrice} درهم`);
   if (filters.q) parts.push(`(${filters.q})`);
-  return parts.join("، ");
+  return parts.join(en ? ", " : "، ");
 }
 
 export default function Properties() {
-  useMeta(pageMeta.properties);
+  const lang = useLang();
+  const t = useT();
+  const templates = whatsappTemplatesFor(lang);
+  useMeta(pageMetaFor(lang).properties);
   const [params, setParams] = useSearchParams();
   const { data, status, reload } = useCatalog();
   const { favorites } = useFavorites();
-  const properties = useMemo(() => (data ? publishedProperties(data) : []), [data]);
+  const properties = useMemo(() => (data ? publishedProperties(data, lang) : []), [data, lang]);
   // الفلاتر تُبنى من الخيارات المفعّلة التي عليها عقار منشور
   const options = useMemo(
-    () => (data ? filterOptions(data) : { cities: [], types: [], terms: [], beds: [] }),
-    [data],
+    () => (data ? filterOptions(data, lang) : { cities: [], types: [], terms: [], beds: [] }),
+    [data, lang],
   );
-  const bedOptions = useMemo(() => bedOptionsFrom(options.beds), [options.beds]);
+  const bedOptions = useMemo(() => bedOptionsFrom(options.beds, lang), [options.beds, lang]);
   const quickTypes = options.types.slice(0, QUICK_TYPES);
   const { cities, terms: rentalTerms, types: propertyTypes } = options;
 
@@ -91,11 +99,11 @@ export default function Properties() {
   useEffect(() => {
     const query = params.toString();
     try {
-      sessionStorage.setItem(LAST_LISTING_KEY, `/properties${query ? `?${query}` : ""}`);
+      sessionStorage.setItem(`${LAST_LISTING_KEY}:${lang}`, `/properties${query ? `?${query}` : ""}`);
     } catch {
       // التخزين غير متاح (وضع خاص) — الرابط يرجع لكل العقارات
     }
-  }, [params]);
+  }, [params, lang]);
 
   // زر «بحث»: يفتح اللوحة والمؤشر داخل حقل البحث مباشرة
   useEffect(() => {
@@ -126,10 +134,8 @@ export default function Properties() {
   const filterCount = activeFilterCount(filters);
   const availableCount = results.filter((p) => p.status === "متاح").length;
   // المفضلة على واتساب: كل بيت بالاسم والكود والرابط
-  const favoritesMessage = whatsappTemplates.favorites(
-    results.map((p) => `• ${p.title} (${p.id}) ${window.location.origin}/property/${p.id}`),
-  );
-  const summary = describeFilters(filters);
+  const favoritesMessage = templates.favorites(results.map((p) => `• ${p.title} (${p.id}) ${propertyUrl(lang, p.id)}`));
+  const summary = describeFilters(filters, lang);
 
   const resetAll = () => {
     setParams(new URLSearchParams(), { replace: true });
@@ -137,13 +143,19 @@ export default function Properties() {
   };
 
   return (
-    <PublicLayout whatsappMessage={summary ? whatsappTemplates.filtered(summary) : undefined}>
+    <PublicLayout whatsappMessage={summary ? templates.filtered(summary) : undefined}>
       <div className="listing-page">
         <div className="container listing-hero">
           <h1>
-            عقارات مختارة<span className="listing-hero__more"> للحياة اليومية</span>
+            {t("عقارات مختارة", "Selected homes")}
+            <span className="listing-hero__more">{t(" للحياة اليومية", " for everyday living")}</span>
           </h1>
-          <p>تصفح مجموعة أرماندو القاضي من المساحات السكنية المختارة للإيجار الشهري والسنوي في دبي.</p>
+          <p>
+            {t(
+              "تصفح مجموعة أرماندو القاضي من المساحات السكنية المختارة للإيجار الشهري والسنوي في دبي.",
+              "Browse the Armando Alkadi collection of selected homes for monthly and yearly rent in Dubai.",
+            )}
+          </p>
         </div>
 
         {/* صف الفلاتر: «فلترة» ثابت أوله، ثم صف يتمرر جانبياً — والصف كله ثابت تحت الهيدر */}
@@ -154,14 +166,14 @@ export default function Properties() {
               onClick={() => setSheetOpen((open) => !open)}
               aria-expanded={sheetOpen}
             >
-              <SlidersHorizontal size={17} /> فلترة
+              <SlidersHorizontal size={17} /> {t("فلترة", "Filters")}
               {filterCount > 0 && (
                 <b>
                   <Ltr>{filterCount}</Ltr>
                 </b>
               )}
             </button>
-            <div className="filter-pills" role="group" aria-label="فلاتر سريعة">
+            <div className="filter-pills" role="group" aria-label={t("فلاتر سريعة", "Quick filters")}>
               <button
                 className={filters.q ? "active" : ""}
                 onClick={() => {
@@ -169,11 +181,11 @@ export default function Properties() {
                   setSheetOpen(true);
                 }}
               >
-                <Search size={14} /> {filters.q ? filters.q : "بحث"}
+                <Search size={14} /> {filters.q ? filters.q : t("بحث", "Search")}
               </button>
               {filters.fav && (
-                <button className="active" onClick={() => update({ fav: false })} aria-label="إزالة فلتر المفضلة">
-                  المفضلة <X size={14} />
+                <button className="active" onClick={() => update({ fav: false })} aria-label={t("إزالة فلتر المفضلة", "Remove favorites filter")}>
+                  {t("المفضلة", "Favorites")} <X size={14} />
                 </button>
               )}
               {rentalTerms.map((term) => (
@@ -204,35 +216,35 @@ export default function Properties() {
         {/* لوحة الفلترة: من الأسفل على الموبايل (85vh)، ولوحة تحت الصف على اللابتوب */}
         {sheetOpen && (
           <div className="filter-sheet">
-            <button className="filter-sheet__backdrop" onClick={() => setSheetOpen(false)} aria-label="إغلاق الفلاتر" tabIndex={-1} />
+            <button className="filter-sheet__backdrop" onClick={() => setSheetOpen(false)} aria-label={t("إغلاق الفلاتر", "Close filters")} tabIndex={-1} />
             <div className="container filter-sheet__wrap">
-              <div className="filter-drawer" role="dialog" aria-label="فلترة العقارات">
+              <div className="filter-drawer" role="dialog" aria-label={t("فلترة العقارات", "Filter homes")}>
                 <div className="filter-drawer__head">
                   <span className="filter-drawer__title">
-                    <SlidersHorizontal size={16} /> فلترة
+                    <SlidersHorizontal size={16} /> {t("فلترة", "Filters")}
                   </span>
-                  <button className="icon-circle" onClick={() => setSheetOpen(false)} aria-label="إغلاق الفلاتر">
+                  <button className="icon-circle" onClick={() => setSheetOpen(false)} aria-label={t("إغلاق الفلاتر", "Close filters")}>
                     <X size={20} />
                   </button>
                 </div>
 
                 <div className="filter-drawer__grid">
                   <label className="filter-field filter-field--wide">
-                    <span>بحث</span>
+                    <span>{t("بحث", "Search")}</span>
                     <input
                       ref={searchRef}
                       value={searchDraft}
                       onChange={(event) => setSearchDraft(event.target.value)}
-                      placeholder="منطقة أو اسم عقار"
-                      aria-label="بحث في العقارات"
+                      placeholder={t("منطقة أو اسم عقار", "Area or home name")}
+                      aria-label={t("بحث في العقارات", "Search homes")}
                     />
                   </label>
 
                   {/* المدينة تظهر فقط حين يكون هناك أكثر من مدينة (حالياً دبي فقط) */}
                   {cities.length > 1 && (
                   <ChoiceChips
-                    label="المدينة"
-                    allLabel="كل الإمارات"
+                    label={t("المدينة", "City")}
+                    allLabel={t("كل الإمارات", "All emirates")}
                     options={cities.map((city) => ({ value: city, label: city }))}
                     value={filters.city}
                     onChange={(value) => update({ city: value })}
@@ -240,24 +252,24 @@ export default function Properties() {
                   )}
 
                   <ChoiceChips
-                    label="نوع العقار"
-                    allLabel="كل الأنواع"
+                    label={t("نوع العقار", "Property type")}
+                    allLabel={t("كل الأنواع", "All types")}
                     options={propertyTypes.map((type) => ({ value: type, label: type }))}
                     value={filters.type}
                     onChange={(value) => update({ type: value })}
                   />
 
                   <ChoiceChips
-                    label="غرف النوم"
-                    allLabel="أي عدد"
+                    label={t("غرف النوم", "Bedrooms")}
+                    allLabel={t("أي عدد", "Any")}
                     options={bedOptions}
                     value={filters.beds}
                     onChange={(value) => update({ beds: value })}
                   />
 
                   <ChoiceChips
-                    label="نوع الإيجار"
-                    allLabel="الكل"
+                    label={t("نوع الإيجار", "Rental type")}
+                    allLabel={t("الكل", "All")}
                     options={rentalTerms.map((term) => ({ value: term, label: term }))}
                     value={filters.term}
                     onChange={(value) => update({ term: value })}
@@ -265,7 +277,7 @@ export default function Properties() {
 
                   <div className="filter-field filter-field--wide filter-price">
                     <label>
-                      <span>أقل سعر (درهم)</span>
+                      <span>{t("أقل سعر (درهم)", "Min price (AED)")}</span>
                       <input
                         type="number"
                         inputMode="numeric"
@@ -276,14 +288,14 @@ export default function Properties() {
                       />
                     </label>
                     <label>
-                      <span>أعلى سعر (درهم)</span>
+                      <span>{t("أعلى سعر (درهم)", "Max price (AED)")}</span>
                       <input
                         type="number"
                         inputMode="numeric"
                         min={0}
                         value={filters.maxPrice}
                         onChange={(event) => update({ maxPrice: event.target.value })}
-                        placeholder="بدون حد"
+                        placeholder={t("بدون حد", "No limit")}
                       />
                     </label>
                   </div>
@@ -292,18 +304,18 @@ export default function Properties() {
                 <div className="filter-drawer__foot">
                   <small>
                     {filters.term
-                      ? `السعر بالدرهم للإيجار ال${filters.term}.`
-                      : "السعر بالدرهم كما هو معروض لكل عقار (شهري أو سنوي)."}
+                      ? t(`السعر بالدرهم للإيجار ال${filters.term}.`, `Price in AED for ${filters.term.toLowerCase()} rent.`)
+                      : t("السعر بالدرهم كما هو معروض لكل عقار (شهري أو سنوي).", "Price in AED as shown on each home (monthly or yearly).")}
                   </small>
                   <button className="text-button" onClick={resetAll}>
-                    <RotateCcw size={16} /> إعادة تعيين الفلاتر
+                    <RotateCcw size={16} /> {t("إعادة تعيين الفلاتر", "Reset filters")}
                   </button>
                 </div>
 
                 {/* زر ثابت أسفل اللوحة بالعدد الحقيقي للنتائج */}
                 <div className="filter-drawer__apply">
                   <button className="primary-button" onClick={() => setSheetOpen(false)}>
-                    عرض <Ltr>{results.length}</Ltr> {countLabel(results.length)}
+                    {t("عرض", "Show")} <Ltr>{results.length}</Ltr> {countLabel(results.length, lang)}
                   </button>
                 </div>
               </div>
@@ -315,15 +327,21 @@ export default function Properties() {
           <span>
             <strong>{results.length}</strong>{" "}
             {availableCount === results.length
-              ? results.length === 1
-                ? "عقار متاح"
-                : "عقارات متاحة"
-              : `${countLabel(results.length)} · ${availableCount} ${availableCount === 1 ? "متاح" : "متاحة"}`}
-            {filterCount > 0 && <em className="result-meta__hint"> · نتائج مفلترة</em>}
+              ? lang === "en"
+                ? results.length === 1
+                  ? "home available"
+                  : "homes available"
+                : results.length === 1
+                  ? "عقار متاح"
+                  : "عقارات متاحة"
+              : lang === "en"
+                ? `${countLabel(results.length, lang)} · ${availableCount} available`
+                : `${countLabel(results.length)} · ${availableCount} ${availableCount === 1 ? "متاح" : "متاحة"}`}
+            {filterCount > 0 && <em className="result-meta__hint">{t(" · نتائج مفلترة", " · filtered results")}</em>}
           </span>
           <SortMenu
-            label="ترتيب النتائج"
-            options={(Object.keys(sortLabels) as SortKey[]).map((key) => ({ value: key, label: sortLabels[key] }))}
+            label={t("ترتيب النتائج", "Sort results")}
+            options={(Object.keys(sortLabels) as SortKey[]).map((key) => ({ value: key, label: (lang === "en" ? sortLabelsEn : sortLabels)[key] }))}
             value={filters.sort}
             onChange={(sort) => update({ sort })}
           />
@@ -331,7 +349,7 @@ export default function Properties() {
 
         {filters.fav && results.length > 0 && (
           <div className="container section-cta favorites-share">
-            <WhatsAppButton label="أرسل مفضلتي عبر واتساب" message={favoritesMessage} />
+            <WhatsAppButton label={t("أرسل مفضلتي عبر واتساب", "Send my favorites on WhatsApp")} message={favoritesMessage} />
           </div>
         )}
 
@@ -346,7 +364,7 @@ export default function Properties() {
         ) : results.length > 0 ? (
           <div className="container property-grid property-grid--listing">
             {/* عنوان للقارئات الصوتية فقط: ترتيب العناوين h1 ← h2 ← عناوين الكروت h3 */}
-            <h2 className="sr-only">نتائج البحث</h2>
+            <h2 className="sr-only">{t("نتائج البحث", "Search results")}</h2>
             {results.map((property, index) => (
               <PropertyCard key={property.id} property={property} priority={index < 2} />
             ))}
@@ -355,17 +373,20 @@ export default function Properties() {
           <div className="container">
             <div className="empty-state">
               <Search size={26} />
-              <h3>{filters.fav ? "لا توجد عقارات في المفضلة بعد" : "لا توجد نتائج مطابقة"}</h3>
+              <h3>{filters.fav ? t("لا توجد عقارات في المفضلة بعد", "No favorites yet") : t("لا توجد نتائج مطابقة", "No matching homes")}</h3>
               <p>
                 {filters.fav
-                  ? "اضغط على أيقونة القلب في أي عقار لإضافته هنا والرجوع إليه لاحقاً."
-                  : "جرّب توسيع نطاق البحث أو إزالة بعض الفلاتر، أو تواصل معنا لنساعدك في إيجاد الخيار المناسب."}
+                  ? t("اضغط على أيقونة القلب في أي عقار لإضافته هنا والرجوع إليه لاحقاً.", "Tap the heart on any home to save it here and come back to it later.")
+                  : t(
+                      "جرّب توسيع نطاق البحث أو إزالة بعض الفلاتر، أو تواصل معنا لنساعدك في إيجاد الخيار المناسب.",
+                      "Try widening your search or removing some filters, or contact us and we will help you find the right home.",
+                    )}
               </p>
               <div className="empty-state__actions">
                 <button className="outline-button" onClick={resetAll}>
-                  <RotateCcw size={16} /> إزالة كل الفلاتر
+                  <RotateCcw size={16} /> {t("إزالة كل الفلاتر", "Clear all filters")}
                 </button>
-                <WhatsAppButton label="اطلب مساعدة مستشار" />
+                <WhatsAppButton label={t("اطلب مساعدة مستشار", "Ask an advisor for help")} />
               </div>
             </div>
           </div>

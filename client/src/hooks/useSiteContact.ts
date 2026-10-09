@@ -1,4 +1,5 @@
-import { contact as fallback, social as fallbackSocial, whatsappTemplates } from "@/config/site";
+import { contact as fallback, social as fallbackSocial, whatsappTemplatesFor } from "@/config/site";
+import { pickLang, useLang } from "@/i18n/lang";
 import { useCatalog } from "@/lib/catalog/store";
 
 /**
@@ -7,6 +8,7 @@ import { useCatalog } from "@/lib/catalog/store";
  */
 export function useSiteContact() {
   const { data } = useCatalog();
+  const lang = useLang();
   const s = data?.settings;
   const phone = s?.phone ?? fallback.phoneDisplay;
   const whatsapp = s?.whatsapp || fallback.whatsapp;
@@ -16,10 +18,11 @@ export function useSiteContact() {
     phoneHref: phone ? `${phone.trim().startsWith("+") ? "+" : ""}${phone.replace(/\D/g, "")}` : "",
     whatsapp,
     email: s ? s.email : fallback.email,
-    address: s?.address ?? fallback.address,
-    hours: s ? s.hours : fallback.hours,
+    // العنوان وساعات العمل بلغة الصفحة (الإنجليزي اختياري من اللوحة؛ فاضي = العربي)
+    address: pickLang(lang, s?.address ?? fallback.address, s?.address_en),
+    hours: s ? (s.hours ? pickLang(lang, s.hours, s.hours_en) : null) : fallback.hours,
     social: s?.social ?? [...fallbackSocial],
     /** رابط واتساب برسالة جاهزة */
-    whatsappHref: (message: string = whatsappTemplates.general) => `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`,
+    whatsappHref: (message: string = whatsappTemplatesFor(lang).general) => `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`,
   };
 }

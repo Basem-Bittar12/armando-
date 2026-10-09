@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "wouter";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { srcsetFor } from "@/lib/imageSrcset";
+import { useT } from "@/i18n/lang";
 
 /** أقصى عدد نقاط؛ بعد الصورة الرابعة تبقى آخر نقطة هي المعلَّمة */
 const MAX_DOTS = 4;
@@ -12,6 +13,7 @@ const MAX_DOTS = 4;
  */
 /** priority: أول كروت الصفحة (أكبر عنصر بالشاشة) — صورتها الأولى تُحمَّل فوراً وبأولوية */
 export function CardGallery({ images, href, alt, priority = false }: { images: string[]; href: string; alt: string; priority?: boolean }) {
+  const t = useT();
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const count = images.length;
@@ -34,7 +36,7 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
   return (
     <div className="card-gallery">
       {/* قابل للتركيز ليتصفح مستخدم لوحة المفاتيح الصور بالأسهم */}
-      <div className="card-gallery__track" ref={trackRef} onScroll={onScroll} tabIndex={0} role="group" aria-label={`صور ${alt}`}>
+      <div className="card-gallery__track" ref={trackRef} onScroll={onScroll} tabIndex={0} role="group" aria-label={t(`صور ${alt}`, `Photos of ${alt}`)}>
         {images.map((image, i) => {
           const set = srcsetFor(image);
           return (
@@ -69,7 +71,7 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
             className="card-gallery__arrow card-gallery__arrow--prev"
             onClick={() => goTo(index - 1)}
             disabled={index === 0}
-            aria-label="الصورة السابقة"
+            aria-label={t("الصورة السابقة", "Previous photo")}
           >
             <ChevronRight size={16} />
           </button>
@@ -78,12 +80,12 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
             className="card-gallery__arrow card-gallery__arrow--next"
             onClick={() => goTo(index + 1)}
             disabled={index === count - 1}
-            aria-label="الصورة التالية"
+            aria-label={t("الصورة التالية", "Next photo")}
           >
             <ChevronLeft size={16} />
           </button>
           <span className="sr-only">
-            الصورة {index + 1} من {count}
+            {t(`الصورة ${index + 1} من ${count}`, `Photo ${index + 1} of ${count}`)}
           </span>
         </>
       )}

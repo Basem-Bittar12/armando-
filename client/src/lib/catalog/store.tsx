@@ -204,6 +204,8 @@ export function CatalogProvider({ children, backend: given }: { children: ReactN
       email: contact.email?.trim() || null,
       address: contact.address.trim(),
       hours: contact.hours?.trim() || null,
+      address_en: contact.address_en?.trim() ?? "",
+      hours_en: contact.hours_en?.trim() ?? "",
       social: contact.social.map((item) => ({ label: item.label.trim(), href: item.href.trim() })).filter((item) => item.label && item.href),
     };
     if (!clean.whatsapp || clean.whatsapp.length < 8) throw new CatalogError("invalid", "رقم واتساب لازم يكون دولي بدون + (مثل 971501234567)");

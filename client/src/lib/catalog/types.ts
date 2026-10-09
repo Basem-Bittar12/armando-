@@ -89,6 +89,9 @@ export type SiteContact = {
   email: string | null;
   address: string;
   hours: string | null;
+  /** للنسخة الإنجليزية (اختياري؛ فاضي = العربي) */
+  address_en?: string;
+  hours_en?: string;
   social: SocialLink[];
 };
 

@@ -1,19 +1,22 @@
 import { createContext, useContext, type ReactNode } from "react";
-import { whatsappTemplates } from "@/config/site";
+import { whatsappTemplatesFor } from "@/config/site";
+import { useLang } from "@/i18n/lang";
 
 /**
  * رسالة واتساب الجاهزة للصفحة الحالية: كل صفحة تمررها لـ PublicLayout، فيستعملها الهيدر وشريط
  * الموبايل وأزرار واتساب داخل الصفحة. الافتراضي الرسالة العامة.
  */
-const WhatsAppMessageContext = createContext<string>(whatsappTemplates.general);
+const WhatsAppMessageContext = createContext<string | undefined>(undefined);
 
 export function WhatsAppMessageProvider({ message, children }: { message?: string; children: ReactNode }) {
-  return (
-    <WhatsAppMessageContext.Provider value={message ?? whatsappTemplates.general}>{children}</WhatsAppMessageContext.Provider>
-  );
+  return <WhatsAppMessageContext.Provider value={message}>{children}</WhatsAppMessageContext.Provider>;
 }
 
-export const usePageWhatsAppMessage = () => useContext(WhatsAppMessageContext);
+/** رسالة الصفحة، أو الرسالة العامة بلغة الصفحة */
+export function usePageWhatsAppMessage() {
+  const lang = useLang();
+  return useContext(WhatsAppMessageContext) ?? whatsappTemplatesFor(lang).general;
+}
 
 /** رقم أو كود أو عدّاد داخل نص عربي: اتجاه يسار-يمين معزول حتى لا تنقلب أجزاؤه */
 export function Ltr({ children }: { children: ReactNode }) {

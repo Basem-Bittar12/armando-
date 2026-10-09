@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { CatalogProvider } from "./lib/catalog/store";
 import { FavoritesProvider } from "./store/Favorites";
 import RevealObserver from "./components/motion/RevealObserver";
+import { LangProvider } from "./i18n/lang";
 
 import Home from "./pages/Home";
 import Properties from "./pages/Properties";
@@ -35,18 +36,36 @@ function ScrollToTop() {
   return null;
 }
 
-function Routes() {
+/** صفحات الموقع العام — نفسها بالعربي (/) وبالإنجليزي (/en، والروابط داخلها نسبية لـ /en تلقائياً) */
+function PublicRoutes() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/properties" component={Properties} />
       <Route path="/property/:id" component={PropertyDetail} />
       <Route path="/contact" component={Contact} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
 
+function Routes() {
+  return (
+    <Switch>
       <Route path="/admin" component={AdminRoute} />
       <Route path="/admin/*" component={AdminRoute} />
 
-      <Route component={NotFound} />
+      <Route path="/en" nest>
+        <LangProvider lang="en">
+          <PublicRoutes />
+        </LangProvider>
+      </Route>
+
+      <Route>
+        <LangProvider lang="ar">
+          <PublicRoutes />
+        </LangProvider>
+      </Route>
     </Switch>
   );
 }

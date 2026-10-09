@@ -120,7 +120,7 @@ export function supabaseBackend(): CatalogBackend {
         options("rental_terms"),
         options("amenities"),
         read<unknown[]>(`properties?select=${propertySelect}`),
-        read<Settings[]>("settings?select=home_count,phone,whatsapp,email,address,hours,social&id=eq.1"),
+        read<Settings[]>("settings?select=home_count,phone,whatsapp,email,address,hours,address_en,hours_en,social&id=eq.1"),
       ]);
       if (!settings[0]) throw new CatalogError("network", "الإعدادات غير موجودة");
       type DbProperty = FullProperty & {

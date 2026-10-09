@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import { ChevronRight, Heart, MapPin, Phone, Share2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { brand, pageMeta, whatsappTemplates } from "@/config/site";
+import { brand, pageMetaFor, whatsappTemplatesFor } from "@/config/site";
+import { propertyUrl, useLang, useT, type Lang } from "@/i18n/lang";
 import { useSiteContact } from "@/hooks/useSiteContact";
 import { useCatalog } from "@/lib/catalog/store";
 import { publishedProperties } from "@/lib/catalog/view";
@@ -18,20 +19,25 @@ import WhatsAppButton from "@/components/site/WhatsAppButton";
 import { Ltr } from "@/components/site/pageContext";
 import { srcsetFor } from "@/lib/imageSrcset";
 
+const STATUS_EN: Record<string, string> = { متاح: "Available", محجوز: "Reserved", مؤجر: "Rented" };
+const statusLabel = (status: string, lang: Lang) => (lang === "en" ? STATUS_EN[status] ?? status : status);
+
 function NotFoundProperty({ id }: { id: string }) {
-  useMeta(pageMeta.notFound);
+  const lang = useLang();
+  const t = useT();
+  useMeta(pageMetaFor(lang).notFound);
   return (
     <PublicLayout>
       <div className="container empty-state empty-state--page">
         <h3>
-          لم نعثر على العقار <Ltr>{id}</Ltr>
+          {t("لم نعثر على العقار", "We couldn't find home")} <Ltr>{id}</Ltr>
         </h3>
-        <p>ربما تم تأجيره أو إزالته من المجموعة. تصفح بقية العقارات المتاحة.</p>
+        <p>{t("ربما تم تأجيره أو إزالته من المجموعة. تصفح بقية العقارات المتاحة.", "It may have been rented or removed from the collection. Browse the other available homes.")}</p>
         <div className="empty-state__actions">
           <Link href="/properties" className="primary-button">
-            عرض كل العقارات
+            {t("عرض كل العقارات", "View all homes")}
           </Link>
-          <WhatsAppButton label="اسأل عن عقار مشابه" />
+          <WhatsAppButton label={t("اسأل عن عقار مشابه", "Ask about a similar home")} />
         </div>
       </div>
     </PublicLayout>
@@ -39,9 +45,9 @@ function NotFoundProperty({ id }: { id: string }) {
 }
 
 /** عدّاد الصور «1 من 4» — الأرقام معزولة الاتجاه */
-const counter = (index: number, total: number) => (
+const counter = (index: number, total: number, lang: Lang) => (
   <>
-    <Ltr>{index + 1}</Ltr> من <Ltr>{total}</Ltr>
+    <Ltr>{index + 1}</Ltr> {lang === "en" ? "of" : "من"} <Ltr>{total}</Ltr>
   </>
 );
 
@@ -50,7 +56,10 @@ export default function PropertyDetail() {
   const { data, status, reload } = useCatalog();
   const { isFavorite, toggleFavorite } = useFavorites();
   const contact = useSiteContact();
-  const properties = useMemo(() => (data ? publishedProperties(data) : []), [data]);
+  const lang = useLang();
+  const t = useT();
+  const meta = pageMetaFor(lang);
+  const properties = useMemo(() => (data ? publishedProperties(data, lang) : []), [data, lang]);
   const property = properties.find((item) => item.id === params.id);
 
   const [activeImage, setActiveImage] = useState(0);
@@ -61,10 +70,12 @@ export default function PropertyDetail() {
   }, [params.id]);
 
   useMeta({
-    title: property ? `${property.title} — ${property.id} | ${brand.name}` : pageMeta.notFound.title,
+    title: property ? `${property.title} — ${property.id} | ${brand.name}` : meta.notFound.title,
     description: property
-      ? `${property.type} ${property.term} في ${property.location} · ${property.price} ${property.unit} · ${property.beds === 0 ? "استوديو" : `${property.beds} غرف`} · ${property.area}`
-      : pageMeta.notFound.description,
+      ? lang === "en"
+        ? `${property.type} for ${property.term.toLowerCase()} rent in ${property.location} · ${property.price} ${property.unit} · ${specsLine(property, lang)}`
+        : `${property.type} ${property.term} في ${property.location} · ${property.price} ${property.unit} · ${property.beds === 0 ? "استوديو" : `${property.beds} غرف`} · ${property.area}`
+      : meta.notFound.description,
     image: property?.image,
   });
 
@@ -102,10 +113,9 @@ export default function PropertyDetail() {
   // البيت المؤجَّر: السؤال يصير عن بيت مشابه متاح
   const rented = property.status === "مؤجر";
   // رسالة واتساب: الكود والعنوان والرابط
-  const message = rented
-    ? whatsappTemplates.similar(property.title, property.id)
-    : whatsappTemplates.property(property.title, property.id, `${window.location.origin}/property/${property.id}`);
-  const askLabel = rented ? "اسأل عن بيت مشابه" : "استفسر عبر واتساب";
+  const templates = whatsappTemplatesFor(lang);
+  const message = rented ? templates.similar(property.title, property.id) : templates.property(property.title, property.id, propertyUrl(lang, property.id));
+  const askLabel = rented ? t("اسأل عن بيت مشابه", "Ask about a similar home") : t("استفسر عبر واتساب", "Ask on WhatsApp");
   const total = property.gallery.length;
 
   const share = async () => {
@@ -116,10 +126,10 @@ export default function PropertyDetail() {
         return;
       }
       await navigator.clipboard.writeText(url);
-      toast.success("تم نسخ رابط العقار");
+      toast.success(t("تم نسخ رابط العقار", "Link copied"));
     } catch {
       // المستخدم ألغى المشاركة أو المتصفح لا يدعم النسخ
-      toast.info("انسخ الرابط من شريط العنوان لمشاركته");
+      toast.info(t("انسخ الرابط من شريط العنوان لمشاركته", "Copy the link from the address bar to share it"));
     }
   };
 
@@ -140,7 +150,7 @@ export default function PropertyDetail() {
               <span>{property.unit}</span>
             </div>
             <WhatsAppButton
-              label={rented ? "اسأل عن بيت مشابه" : "اسأل عبر واتساب"}
+              label={rented ? t("اسأل عن بيت مشابه", "Ask about a similar home") : t("اسأل عبر واتساب", "Ask on WhatsApp")}
               message={message}
               className="mobile-action-bar__ask"
             />
@@ -151,8 +161,8 @@ export default function PropertyDetail() {
       <div className="detail-page">
         <div className="container detail-breadcrumb">
           {/* يرجع لنفس البحث والفلاتر التي جاء منها الزائر */}
-          <Link href={lastListingHref()}>
-            <ChevronRight size={18} /> العودة إلى العقارات
+          <Link href={lastListingHref(lang)}>
+            <ChevronRight size={18} /> {t("العودة إلى العقارات", "Back to properties")}
           </Link>
         </div>
 
@@ -167,12 +177,12 @@ export default function PropertyDetail() {
                 onSelect={openAt}
                 alt={property.title}
               />
-              <span className="detail-gallery__count">{counter(activeImage, total)}</span>
+              <span className="detail-gallery__count">{counter(activeImage, total, lang)}</span>
             </div>
 
             {/* لابتوب: صورة كبيرة وصور مصغّرة */}
             <div className="detail-gallery__desktop">
-              <button className="detail-gallery__main" onClick={() => setLightbox(true)} aria-label="تكبير الصورة">
+              <button className="detail-gallery__main" onClick={() => setLightbox(true)} aria-label={t("تكبير الصورة", "Enlarge photo")}>
                 {property.gallery.map((image, index) => (
                   <img
                     key={image + index}
@@ -185,7 +195,7 @@ export default function PropertyDetail() {
                     decoding="async"
                   />
                 ))}
-                <span className="detail-gallery__count">{counter(activeImage, total)}</span>
+                <span className="detail-gallery__count">{counter(activeImage, total, lang)}</span>
               </button>
               <div className="gallery-thumbs">
                 {property.gallery.map((image, index) => (
@@ -193,7 +203,7 @@ export default function PropertyDetail() {
                     key={image + index}
                     className={index === activeImage ? "is-active" : ""}
                     onClick={() => setActiveImage(index)}
-                    aria-label={`عرض الصورة ${index + 1}`}
+                    aria-label={t(`عرض الصورة ${index + 1}`, `Show photo ${index + 1}`)}
                   >
                     <img {...srcsetFor(image)} sizes="120px" alt="" loading="lazy" />
                   </button>
@@ -204,7 +214,7 @@ export default function PropertyDetail() {
 
           {/* عمود المعلومات: ثابت (sticky) على اللابتوب */}
           <div className="detail-info">
-            <span className="detail-info__term">{rentalLabel(property)}</span>
+            <span className="detail-info__term">{rentalLabel(property, lang)}</span>
             <div className="detail-info__title">
               <h1>{property.title}</h1>
               {/* الكود يظهر مرة واحدة فقط في الموقع: هنا جنب العنوان */}
@@ -220,14 +230,14 @@ export default function PropertyDetail() {
               <strong>{property.price}</strong>
               <span>{property.unit}</span>
               {/* الحالة تظهر فقط إذا لم يكن العقار متاحاً */}
-              {property.status !== "متاح" && <small className="detail-status">{property.status}</small>}
+              {property.status !== "متاح" && <small className="detail-status">{statusLabel(property.status, lang)}</small>}
             </div>
             {/* سعر ثانٍ (مثلاً سنوي بجانب الشهري) */}
             {property.prices.length > 1 && (
               <p className="detail-other-prices">
                 {property.prices.slice(1).map((price) => (
                   <span key={price.term}>
-                    أو <strong>{new Intl.NumberFormat("en-US").format(price.amount)}</strong> {price.unit}
+                    {t("أو", "or")} <strong>{new Intl.NumberFormat("en-US").format(price.amount)}</strong> {price.unit}
                   </span>
                 ))}
               </p>
@@ -241,38 +251,38 @@ export default function PropertyDetail() {
                   document.getElementById("similar")?.scrollIntoView({ behavior: "smooth", block: "start" });
                 }}
               >
-                هذا البيت مؤجر حالياً — شوف بيوت مشابهة متاحة
+                {t("هذا البيت مؤجر حالياً — شوف بيوت مشابهة متاحة", "This home is currently rented — see similar available homes")}
               </a>
             )}
 
-            <p className="detail-specs">{specsLine(property)}</p>
+            <p className="detail-specs">{specsLine(property, lang)}</p>
 
             <p className="detail-description">{property.description}</p>
 
             <div className="detail-actions">
               <WhatsAppButton label={askLabel} message={message} />
               <a href={`tel:${contact.phoneHref}`} className="outline-button">
-                <Phone size={17} /> اتصل بنا
+                <Phone size={17} /> {t("اتصل بنا", "Call us")}
               </a>
               <button
                 className={`icon-circle detail-fav ${favorite ? "is-active" : ""}`}
                 onClick={() => {
                   const added = toggleFavorite(property.id);
-                  toast.success(added ? "تمت إضافة العقار للمفضلة" : "تمت إزالة العقار من المفضلة");
+                  toast.success(added ? t("تمت إضافة العقار للمفضلة", "Added to favorites") : t("تمت إزالة العقار من المفضلة", "Removed from favorites"));
                 }}
-                aria-label={favorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
+                aria-label={favorite ? t("إزالة من المفضلة", "Remove from favorites") : t("إضافة للمفضلة", "Add to favorites")}
                 aria-pressed={favorite}
               >
                 <Heart size={18} fill={favorite ? "currentColor" : "none"} />
               </button>
-              <button className="icon-circle" onClick={share} aria-label="مشاركة العقار">
+              <button className="icon-circle" onClick={share} aria-label={t("مشاركة العقار", "Share this home")}>
                 <Share2 size={18} />
               </button>
             </div>
 
             <div className="detail-note">
               <ShieldCheck size={17} />
-              <span>المعلومات المعروضة قابلة للتحديث حسب توفر العقار. تواصل معنا للتأكد من السعر والحالة.</span>
+              <span>{t("المعلومات المعروضة قابلة للتحديث حسب توفر العقار. تواصل معنا للتأكد من السعر والحالة.", "Details may change with availability. Contact us to confirm the price and status.")}</span>
             </div>
           </div>
         </div>
@@ -281,7 +291,7 @@ export default function PropertyDetail() {
         <div className="container detail-extra">
           {property.amenities.length > 0 && (
             <section className="detail-panel">
-              <h2>المرافق والمميزات</h2>
+              <h2>{t("المرافق والمميزات", "Amenities and features")}</h2>
               <ul className="amenity-list">
                 {property.amenities.map((amenity) => (
                   <li key={amenity}>{amenity}</li>
@@ -291,30 +301,30 @@ export default function PropertyDetail() {
           )}
 
           <section className="detail-panel">
-            <h2>تفاصيل العقار</h2>
+            <h2>{t("تفاصيل العقار", "Property details")}</h2>
             <dl className="detail-table">
               <div>
-                <dt>كود العقار</dt>
+                <dt>{t("كود العقار", "Property code")}</dt>
                 <dd>
                   <Ltr>{property.id}</Ltr>
                 </dd>
               </div>
               <div>
-                <dt>نوع العقار</dt>
+                <dt>{t("نوع العقار", "Property type")}</dt>
                 <dd>{property.type}</dd>
               </div>
               <div>
-                <dt>نوع الإيجار</dt>
+                <dt>{t("نوع الإيجار", "Rental type")}</dt>
                 <dd>{property.term}</dd>
               </div>
               <div>
-                <dt>المدينة</dt>
+                <dt>{t("المدينة", "City")}</dt>
                 <dd>{property.city}</dd>
               </div>
               {/* «متاح من» يظهر فقط حين يضيف المكتب التاريخ للعقار */}
               {property.availableFrom && (
                 <div>
-                  <dt>متاح من</dt>
+                  <dt>{t("متاح من", "Available from")}</dt>
                   <dd>{property.availableFrom}</dd>
                 </div>
               )}
@@ -329,12 +339,12 @@ export default function PropertyDetail() {
 
           {/* إلى أن تتوفر خريطة حقيقية: اسم المنطقة ورابط الخريطة فقط */}
           <section className="detail-panel detail-panel--map">
-            <h2>الموقع</h2>
+            <h2>{t("الموقع", "Location")}</h2>
             <p className="detail-location">
               <MapPin size={16} /> {property.location}
             </p>
             <a href={mapUrl} target="_blank" rel="noreferrer" className="text-button">
-              افتح بالخريطة
+              {t("افتح بالخريطة", "Open in maps")}
             </a>
           </section>
         </div>
@@ -343,9 +353,9 @@ export default function PropertyDetail() {
           <section className="section section--ruled" id="similar">
             <div className="container">
               <div className="section-heading">
-                <h2>عقارات مشابهة</h2>
+                <h2>{t("عقارات مشابهة", "Similar homes")}</h2>
                 <Link href="/properties" className="text-button">
-                  كل العقارات
+                  {t("كل العقارات", "All properties")}
                 </Link>
               </div>
               <div className="property-grid">

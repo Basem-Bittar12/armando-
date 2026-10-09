@@ -3,7 +3,8 @@ import { Link } from "wouter";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-import { heroStory } from "@/config/site";
+import { heroStoryFor } from "@/config/site";
+import { useLang, useT } from "@/i18n/lang";
 import { setActiveLenis, useMediaFlag, useStaticMotion } from "@/lib/motion";
 import WhatsAppButton from "./WhatsAppButton";
 
@@ -232,6 +233,9 @@ const getLoader = (device: Device) => (loaders[device] ??= new FrameLoader(devic
 const readDevice = (): Device =>
   typeof window !== "undefined" && window.matchMedia(PORTRAIT_QUERY).matches ? "mobile" : "desktop";
 export default function HeroCanvas() {
+  const lang = useLang();
+  const t = useT();
+  const heroStory = heroStoryFor(lang);
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -512,7 +516,7 @@ export default function HeroCanvas() {
             </p>
             {/* صف الأزرار: واتساب من أول لحظة، «تصفّح البيوت» يُضاف بجانبه عند 78% (مكانه محجوز) */}
             <div className="hero-story__actions">
-              <WhatsAppButton label="واتساب" className="hero-story__whatsapp" />
+              <WhatsAppButton label={t("واتساب", "WhatsApp")} className="hero-story__whatsapp" />
               <Link href={heroStory.cta.href} className="hero-story__browse" data-story={returning ? undefined : 3}>
                 {heroStory.cta.label}
               </Link>

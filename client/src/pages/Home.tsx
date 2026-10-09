@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "wouter";
-import { brand, pageMeta } from "@/config/site";
+import { brand, pageMetaFor } from "@/config/site";
+import { useLang, useT, type Lang } from "@/i18n/lang";
 import { useCatalog } from "@/lib/catalog/store";
 import { areaCards } from "@/lib/catalog/view";
 import { srcsetFor } from "@/lib/imageSrcset";
@@ -11,13 +12,16 @@ import AvailableHomesStrip from "@/components/site/AvailableHomesStrip";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
 
 /** عدد البيوت لكل منطقة محسوب من البيانات نفسها (نفس فلتر الرابط الذي تفتحه البطاقة) */
-const countLabel = (count: number) => (count === 1 ? "بيت واحد" : count === 2 ? "بيتان" : `${count} بيوت`);
+const countLabel = (count: number, lang: Lang) =>
+  lang === "en" ? (count === 1 ? "1 home" : `${count} homes`) : count === 1 ? "بيت واحد" : count === 2 ? "بيتان" : `${count} بيوت`;
 
 export default function Home() {
-  useMeta(pageMeta.home);
+  const lang = useLang();
+  const t = useT();
+  useMeta(pageMetaFor(lang).home);
   const { data } = useCatalog();
   // المناطق المفعّلة التي فيها عقار منشور، بأعدادها الحقيقية
-  const areas = useMemo(() => (data ? areaCards(data) : []), [data]);
+  const areas = useMemo(() => (data ? areaCards(data, lang) : []), [data, lang]);
 
   return (
     <PublicLayout mobileBar="after-hero">
@@ -30,18 +34,19 @@ export default function Home() {
       <section className="section section--dark statement-section">
         <div className="container statement-grid">
           <h2>
-            نحن لا نعرض
+            {t("نحن لا نعرض", "We don't just")}
             <br />
-            منازل فقط
+            {t("منازل فقط", "show homes")}
           </h2>
           <div className="statement-copy">
             <p>
-              كل عقار في مجموعة {brand.shortAr} يمرّ بعناية من التفاصيل إلى
-              الإطلالة. لأن المكان الذي تسكنه يترك أثراً في الطريقة التي تعيش
-              بها.
+              {t(
+                `كل عقار في مجموعة ${brand.shortAr} يمرّ بعناية من التفاصيل إلى الإطلالة. لأن المكان الذي تسكنه يترك أثراً في الطريقة التي تعيش بها.`,
+                "Every home in the Armando Alkadi collection is chosen with care, from the details to the view. Because the place you live shapes the way you live.",
+              )}
             </p>
             <Link href="/contact" className="text-button text-button--light">
-              تحدث مع مستشار
+              {t("تحدث مع مستشار", "Talk to an advisor")}
             </Link>
           </div>
         </div>
@@ -51,7 +56,7 @@ export default function Home() {
         <section className="section section--ruled">
           <div className="container">
             <div className="section-heading section-heading--center">
-              <h2>اكتشف المكان</h2>
+              <h2>{t("اكتشف المكان", "Explore the area")}</h2>
             </div>
             <div className="neighborhood-grid">
               {areas.map((area) => {
@@ -63,7 +68,7 @@ export default function Home() {
                     )}
                     <div className="neighborhood-card__overlay" />
                     <div className="neighborhood-card__copy">
-                      <span>{countLabel(area.count)}</span>
+                      <span>{countLabel(area.count, lang)}</span>
                       <h3>{area.name}</h3>
                     </div>
                   </Link>
@@ -77,12 +82,12 @@ export default function Home() {
       <section className="section contact-banner">
         <div className="container contact-banner__inner">
           <h2>
-            هل تبحث عن
+            {t("هل تبحث عن", "Looking for")}
             <br />
-            عنوان جديد؟
+            {t("عنوان جديد؟", "a new address?")}
           </h2>
           <div>
-            <p>شاركنا تفضيلاتك، وسنساعدك في العثور على مساحة تشبهك.</p>
+            <p>{t("شاركنا تفضيلاتك، وسنساعدك في العثور على مساحة تشبهك.", "Tell us what you are looking for, and we will help you find a place that feels like you.")}</p>
             <WhatsAppButton variant="light" />
           </div>
         </div>

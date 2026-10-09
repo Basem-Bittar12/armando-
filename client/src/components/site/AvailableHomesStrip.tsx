@@ -7,6 +7,7 @@ import { homeProperties } from "@/lib/catalog/view";
 import { CardSkeletons, LoadError } from "./CatalogState";
 import { getActiveLenis, useStaticMotion } from "@/lib/motion";
 import PropertyCard from "./PropertyCard";
+import { useLang, useT } from "@/i18n/lang";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,8 +31,10 @@ const USER_IDLE_MS = 180;
  */
 export function AvailableHomesStrip() {
   const { data, status, reload } = useCatalog();
+  const lang = useLang();
+  const t = useT();
   // المنشور + المعروض بالرئيسية + غير المؤجّر، بترتيبه وبحد العدد من الإعدادات
-  const selection = useMemo(() => (data ? homeProperties(data) : []), [data]);
+  const selection = useMemo(() => (data ? homeProperties(data, lang) : []), [data, lang]);
   const { reduced } = useStaticMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
@@ -217,7 +220,7 @@ export function AvailableHomesStrip() {
     <section ref={sectionRef} className={`hstrip ${reduced ? "hstrip--static" : ""}`} aria-labelledby="hstrip-title">
       <div ref={pinRef} className="hstrip__inner">
         <div className="container hstrip__head">
-          <h2 id="hstrip-title">اختيارات تستحق الانتباه</h2>
+          <h2 id="hstrip-title">{t("اختيارات تستحق الانتباه", "Homes worth a closer look")}</h2>
         </div>
         <div ref={viewportRef} className="hstrip__viewport">
           {/* المتحرك: الأول أقصى اليسار فيدخل أولاً من اليمين؛ الثابت: ترتيب عربي عادي من اليمين */}
@@ -243,7 +246,7 @@ export function AvailableHomesStrip() {
       </div>
       <div className="container section-cta hstrip__cta">
         <Link href="/properties" className="outline-button">
-          عرض كل البيوت
+          {t("عرض كل البيوت", "View all homes")}
         </Link>
       </div>
     </section>

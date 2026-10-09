@@ -5,14 +5,20 @@ import type { Property } from "@/lib/catalog/view";
 import { useFavorites } from "@/store/Favorites";
 import CardGallery from "./CardGallery";
 import { srcsetFor } from "@/lib/imageSrcset";
+import { useLang, useT, type Lang } from "@/i18n/lang";
 
 /** نوع العقار ومدة الإيجار ككلام عادي: "شقة للإيجار الشهري" */
-export const rentalLabel = (property: Pick<Property, "type" | "term">) =>
-  `${property.type} للإيجار ال${property.term}`;
+export const rentalLabel = (property: Pick<Property, "type" | "term">, lang: Lang = "ar") =>
+  lang === "en" ? `${property.type} for ${property.term.toLowerCase()} rent` : `${property.type} للإيجار ال${property.term}`;
 
 /** المواصفات في سطر واحد */
-export const specsLine = (property: Pick<Property, "beds" | "baths" | "area">) =>
-  [property.beds === 0 ? "استوديو" : `${property.beds} غرف`, `${property.baths} حمام`, property.area].join(" · ");
+export const specsLine = (property: Pick<Property, "beds" | "baths" | "area">, lang: Lang = "ar") =>
+  (lang === "en"
+    ? [property.beds === 0 ? "Studio" : `${property.beds} ${property.beds === 1 ? "bed" : "beds"}`, `${property.baths} ${property.baths === 1 ? "bath" : "baths"}`, property.area]
+    : [property.beds === 0 ? "استوديو" : `${property.beds} غرف`, `${property.baths} حمام`, property.area]
+  )
+    .filter(Boolean)
+    .join(" · ");
 
 /**
  * بطاقة العقار — بلا خلفية ولا إطار ولا خطوط، الكارت كله رابط واحد.
@@ -26,10 +32,12 @@ export function PropertyCard({ property, gallery = true, priority = false }: { p
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(property.id);
   const rented = property.status === "مؤجر";
+  const lang = useLang();
+  const t = useT();
 
   const onToggleFavorite = () => {
     const added = toggleFavorite(property.id);
-    toast.success(added ? "تمت إضافة العقار للمفضلة" : "تمت إزالة العقار من المفضلة");
+    toast.success(added ? t("تمت إضافة العقار للمفضلة", "Added to favorites") : t("تمت إزالة العقار من المفضلة", "Removed from favorites"));
   };
 
   return (
@@ -50,12 +58,12 @@ export function PropertyCard({ property, gallery = true, priority = false }: { p
         )}
         {property.new && (
           <div className="property-card__chips">
-            <span className="chip chip--dark">جديد</span>
+            <span className="chip chip--dark">{t("جديد", "New")}</span>
           </div>
         )}
         <button
           className={`icon-circle property-card__heart ${favorite ? "is-active" : ""}`}
-          aria-label={favorite ? "إزالة من المفضلة" : "إضافة للمفضلة"}
+          aria-label={favorite ? t("إزالة من المفضلة", "Remove from favorites") : t("إضافة للمفضلة", "Add to favorites")}
           aria-pressed={favorite}
           onClick={onToggleFavorite}
         >
@@ -63,7 +71,7 @@ export function PropertyCard({ property, gallery = true, priority = false }: { p
         </button>
       </div>
       <div className="property-card__body">
-        <span className="property-card__term">{rentalLabel(property)}</span>
+        <span className="property-card__term">{rentalLabel(property, lang)}</span>
         <h3>
           <Link href={`/property/${property.id}`} className="property-card__link">
             {property.title}
@@ -72,7 +80,7 @@ export function PropertyCard({ property, gallery = true, priority = false }: { p
         <p className="property-card__location">
           <MapPin size={15} /> {property.location}
         </p>
-        <p className="property-card__specs">{specsLine(property)}</p>
+        <p className="property-card__specs">{specsLine(property, lang)}</p>
         <p className="property-card__price">
           <strong>{property.price}</strong> <span>{property.unit}</span>
         </p>

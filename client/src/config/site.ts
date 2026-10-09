@@ -1,3 +1,5 @@
+import type { Lang } from "@/i18n/lang";
+
 /**
  * ============================================================================
  *  ملف البيانات المركزي — Armando Alkadi Holiday Homes
@@ -93,7 +95,7 @@ export const whatsappTemplates = {
  * النسخة الإنجليزية: false = لا يظهر مبدّل اللغة إطلاقاً (لا خيار «قريباً» يوصل لحيط).
  * عند جاهزيتها: true فقط ويعود المبدّل في الهيدر وقائمة الموبايل.
  */
-export const englishReady = false;
+export const englishReady = true;
 
 /** رابط واتساب برسالة جاهزة */
 export const whatsappHref = (message: string = whatsappTemplates.general) =>
@@ -144,3 +146,64 @@ export const demoNotice = {
   enabled: true,
   text: "نسخة عرض تفاعلية — البيانات المعروضة تجريبية ولا تُحفظ",
 } as const;
+
+// ============================================================================
+//  النسخة الإنجليزية (/en) — نفس البنية. نصوص القصة والتسويق مسودة تنتظر موافقة صاحب المكتب.
+// ============================================================================
+const heroStoryEn = {
+  lines: ["Every home starts empty.", "We choose it with care and prepare every detail.", "Until it is ready for you."],
+  body: ["We choose it with care and prepare every detail,", "until it is ready for you."],
+  brandLine: "Armando Alkadi Holiday Homes, Dubai",
+  cta: { label: "Browse homes", href: "/properties" },
+} as const;
+
+const pageMetaEn = {
+  home: {
+    title: "Armando Alkadi Holiday Homes — Selected homes for monthly and yearly rent in Dubai",
+    description: "Armando Alkadi Holiday Homes: selected apartments, villas and studios for monthly and yearly rent in Dubai.",
+  },
+  properties: {
+    title: "Available homes — Armando Alkadi Holiday Homes",
+    description: "Browse all Armando Alkadi homes available for monthly and yearly rent, with filters for price, area and property type.",
+  },
+  contact: {
+    title: "Contact us — Armando Alkadi Holiday Homes",
+    description: "Talk to an Armando Alkadi advisor to help you find the right home to rent in Dubai.",
+  },
+  admin: pageMeta.admin,
+  notFound: {
+    title: "Page not found — Armando Alkadi Holiday Homes",
+    description: "The page you requested is not available.",
+  },
+} as const;
+
+const whatsappTemplatesEn = {
+  general: "Hello, I would like to ask about your available homes",
+  property: (title: string, id: string, url: string) => `Hello, I would like to ask about ${title} (${id})\n${url}`,
+  viewing: (title: string, id: string) => `Hello, I would like to book a viewing for ${title} - ${id}`,
+  filtered: (summary: string) => `Hello, I am looking for a home: ${summary}`,
+  similar: (title: string, id: string) => `Hello, ${title} (${id}) is currently rented — do you have a similar home available?`,
+  favorites: (lines: string[]) => `Hello, these are the homes I liked:\n${lines.join("\n")}`,
+  contactForm: (form: { name: string; phone: string; term: string; city: string; message: string }) =>
+    [
+      "Hello, I would like help finding a home.",
+      `Name: ${form.name}`,
+      `Phone: ${form.phone}`,
+      form.term && `Rental type: ${form.term}`,
+      form.city && `Area: ${form.city}`,
+      form.message && `Details: ${form.message}`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+} as const;
+
+const mainNavEn = [
+  { label: "Home", href: "/" },
+  { label: "Properties", href: "/properties" },
+  { label: "Contact us", href: "/contact" },
+] as const;
+
+export const heroStoryFor = (lang: Lang) => (lang === "en" ? heroStoryEn : heroStory);
+export const pageMetaFor = (lang: Lang) => (lang === "en" ? pageMetaEn : pageMeta);
+export const whatsappTemplatesFor = (lang: Lang) => (lang === "en" ? whatsappTemplatesEn : whatsappTemplates);
+export const mainNavFor = (lang: Lang) => (lang === "en" ? mainNavEn : mainNav);

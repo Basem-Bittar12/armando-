@@ -1,29 +1,32 @@
 import { Link } from "wouter";
-import { pageMeta } from "@/config/site";
+import { pageMetaFor } from "@/config/site";
+import { useLang, useT } from "@/i18n/lang";
 import { useMeta } from "@/hooks/useMeta";
 import PublicLayout from "@/components/site/PublicLayout";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
 
 export default function NotFound() {
-  useMeta({ ...pageMeta.notFound, noIndex: true });
+  const lang = useLang();
+  const t = useT();
+  useMeta({ ...pageMetaFor(lang).notFound, noIndex: true });
 
   return (
     <PublicLayout>
       <div className="container notfound-page">
         <h1>
-          الصفحة التي تبحث عنها
+          {t("الصفحة التي تبحث عنها", "The page you are looking for")}
           <br />
-          غير موجودة
+          {t("غير موجودة", "does not exist")}
         </h1>
-        <p>ربما تغيّر الرابط أو تمت إزالة الصفحة. يمكنك العودة إلى المجموعة من هنا.</p>
+        <p>{t("ربما تغيّر الرابط أو تمت إزالة الصفحة. يمكنك العودة إلى المجموعة من هنا.", "The link may have changed or the page was removed. You can return to the collection from here.")}</p>
         <div className="empty-state__actions">
           <Link href="/" className="primary-button primary-button--large">
-            العودة إلى الرئيسية
+            {t("العودة إلى الرئيسية", "Back to home")}
           </Link>
           <Link href="/properties" className="outline-button">
-            تصفح العقارات
+            {t("تصفح العقارات", "Browse properties")}
           </Link>
-          <WhatsAppButton label="تحدث مع مستشار" />
+          <WhatsAppButton label={t("تحدث مع مستشار", "Talk to an advisor")} />
         </div>
       </div>
     </PublicLayout>

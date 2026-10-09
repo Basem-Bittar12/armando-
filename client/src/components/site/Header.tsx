@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "wouter";
-import { ChevronDown, Heart, Menu, Phone, X } from "lucide-react";
-import { toast } from "sonner";
-import { englishReady, mainNav } from "@/config/site";
+import { Heart, Menu, Phone, X } from "lucide-react";
+import { englishReady, mainNavFor } from "@/config/site";
+import { useLang, useT } from "@/i18n/lang";
+import LangSwitch from "./LangSwitch";
 import { useSiteContact } from "@/hooks/useSiteContact";
 import { useFavorites } from "@/store/Favorites";
 import Logo from "./Logo";
@@ -18,8 +19,6 @@ function isActive(href: string, pathname: string, params: URLSearchParams) {
   return params.get(key) === value;
 }
 
-const englishSoon = () => toast.info("النسخة الإنجليزية قيد الإعداد وستتوفر قريباً");
-
 /**
  * الهيدر — موبايل: المونوغرام يميناً وزر القائمة يساراً فقط (44×44)، واللغة والمفضلة داخل القائمة.
  * لابتوب: الشعار، ثلاثة روابط (15px بمسافة 32px)، المفضلة واللغة، وزر واتساب معبّأ 40px بأقصى اليسار.
@@ -27,11 +26,12 @@ const englishSoon = () => toast.info("النسخة الإنجليزية قيد �
 export function Header() {
   const [location] = useLocation();
   const contact = useSiteContact();
+  const lang = useLang();
+  const t = useT();
+  const mainNav = mainNavFor(lang);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
   const [condensed, setCondensed] = useState(false);
   const { favorites } = useFavorites();
-  const langRef = useRef<HTMLDivElement>(null);
   const [params] = useSearchParams();
 
   // تصغير الهيدر بعد بدء التمرير. عتبتان مختلفتان تمنعان التذبذب عند الحد الفاصل
@@ -56,17 +56,13 @@ export function Header() {
   // إغلاق القائمة عند تغيّر الصفحة
   useEffect(() => {
     setMenuOpen(false);
-    setLangOpen(false);
   }, [location]);
 
   // منع تمرير الصفحة خلف القائمة المفتوحة + الإغلاق بمفتاح Escape
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setMenuOpen(false);
-        setLangOpen(false);
-      }
+      if (event.key === "Escape") setMenuOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -75,15 +71,6 @@ export function Header() {
     };
   }, [menuOpen]);
 
-  // إغلاق قائمة اللغة عند الضغط خارجها
-  useEffect(() => {
-    if (!langOpen) return;
-    const onClick = (event: MouseEvent) => {
-      if (langRef.current && !langRef.current.contains(event.target as Node)) setLangOpen(false);
-    };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, [langOpen]);
 
   return (
     <>
@@ -91,7 +78,7 @@ export function Header() {
         <div className="container header-inner">
           <Logo />
 
-          <nav className="main-nav" aria-label="التنقل الرئيسي">
+          <nav className="main-nav" aria-label={t("التنقل الرئيسي", "Main navigation")}>
             {mainNav.map((item) => (
               <Link
                 key={item.label}
@@ -107,50 +94,23 @@ export function Header() {
             <Link
               href="/properties?fav=1"
               className="header-fav"
-              aria-label={`المفضلة (${favorites.length})`}
-              title="المفضلة"
+              aria-label={`${t("المفضلة", "Favorites")} (${favorites.length})`}
+              title={t("المفضلة", "Favorites")}
             >
               <Heart size={18} fill={favorites.length ? "currentColor" : "none"} />
               {favorites.length > 0 && <b>{favorites.length}</b>}
             </Link>
 
-            {/* مبدّل اللغة يظهر فقط حين تجهز النسخة الإنجليزية (englishReady في config/site.ts) */}
-            {englishReady && (
-            <div className="language-menu" ref={langRef}>
-              <button
-                className="language-switch"
-                onClick={() => setLangOpen((open) => !open)}
-                aria-haspopup="menu"
-                aria-expanded={langOpen}
-              >
-                AR <ChevronDown size={13} />
-              </button>
-              {langOpen && (
-                <div className="language-dropdown" role="menu">
-                  <button className="is-current" role="menuitem">
-                    العربية <span>نشط</span>
-                  </button>
-                  <button
-                    role="menuitem"
-                    onClick={() => {
-                      setLangOpen(false);
-                      englishSoon();
-                    }}
-                  >
-                    English <span className="soon-tag">قريباً</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            )}
-            <WhatsAppButton label="واتساب" className="header-whatsapp" />
+            {/* زر اللغة: EN بالعربي، عربي بالإنجليزي (englishReady في config/site.ts) */}
+            {englishReady && <LangSwitch />}
+            <WhatsAppButton label={t("واتساب", "WhatsApp")} className="header-whatsapp" />
           </div>
 
+          {englishReady && <LangSwitch className="header-lang--mobile" />}
           <button
             className="mobile-menu"
             onClick={() => setMenuOpen(true)}
-            aria-label="فتح القائمة"
+            aria-label={t("فتح القائمة", "Open menu")}
             aria-expanded={menuOpen}
           >
             <Menu size={22} />
@@ -160,11 +120,11 @@ export function Header() {
 
       {/* قائمة الموبايل: الروابط، المفضلة، اللغة، والتواصل */}
       <div className={`mobile-drawer ${menuOpen ? "is-open" : ""}`} aria-hidden={!menuOpen}>
-        <button className="mobile-drawer__backdrop" onClick={() => setMenuOpen(false)} aria-label="إغلاق القائمة" tabIndex={-1} />
-        <aside className="mobile-drawer__panel" role="dialog" aria-modal="true" aria-label="قائمة التنقل">
+        <button className="mobile-drawer__backdrop" onClick={() => setMenuOpen(false)} aria-label={t("إغلاق القائمة", "Close menu")} tabIndex={-1} />
+        <aside className="mobile-drawer__panel" role="dialog" aria-modal="true" aria-label={t("قائمة التنقل", "Navigation menu")}>
           <div className="mobile-drawer__head">
             <Logo />
-            <button className="icon-circle" onClick={() => setMenuOpen(false)} aria-label="إغلاق القائمة">
+            <button className="icon-circle" onClick={() => setMenuOpen(false)} aria-label={t("إغلاق القائمة", "Close menu")}>
               <X size={20} />
             </button>
           </div>
@@ -180,21 +140,9 @@ export function Header() {
               </Link>
             ))}
             <Link href="/properties?fav=1" className={params.get("fav") === "1" ? "active" : ""}>
-              <Heart size={18} /> المفضلة {favorites.length > 0 && <b>{favorites.length}</b>}
+              <Heart size={18} /> {t("المفضلة", "Favorites")} {favorites.length > 0 && <b>{favorites.length}</b>}
             </Link>
           </nav>
-
-          {englishReady && (
-          <div className="mobile-drawer__language" role="group" aria-label="اللغة">
-            <span>اللغة</span>
-            <button className="is-current" aria-pressed="true">
-              العربية
-            </button>
-            <button onClick={englishSoon}>
-              English <span className="soon-tag">قريباً</span>
-            </button>
-          </div>
-          )}
 
           <div className="mobile-drawer__contact">
             <a href={`tel:${contact.phoneHref}`}>
@@ -205,7 +153,7 @@ export function Header() {
 
           <div className="mobile-drawer__footer">
             {/* لوحة المكتب تُفتح بالرابط /admin فقط، لا رابط لها في الموقع العام */}
-            <WhatsAppButton label="واتساب" />
+            <WhatsAppButton label={t("واتساب", "WhatsApp")} />
           </div>
         </aside>
       </div>

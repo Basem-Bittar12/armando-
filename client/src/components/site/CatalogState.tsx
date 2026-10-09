@@ -1,5 +1,6 @@
 import { RotateCcw } from "lucide-react";
 import WhatsAppButton from "./WhatsAppButton";
+import { useT } from "@/i18n/lang";
 
 /** هيكل تحميل بنفس أحجام كروت العقارات (ألوان الباليت فقط) */
 export function CardSkeletons({ count = 3 }: { count?: number }) {
@@ -22,15 +23,16 @@ export function CardSkeletons({ count = 3 }: { count?: number }) {
 
 /** حالة خطأ التحميل: إعادة المحاولة + واتساب */
 export function LoadError({ onRetry }: { onRetry: () => void }) {
+  const t = useT();
   return (
     <div className="empty-state load-error" role="alert">
-      <h3>تعذّر تحميل البيوت</h3>
-      <p>تحقق من الاتصال بالإنترنت وأعد المحاولة، أو اسألنا مباشرة عبر واتساب.</p>
+      <h3>{t("تعذّر تحميل البيوت", "We couldn't load the homes")}</h3>
+      <p>{t("تحقق من الاتصال بالإنترنت وأعد المحاولة، أو اسألنا مباشرة عبر واتساب.", "Check your internet connection and try again, or ask us directly on WhatsApp.")}</p>
       <div className="empty-state__actions">
         <button className="outline-button" onClick={onRetry}>
-          <RotateCcw size={16} /> إعادة المحاولة
+          <RotateCcw size={16} /> {t("إعادة المحاولة", "Try again")}
         </button>
-        <WhatsAppButton label="اسألنا عبر واتساب" />
+        <WhatsAppButton label={t("اسألنا عبر واتساب", "Ask us on WhatsApp")} />
       </div>
     </div>
   );
