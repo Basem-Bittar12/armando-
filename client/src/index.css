@@ -1444,3 +1444,6 @@ bdi { unicode-bidi: isolate; }
   .filter-bar .filter-pills__divider { display: none; }
   .filter-toggle, .filter-bar .filter-pills button { min-height: 40px; padding: 0 12px; font-size: 14px; }
 }
+
+/* عنوان المكتب بالفوتر: نص عادي يلتف كسطر واحد (inline-flex كان يقسم العربي والاسم الإنجليزي لأعمدة على التلفون) */
+.footer-grid span.footer-address { display: block; }

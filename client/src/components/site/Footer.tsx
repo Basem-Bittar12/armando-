@@ -37,7 +37,7 @@ export function Footer() {
           {contact.email && (
             <a href={`mailto:${contact.email}`}>{contact.email}</a>
           )}
-          <span>
+          <span className="footer-address">
             <Address text={contact.address} />
           </span>
         </div>
