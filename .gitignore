@@ -119,3 +119,6 @@ e2e/.admin.json
 
 # Local Supabase stack keys (copy into .env.local to use the local stack)
 .env.localstack
+
+# Netlify CLI local state
+.netlify
