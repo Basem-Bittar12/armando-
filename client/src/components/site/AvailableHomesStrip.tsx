@@ -45,14 +45,21 @@ export function AvailableHomesStrip() {
     if (reduced || !section || !pinned || !viewport || !track || selection.length === 0) return;
 
     const isMobile = () => window.matchMedia("(max-width: 760px)").matches;
-    // أقصى سكرول أفقي للصف، بعد ضبط هامشه على هامش المحتوى (حافة العنوان)
+    // أقصى سكرول أفقي للصف، بعد ضبط هامشه على هامش المحتوى (حافة العنوان).
+    // إذا كل الكروت بتساع بالشاشة: الصف بالنص بالضبط وبلا حركة أفقية (ما في شي يتحرك له)
     const measure = () => {
       const head = pinned.querySelector<HTMLElement>(".hstrip__head");
       const gutter = head ? head.getBoundingClientRect().left + parseFloat(getComputedStyle(head).paddingLeft) : 16;
-      track.style.paddingLeft = track.style.paddingRight = `${Math.round(gutter)}px`;
       const vw = viewport.clientWidth;
-      const cardW = (track.firstElementChild as HTMLElement | null)?.offsetWidth ?? 0;
-      const max = Math.max(0, viewport.scrollWidth - vw);
+      const items = Array.from(track.children) as HTMLElement[];
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      const content = items.reduce((sum, item) => sum + item.offsetWidth, 0) + gap * Math.max(0, items.length - 1);
+      const fits = content + 32 <= vw;
+      const pad = fits ? Math.floor((vw - content) / 2) : Math.round(gutter);
+      track.style.paddingLeft = track.style.paddingRight = `${pad}px`;
+      section.classList.toggle("hstrip--fits", fits);
+      const cardW = items[0]?.offsetWidth ?? 0;
+      const max = fits ? 0 : Math.max(0, viewport.scrollWidth - vw);
       return { vw, cardW, max };
     };
     let max = measure().max;
@@ -180,6 +187,7 @@ export function AvailableHomesStrip() {
       triggerRef.current = null;
       trigger.kill(true);
       track.style.paddingLeft = track.style.paddingRight = "";
+      section.classList.remove("hstrip--fits");
     };
   }, [reduced, selection.length]);
 

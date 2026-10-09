@@ -1297,6 +1297,8 @@ bdi { unicode-bidi: isolate; }
 .hstrip:not(.hstrip--static) .hstrip__viewport { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; cursor: grab; user-select: none; }
 .hstrip:not(.hstrip--static) .hstrip__viewport::-webkit-scrollbar { display: none; }
 .hstrip:not(.hstrip--static) .hstrip__viewport:active { cursor: grabbing; }
+/* كل الكروت ظاهرة بالنص: لا سحب */
+.hstrip.hstrip--fits .hstrip__viewport, .hstrip.hstrip--fits .hstrip__viewport:active { cursor: default; }
 .hstrip--static .hstrip__viewport { direction: rtl; }
 .hstrip__track { display: flex; gap: var(--gap); width: max-content; }
 .hstrip__item { flex: none; width: var(--card-w); }
