@@ -1,13 +1,18 @@
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
 
 Running 8 tests using 1 worker
 
-  ✓  1 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام / (4.8s)
+  ✓  1 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام / (5.1s)
   ✓  2 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /properties (5.0s)
-  ✓  3 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-102 (5.0s)
-  ✓  4 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-087 (4.7s)
-  ✓  5 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /contact (4.4s)
-  ✓  6 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /no-such-page (4.3s)
-  ✓  7 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /admin (4.4s)
-  ✓  8 [chromium-desktop] › e2e/audit.spec.ts:123:3 › تدقيق الجودة › صفحات اللوحة (27.0s)
+  ✓  3 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-102 (5.2s)
+  ✓  4 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /property/AK-087 (5.3s)
+  ✓  5 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /contact (4.7s)
+  ✓  6 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /no-such-page (4.7s)
+  ✓  7 [chromium-desktop] › e2e/audit.spec.ts:111:5 › تدقيق الجودة › الموقع العام /admin (4.7s)
+  ✓  8 [chromium-desktop] › e2e/audit.spec.ts:123:3 › تدقيق الجودة › صفحات اللوحة (29.9s)
 
-  8 passed (1.0m)
+  8 passed (1.3m)

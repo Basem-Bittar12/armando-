@@ -10,7 +10,8 @@ const MAX_DOTS = 4;
  * صور الكرت قابلة للتقليب من برا، قبل فتح البيت: سحب بالإصبع (scroll-snap) على التلفون، وأسهم عند المرور
  * بالماوس على اللابتوب، ونقاط تحت الصورة تبين أن هناك صوراً أخرى. الضغط على الصورة يفتح صفحة البيت.
  */
-export function CardGallery({ images, href, alt }: { images: string[]; href: string; alt: string }) {
+/** priority: أول كروت الصفحة (أكبر عنصر بالشاشة) — صورتها الأولى تُحمَّل فوراً وبأولوية */
+export function CardGallery({ images, href, alt, priority = false }: { images: string[]; href: string; alt: string; priority?: boolean }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const count = images.length;
@@ -45,7 +46,8 @@ export function CardGallery({ images, href, alt }: { images: string[]; href: str
                 sizes="(max-width: 760px) 50vw, 320px"
                 alt={i === 0 ? alt : ""}
                 className="property-card__image"
-                loading="lazy"
+                loading={priority && i === 0 ? "eager" : "lazy"}
+                fetchPriority={priority && i === 0 ? "high" : "auto"}
                 decoding="async"
                 draggable={false}
               />

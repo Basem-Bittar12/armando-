@@ -345,8 +345,10 @@ export default function Properties() {
           </div>
         ) : results.length > 0 ? (
           <div className="container property-grid property-grid--listing">
-            {results.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+            {/* عنوان للقارئات الصوتية فقط: ترتيب العناوين h1 ← h2 ← عناوين الكروت h3 */}
+            <h2 className="sr-only">نتائج البحث</h2>
+            {results.map((property, index) => (
+              <PropertyCard key={property.id} property={property} priority={index < 2} />
             ))}
           </div>
         ) : (

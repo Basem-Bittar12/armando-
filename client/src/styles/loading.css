@@ -8,7 +8,8 @@
 .skeleton-line--short { width: 40%; }
 .skeleton-card .property-card__body { gap: 10px; }
 .skeleton-card .property-card__image-wrap { background: var(--sandstone); }
-.detail-loading { display: grid; gap: 14px; padding-top: 32px; padding-bottom: 80px; }
+/* بارتفاع الشاشة: الفوتر يبقى تحت حتى يصل العقار، فلا يقفز المحتوى (CLS) */
+.detail-loading { display: grid; align-content: start; gap: 14px; padding-top: 32px; padding-bottom: 80px; min-height: 100vh; min-height: 100svh; }
 .detail-loading__image { height: min(60vw, 420px); }
 .load-error { margin: 32px 0; }
 .detail-other-prices { margin: -6px 0 0; color: var(--date); font-size: 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
