@@ -1,6 +1,6 @@
 /**
  * معاينة رابط العقار عند مشاركته (واتساب، سوشيال): وسوم Open Graph من بيانات العقار.
- * مشترك بين Netlify Edge Function (Deno) وCloudflare Pages Functions والاختبارات — بلا أي مكتبة، fetch فقط.
+ * تستعمله Cloudflare Pages Functions (functions/property) والاختبارات — بلا أي مكتبة، fetch فقط.
  * (الاستيراد بامتداد .ts: Deno يشترطه)
  */
 import { IMG_PREFIX, directImageUrl } from "./img.ts";
@@ -120,8 +120,7 @@ export function injectOg(html: string, og: { title: string; tags: string }, lang
 }
 
 /**
- * صفحة عقار جاهزة (index.html من الاستضافة) + وسوم معاينة العقار. مشترك بين Netlify Edge Function
- * وCloudflare Pages Functions. /en/property/:code بالإنجليزي، /property/:code بالعربي.
+ * صفحة عقار جاهزة (index.html من الاستضافة) + وسوم معاينة العقار. تستعمله Cloudflare Pages Functions. /en/property/:code بالإنجليزي، /property/:code بالعربي.
  * أي خطأ أو عقار غير موجود: الصفحة كما هي.
  */
 export async function withPropertyOg(request: Request, page: Response, supabaseUrl?: string, anonKey?: string): Promise<Response> {

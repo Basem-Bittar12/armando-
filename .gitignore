@@ -126,3 +126,4 @@ e2e/.admin.json
 # Cloudflare (wrangler): local secrets and state
 .dev.vars
 .wrangler/
+.env.newproject

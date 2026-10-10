@@ -1,6 +1,6 @@
 /**
  * Pages Function: /en/property/:code (English) — صفحة الموقع نفسها + وسوم معاينة العقار
- * لروبوتات واتساب والسوشيال (shared/og.ts، نفس منطق Netlify Edge Function).
+ * لروبوتات واتساب والسوشيال (shared/og.ts).
  * ملف _headers لا يُطبَّق على ردود الـFunctions، فنضيف noindex هنا حتى الإطلاق (INDEXING=true).
  */
 import { withPropertyOg } from "../../../shared/og";

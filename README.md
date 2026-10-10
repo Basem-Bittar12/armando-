@@ -16,7 +16,7 @@ Everything stays on free plans with no credit card; see [Free-plan safeguards](#
 | Pages | `client/src/pages`, dashboard in `client/src/pages/admin` (one lazy chunk) |
 | Data layer | `client/src/lib/catalog` — `store.tsx` (rules), `backend.ts` (read + inquiries), `supabaseAdmin.ts` (writes, lazy) |
 | Database | `supabase/migrations/0001…0005` — tables, RLS, storage buckets, RPCs |
-| Link previews | `functions/property/[code].ts`, `functions/en/property/[code].ts` (Cloudflare) + `shared/og.ts`; Netlify copy in `netlify/edge-functions/` |
+| Link previews | `functions/property/[code].ts`, `functions/en/property/[code].ts` + `shared/og.ts` |
 | Property images | `/img/<bucket>/<path>` → `functions/img/[[path]].ts` (edge cache) + `shared/img.ts`; fallback to Supabase in `client/src/lib/imgFallback.ts` |
 | Keep-alive + backups | Worker `cloudflare/ops` (cron), restore with `scripts/restore-backup.ts` |
 | Brand, texts, defaults | `client/src/config/site.ts` (contact details now live in the dashboard) |
@@ -37,7 +37,7 @@ See `.env.example`.
 | `SUPABASE_DB_PASSWORD` or `SUPABASE_DB_URL` | `npm run db:migrate` | yes |
 | `SITE_URL` | sitemap/robots (optional) | no |
 
-`npm run build:pages` (and `build:netlify`) ends with `scripts/check-bundle.ts`, which fails the build if a service-role key (value, `sb_secret_…`, or a JWT with role `service_role`) appears anywhere in `dist/public`, or if dashboard code leaks into the public entry chunk.
+`npm run build:pages` ends with `scripts/check-bundle.ts`, which fails the build if a service-role key (value, `sb_secret_…`, or a JWT with role `service_role`) appears anywhere in `dist/public`, or if dashboard code leaks into the public entry chunk.
 
 ## Local development
 
@@ -66,7 +66,7 @@ npm run admin:create -- you@example.com "a-strong-password"
 | `npm run test:audit` | axe (serious/critical), no horizontal scroll at 360–430 px, palette-only colors, no console errors — every public page and every dashboard page |
 | `npm run db:check-rls` | real anonymous and non-admin write attempts against Supabase; all must fail |
 | `npm run check:bundle` | service-role key scan + dashboard code split check on `dist/public` |
-| `npx tsx scripts/check-og.ts AK-102` | runs the link-preview edge function locally |
+| `npx tsx scripts/check-og.ts AK-102 [en]` | runs the link-preview logic locally against `dist/public/index.html` |
 | `npm run pages:dev` | the built site + Pages Functions in Cloudflare's local runtime on :8788 (add `--binding VITE_SUPABASE_URL=… --binding VITE_SUPABASE_ANON_KEY=…` for a local Supabase) |
 | `npm run ops:dev` | the ops Worker locally on :8787 (secrets from `cloudflare/ops/.dev.vars`); `curl "localhost:8787/__scheduled?cron=53+2+*+*+sun"` runs the weekly backup |
 | `npx tsx scripts/screens.ts` | screenshots of every page into `docs/screens/final` |
@@ -87,7 +87,6 @@ E2E creates a temporary admin with the service-role key and deletes it afterward
    `npx wrangler secret put OPS_TOKEN -c cloudflare/ops/wrangler.jsonc` (any long random string) and `npm run ops:deploy`.
 8. The site stays **noindex** (`client/public/_headers`, `<meta name="robots">` in `client/index.html`, `indexing = false` in `config/site.ts`, `INDEXING` in `wrangler.jsonc` for the Function-served property pages). At launch, flip all four.
 
-Netlify (`netlify.toml`, `netlify/edge-functions/`, the `/img/*` line in `_redirects`) is kept only as a fallback host until the Cloudflare site is confirmed; every Netlify production deploy costs 15 of its 300 monthly credits (D22).
 
 ## Admins
 

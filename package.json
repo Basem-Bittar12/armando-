@@ -21,7 +21,6 @@
     "db:restore": "tsx scripts/restore-backup.ts",
     "test:e2e": "playwright test --project=chromium-desktop --project=chromium-iphone",
     "test:e2e:webkit": "docker run --rm --network host -v \"$PWD\":\"$PWD\" -w \"$PWD\" -e E2E_NO_SERVER=1 mcr.microsoft.com/playwright:v1.56.1-noble npx playwright test --project=webkit-iphone",
-    "build:netlify": "vite build && tsx scripts/sitemap.ts && tsx scripts/check-bundle.ts",
     "build:pages": "vite build && tsx scripts/sitemap.ts && tsx scripts/check-bundle.ts",
     "pages:dev": "wrangler pages dev dist/public --port 8788",
     "pages:deploy": "wrangler pages deploy dist/public --project-name armando-alkadi --branch main",

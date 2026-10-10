@@ -1,7 +1,7 @@
 /**
  * خريطة الموقع وقت البناء: الصفحات الثابتة + كل العقارات المنشورة (من Supabase بالمفتاح العام).
  * تُكتب في dist/public/sitemap.xml مع robots.txt. الموقع يبقى noindex حتى الإطلاق (config/site.ts → indexing).
- * عنوان الموقع: SITE_URL، أو URL الذي يضعه Netlify تلقائياً وقت البناء.
+ * عنوان الموقع: SITE_URL، أو URL إن وُجد بالبيئة.
  * التشغيل: npx tsx scripts/sitemap.ts (بعد vite build)
  */
 import { existsSync, writeFileSync } from "node:fs";
