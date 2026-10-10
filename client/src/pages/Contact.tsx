@@ -126,6 +126,11 @@ export default function Contact() {
                 <a href={`tel:${contact.phoneHref}`}>
                   <Ltr>{contact.phone}</Ltr>
                 </a>
+                {contact.landline && (
+                  <a href={`tel:${contact.landlineHref}`}>
+                    <Ltr>{contact.landline}</Ltr>
+                  </a>
+                )}
               </div>
               {/* البريد وساعات العمل مخفيان حتى تصل البيانات الحقيقية (config/site.ts) */}
               {contact.email && (

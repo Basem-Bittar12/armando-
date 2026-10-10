@@ -1055,7 +1055,19 @@ bdi { unicode-bidi: isolate; }
 .mobile-drawer__language button.is-current { background: var(--espresso); border-color: var(--espresso); color: var(--almond); }
 .mobile-drawer__contact a { min-height: 44px; }
 
-/* ---------- [5] شريط الموبايل الثابت (بديل الفقاعة العائمة) ---------- */
+/* ---------- زر واتساب العائم (اللابتوب والتابلت؛ على التلفون الشريط الثابت) — ألوان الهوية: Espresso وAlmond ---------- */
+.floating-whatsapp {
+  position: fixed; bottom: 24px; inset-inline-end: 24px; z-index: 36;
+  width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--espresso); color: var(--almond); border: 1px solid rgba(239,226,208,.35);
+  box-shadow: 0 10px 28px rgba(47,34,26,.28); transition: transform .25s var(--ease-quiet), background .25s var(--ease-quiet);
+}
+.floating-whatsapp:hover { background: var(--espresso-deep); transform: translateY(-2px); }
+.floating-whatsapp:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 3px; }
+@media (max-width: 760px) { .floating-whatsapp { display: none; } }
+@media print { .floating-whatsapp { display: none; } }
+
+/* ---------- [5] شريط الموبايل الثابت ---------- */
 .mobile-action-bar { display: none; }
 @media (max-width: 760px) {
   .public-shell { padding-bottom: var(--bar-h); }
@@ -1487,3 +1499,11 @@ bdi { unicode-bidi: isolate; }
   .header-lang--mobile { display: inline-grid; order: 2; margin-inline-start: auto; }
   .header-inner .mobile-menu { order: 3; }
 }
+
+/* شعار tabby (ملف الشعار الرسمي كما هو) — مخفي حتى التفعيل في config/site.ts */
+.tabby-badge { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; color: var(--date); }
+.tabby-badge__logo { height: 22px; width: auto; display: block; }
+.tabby-badge--footer { padding: 18px 0 0; color: var(--almond); }
+.tabby-badge--detail { margin-top: 10px; }
+.tabby-badge--card { display: inline-flex; margin-inline-start: 8px; vertical-align: middle; }
+.tabby-badge--card .tabby-badge__logo { height: 16px; }

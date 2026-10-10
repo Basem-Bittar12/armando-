@@ -5,6 +5,7 @@ import type { Property } from "@/lib/catalog/view";
 import { useFavorites } from "@/store/Favorites";
 import CardGallery from "./CardGallery";
 import { srcsetFor } from "@/lib/imageSrcset";
+import TabbyBadge from "./TabbyBadge";
 import { useLang, useT, type Lang } from "@/i18n/lang";
 
 /** نوع العقار ومدة الإيجار ككلام عادي: "شقة للإيجار الشهري" */
@@ -83,6 +84,7 @@ export function PropertyCard({ property, gallery = true, priority = false }: { p
         <p className="property-card__specs">{specsLine(property, lang)}</p>
         <p className="property-card__price">
           <strong>{property.price}</strong> <span>{property.unit}</span>
+          <TabbyBadge placement="card" />
         </p>
       </div>
     </article>

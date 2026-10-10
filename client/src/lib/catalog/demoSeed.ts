@@ -174,6 +174,7 @@ export function demoCatalog(): CatalogData {
     settings: {
       home_count: 6,
       phone: contact.phoneDisplay,
+      landline: contact.landline,
       whatsapp: contact.whatsapp,
       email: contact.email,
       address: contact.address,

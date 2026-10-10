@@ -5,7 +5,8 @@ import { useSiteContact } from "@/hooks/useSiteContact";
 import Header from "./Header";
 import Footer from "./Footer";
 import WhatsAppButton from "./WhatsAppButton";
-import { WhatsAppMessageProvider } from "./pageContext";
+import WhatsAppIcon from "./WhatsAppIcon";
+import { WhatsAppMessageProvider, usePageWhatsAppMessage } from "./pageContext";
 import { useT } from "@/i18n/lang";
 
 /**
@@ -16,7 +17,30 @@ import { useT } from "@/i18n/lang";
  */
 type MobileBar = "always" | "after-hero" | { showAfter: number; content: ReactNode };
 
-/** شريط الموبايل الثابت: بديل فقاعة واتساب العائمة (اللابتوب لا يعرضه) */
+/**
+ * زر واتساب عائم بزاوية الشاشة (طلب صاحب المكتب) — على اللابتوب والتابلت.
+ * على التلفون شريط الموبايل فيه زر واتساب كبير أصلاً، فما منكرره فوقه.
+ * نفس رسالة الصفحة الجاهزة (اسم العقار وكوده بصفحة العقار).
+ */
+function FloatingWhatsApp() {
+  const message = usePageWhatsAppMessage();
+  const { whatsappHref } = useSiteContact();
+  const t = useT();
+  return (
+    <a
+      href={whatsappHref(message)}
+      target="_blank"
+      rel="noreferrer"
+      className="floating-whatsapp"
+      aria-label={t("تواصل معنا عبر واتساب", "Chat with us on WhatsApp")}
+      title={t("واتساب", "WhatsApp")}
+    >
+      <WhatsAppIcon size={28} />
+    </a>
+  );
+}
+
+/** شريط الموبايل الثابت (اللابتوب لا يعرضه؛ عليه الزر العائم) */
 function MobileActionBar({ mode }: { mode: MobileBar }) {
   const contact = useSiteContact();
   const t = useT();
@@ -91,6 +115,7 @@ export function PublicLayout({
         </main>
         <Footer />
         <MobileActionBar mode={mobileBar} />
+        <FloatingWhatsApp />
       </div>
     </WhatsAppMessageProvider>
   );

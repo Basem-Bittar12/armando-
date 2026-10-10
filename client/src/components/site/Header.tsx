@@ -148,6 +148,11 @@ export function Header() {
             <a href={`tel:${contact.phoneHref}`}>
               <Phone size={17} /> <Ltr>{contact.phone}</Ltr>
             </a>
+            {contact.landline && (
+              <a href={`tel:${contact.landlineHref}`}>
+                <Phone size={17} /> <Ltr>{contact.landline}</Ltr>
+              </a>
+            )}
             {contact.email && <a href={`mailto:${contact.email}`}>{contact.email}</a>}
           </div>
 

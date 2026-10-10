@@ -49,6 +49,8 @@ export const heroStory = {
 export const contact = {
   /** رقم الهاتف بصيغة العرض */
   phoneDisplay: "+971 50 246 5851",
+  /** الهاتف الأرضي للمكتب (من صاحب المكتب، 10/2026) */
+  landline: "04 370 8077",
   /** نفس الرقم بصيغة الاتصال tel: */
   phoneHref: "+971502465851",
   /** رقم واتساب بالصيغة الدولية بدون + أو مسافات */
@@ -207,3 +209,13 @@ export const heroStoryFor = (lang: Lang) => (lang === "en" ? heroStoryEn : heroS
 export const pageMetaFor = (lang: Lang) => (lang === "en" ? pageMetaEn : pageMeta);
 export const whatsappTemplatesFor = (lang: Lang) => (lang === "en" ? whatsappTemplatesEn : whatsappTemplates);
 export const mainNavFor = (lang: Lang) => (lang === "en" ? mainNavEn : mainNav);
+
+/**
+ * طرق الدفع — tabby (طلب صاحب المكتب، 10/2026).
+ * مخفي حتى يُضاف ملف الشعار الرسمي كما هو من حزمة tabby للتجار (ممنوع رسمه أو تعديل لونه):
+ *   client/public/brand/partners/tabby.svg ثم enabled: true.
+ * يظهر بثلاثة أماكن: سطر «طرق الدفع» بالفوتر، تحت السعر بصفحة العقار، وشعار صغير بكروت العقارات.
+ */
+export const payments = {
+  tabby: { enabled: false, logo: "/brand/partners/tabby.svg" },
+} as const;

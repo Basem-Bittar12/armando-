@@ -200,6 +200,7 @@ export function CatalogProvider({ children, backend: given }: { children: ReactN
   const saveContact = useCallback(async (contact: SiteContact) => {
     const clean: SiteContact = {
       phone: contact.phone.trim(),
+      landline: contact.landline?.trim() ?? "",
       whatsapp: contact.whatsapp.replace(/\D/g, ""),
       email: contact.email?.trim() || null,
       address: contact.address.trim(),

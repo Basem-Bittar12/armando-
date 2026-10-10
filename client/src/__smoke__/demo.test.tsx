@@ -68,8 +68,10 @@ describe("صفحات الموقع العام", () => {
     expect(text()).toContain("اختيارات تستحق الانتباه");
     expect(container!.querySelectorAll(".hstrip .property-card").length).toBe(3);
     expect(container!.querySelector(".hstrip__cta a")?.getAttribute("href")).toBe("/properties");
-    // لا فقاعة واتساب عائمة، ولا كود عقار على الكروت
-    expect(container!.querySelector(".floating-whatsapp")).toBeNull();
+    // زر واتساب عائم واحد (طلب صاحب المكتب)، برسالة جاهزة
+    expect(container!.querySelectorAll(".floating-whatsapp")).toHaveLength(1);
+    expect(container!.querySelector(".floating-whatsapp")!.getAttribute("href")).toMatch(/^https:\/\/wa\.me\/\d+\?text=/);
+    // لا كود عقار على الكروت
     expect(container!.querySelector(".property-card__id")).toBeNull();
     expect(text()).toContain("شقة بانورامية بإطلالة على المدينة");
     expect(text()).toContain("اكتشف");

@@ -21,6 +21,7 @@ function ContactBody() {
   const settings = catalog.data!.settings;
   const [form, setForm] = useState<SiteContact>({
     phone: settings.phone,
+    landline: settings.landline ?? "",
     whatsapp: settings.whatsapp,
     email: settings.email,
     address: settings.address,
@@ -53,6 +54,9 @@ function ContactBody() {
         <div className="adm-grid">
           <Field label="رقم الهاتف (كما يظهر بالموقع)" hint="مثلاً: +971 50 123 4567">
             <TextInput dir="ltr" inputMode="tel" autoComplete="off" value={form.phone} onChange={(e) => set({ phone: e.target.value })} />
+          </Field>
+          <Field label="الهاتف الأرضي (اختياري)" hint="مثلاً: 04 370 8077 — فاضي = ما بيظهر">
+            <TextInput dir="ltr" inputMode="tel" autoComplete="off" value={form.landline ?? ""} onChange={(e) => set({ landline: e.target.value })} />
           </Field>
           <Field label="رقم واتساب" hint="دولي، أرقام فقط بدون + أو مسافات: 971501234567">
             <TextInput dir="ltr" inputMode="numeric" value={form.whatsapp} onChange={(e) => set({ whatsapp: e.target.value.replace(/\D/g, "") })} />

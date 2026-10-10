@@ -84,6 +84,8 @@ export type SocialLink = { label: string; href: string };
 /** معلومات التواصل — تُعدَّل من اللوحة وتظهر بكل الموقع */
 export type SiteContact = {
   phone: string;
+  /** الهاتف الأرضي للمكتب (اختياري؛ فاضي = ما بيظهر) */
+  landline?: string;
   /** رقم واتساب دولي بدون + أو مسافات */
   whatsapp: string;
   email: string | null;

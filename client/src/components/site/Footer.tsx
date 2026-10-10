@@ -6,6 +6,7 @@ import { bySort, useCatalog } from "@/lib/catalog/store";
 import Logo from "./Logo";
 import { Address, Ltr } from "./pageContext";
 import WhatsAppIcon from "./WhatsAppIcon";
+import TabbyBadge from "./TabbyBadge";
 
 /** الفوتر — عربي بالكامل على أرضية Espresso، مع الشعار الرسمي ثنائي اللغة (نسخة Inverse) */
 export function Footer() {
@@ -52,6 +53,11 @@ export function Footer() {
           <a href={`tel:${contact.phoneHref}`}>
             <Ltr>{contact.phone}</Ltr>
           </a>
+          {contact.landline && (
+            <a href={`tel:${contact.landlineHref}`} aria-label={t(`الهاتف الأرضي ${contact.landline}`, `Office landline ${contact.landline}`)}>
+              <Ltr>{contact.landline}</Ltr>
+            </a>
+          )}
           {contact.email && (
             <a href={`mailto:${contact.email}`}>{contact.email}</a>
           )}
@@ -79,6 +85,7 @@ export function Footer() {
       </div>
 
       <div className="container">
+        <TabbyBadge placement="footer" />
         <div className="footer-bottom">
           <span>
             {t(`© ${year} ${brand.nameAr}. جميع الحقوق محفوظة.`, `© ${year} ${brand.name}. All rights reserved.`)}

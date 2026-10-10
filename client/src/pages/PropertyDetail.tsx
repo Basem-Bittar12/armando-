@@ -17,6 +17,7 @@ import SwipeGallery from "@/components/site/SwipeGallery";
 import PropertyLightbox from "@/components/site/PropertyLightbox";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
 import { Ltr } from "@/components/site/pageContext";
+import TabbyBadge from "@/components/site/TabbyBadge";
 import { srcsetFor } from "@/lib/imageSrcset";
 
 const STATUS_EN: Record<string, string> = { متاح: "Available", محجوز: "Reserved", مؤجر: "Rented" };
@@ -232,6 +233,7 @@ export default function PropertyDetail() {
               {/* الحالة تظهر فقط إذا لم يكن العقار متاحاً */}
               {property.status !== "متاح" && <small className="detail-status">{statusLabel(property.status, lang)}</small>}
             </div>
+            <TabbyBadge placement="detail" />
             {/* سعر ثانٍ (مثلاً سنوي بجانب الشهري) */}
             {property.prices.length > 1 && (
               <p className="detail-other-prices">
