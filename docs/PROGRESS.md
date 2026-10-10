@@ -38,3 +38,4 @@ Local Supabase: `cd /home/user/armando- && npx supabase start` (needs `SUPABASE_
 - 2026-10-10: Supabase moved to Mumbai (D27): new project txlvfqpnurbtnjfagsge, data/files/accounts identical, RLS 42/42, Worker repointed (secret + vars). Netlify files removed.
 - 2026-10-10: live site confirmed on the Mumbai project (pages, 72 images, both admin logins, no requests to the old host); old Tokyo project fgpnasnmirfcxmjlvpey deleted (API 200, now 404). Old keys removed from the working copy.
 - 2026-10-10: office feedback done (D28): landline, floating WhatsApp (laptop), tabby slots hidden until the official logo file.
+- 2026-10-10: CLAUDE.md added (full handover for new sessions/machines). Domain connection to Cloudflare in progress (Connect a domain, automatic DNS import).
