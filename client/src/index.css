@@ -1502,8 +1502,9 @@ bdi { unicode-bidi: isolate; }
 
 /* شعار tabby (ملف الشعار الرسمي كما هو) — مخفي حتى التفعيل في config/site.ts */
 .tabby-badge { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; color: var(--date); }
-.tabby-badge__logo { height: 22px; width: auto; display: block; }
+.tabby-badge__logo { height: 22px; width: 22px; display: block; border-radius: 5px; }
+.tabby-badge__brand { display: inline-flex; align-items: center; gap: 6px; font-family: "Castoro", serif; color: inherit; }
 .tabby-badge--footer { padding: 18px 0 0; color: var(--almond); }
 .tabby-badge--detail { margin-top: 10px; }
 .tabby-badge--card { display: inline-flex; margin-inline-start: 8px; vertical-align: middle; }
-.tabby-badge--card .tabby-badge__logo { height: 16px; }
+.tabby-badge--card .tabby-badge__logo { height: 16px; width: 16px; border-radius: 4px; }

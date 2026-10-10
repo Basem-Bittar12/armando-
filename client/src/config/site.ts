@@ -212,10 +212,11 @@ export const mainNavFor = (lang: Lang) => (lang === "en" ? mainNavEn : mainNav);
 
 /**
  * طرق الدفع — tabby (طلب صاحب المكتب، 10/2026).
- * مخفي حتى يُضاف ملف الشعار الرسمي كما هو من حزمة tabby للتجار (ممنوع رسمه أو تعديل لونه):
- *   client/public/brand/partners/tabby.svg ثم enabled: true.
+ * الشعار ملف رسمي كما هو (ممنوع رسمه أو تعديل لونه). عند وصول الشعار الكامل (wordmark) من حزمة tabby للتجار
+ * يُستبدل هنا. enabled: false يخفيه من كل الأماكن.
  * يظهر بثلاثة أماكن: سطر «طرق الدفع» بالفوتر، تحت السعر بصفحة العقار، وشعار صغير بكروت العقارات.
  */
 export const payments = {
-  tabby: { enabled: false, logo: "/brand/partners/tabby.svg" },
+  // أيقونة tabby الرسمية (مقصوصة كما هي من صفحتهم على App Store؛ إرشاداتهم تسمح بالأيقونة وحدها بالمساحات الصغيرة)
+  tabby: { enabled: true, logo: "/brand/partners/tabby-icon-64.png", logo2x: "/brand/partners/tabby-icon-128.png" },
 } as const;
