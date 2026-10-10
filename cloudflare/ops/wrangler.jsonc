@@ -20,8 +20,8 @@
     "BACKUP_CRON": "53 2 * * sun"
   },
   "kv_namespaces": [
-    // يُنشأ مرة واحدة: npx wrangler kv namespace create armando-backups
-    { "binding": "BACKUPS", "id": "REPLACED_AT_SETUP" }
+    // أُنشئ 2026-10-10 (npx wrangler kv namespace create armando-backups) — رقم ليس سراً
+    { "binding": "BACKUPS", "id": "4b29983a151c491b84d07887f0a86dd6" }
   ],
   "observability": { "enabled": true }
 }
