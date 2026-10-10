@@ -38,6 +38,10 @@ export function Footer() {
             </Link>
           ))}
           <Link href="/contact">{t("تواصل معنا", "Contact us")}</Link>
+          {/* للمكتب: إذا ضاع رابط اللوحة يلاقيه هون (اللوحة عربية فقط، فالرابط نفسه من النسختين) */}
+          <Link href="~/admin" rel="nofollow">
+            {t("لوحة التحكم", "Dashboard")}
+          </Link>
         </div>
 
         <div>

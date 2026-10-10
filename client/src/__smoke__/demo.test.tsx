@@ -74,8 +74,11 @@ describe("صفحات الموقع العام", () => {
     expect(text()).toContain("شقة بانورامية بإطلالة على المدينة");
     expect(text()).toContain("اكتشف");
     expect(document.title).toContain("أرماندو القاضي لبيوت العطلات");
-    // الهوية الرسمية: لا رابط للوحة المكتب في الموقع العام، لا شارة "متاح"، لا روابط وهمية
-    expect(container!.querySelector('a[href="/admin"]')).toBeNull();
+    // رابط لوحة المكتب في الفوتر فقط (تحت «تصفّح»)، لا شارة "متاح"، لا روابط وهمية
+    const adminLinks = Array.from(container!.querySelectorAll('a[href="/admin"]'));
+    expect(adminLinks).toHaveLength(1);
+    expect(adminLinks[0].closest(".site-footer")).not.toBeNull();
+    expect(adminLinks[0].textContent).toBe("لوحة التحكم");
     expect(container!.querySelectorAll(".property-card .chip").length).toBe(
       Array.from(container!.querySelectorAll(".property-card .chip")).filter((chip) => chip.textContent !== "متاح").length,
     );
@@ -457,9 +460,14 @@ describe("النسخة الإنجليزية وزر اللغة", () => {
     expect(text()).not.toContain("اختيارات تستحق الانتباه");
     const internal = Array.from(container!.querySelectorAll<HTMLAnchorElement>(".public-shell a[href^='/']"))
       .map((a) => a.getAttribute("href")!)
-      .filter((href) => !container!.querySelector(`a.header-lang[href="${href}"]`));
+      .filter((href) => !container!.querySelector(`a.header-lang[href="${href}"]`))
+      // لوحة التحكم عربية فقط: رابطها نفسه من النسختين
+      .filter((href) => href !== "/admin");
     expect(internal.length).toBeGreaterThan(0);
     internal.forEach((href) => expect(href, href).toMatch(/^\/en(\/|$|\?)/));
+
+    const dashboard = container!.querySelector<HTMLAnchorElement>('.site-footer a[href="/admin"]');
+    expect(dashboard?.textContent).toBe("Dashboard");
 
     await mount("/en/property/AK-102");
     expect(text()).toContain("Property details");
