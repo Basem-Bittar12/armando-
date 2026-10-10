@@ -1107,6 +1107,8 @@ bdi { unicode-bidi: isolate; }
 .hero-canvas[data-device="mobile"] .hero-zone { padding: 16px 20px; }
 .hero-canvas[data-device="mobile"] .hero-story { flex: 1; align-items: stretch; text-align: start; }
 .hero-canvas[data-device="mobile"] .hero-story__title { font-size: 32px; line-height: 1.3; }
+/* الإنجليزي أعرض من العربي بنفس الحجم: العنوان يبقى سطراً واحداً مثل العربي، فيبقى الفيديو بنفس الحجم والقصة نفسها */
+.hero-canvas[data-device="mobile"] .hero-story__title:lang(en) { font-size: min(32px, calc((100vw - 40px) * .087)); white-space: nowrap; }
 .hero-canvas[data-device="mobile"] .hero-story__body { font-size: 16px; line-height: 1.8; margin-top: 8px; }
 .hero-canvas[data-device="mobile"] .hero-story__brand { margin-top: 4px; }
 .hero-canvas[data-device="mobile"] .hero-story__actions { margin-top: auto; padding-top: 12px; }

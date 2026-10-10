@@ -69,3 +69,6 @@ The five demo homes got English titles/descriptions (translations of their Arabi
 
 ## D20. English marketing copy is a draft
 Hero story, page titles and section headings in English are faithful translations of the Arabic copy, marked as a draft for the owner to approve (`heroStoryEn`, `pageMetaEn` in `client/src/config/site.ts`).
+
+## D21. English hero headline fits one line on phones
+Same font (Castoro), size scales down only when needed: `min(32px, (100vw − 40px) × 0.087)` → 30.5 px on a 390 px phone, 27.8 px on 360 px. At 32 px "Every home starts empty." is 360 px wide and wrapped to two lines, which made the phone hero text band taller and the video smaller than in Arabic (61 % vs 66 % of the hero). Now both languages show the same split (66 % / 66 % on 390×844). On 412–430 px phones the English body sentence still needs one more line than the Arabic (Latin text is wider), so the video is 3 points smaller there. Laptop unchanged: the video is full-bleed and does not depend on the text height. Scroll mechanics (pins, scroll lengths, strip travel, reveals) were measured identical in both languages.
