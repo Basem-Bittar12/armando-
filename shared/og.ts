@@ -1,7 +1,9 @@
 /**
  * معاينة رابط العقار عند مشاركته (واتساب، سوشيال): وسوم Open Graph من بيانات العقار.
- * مشترك بين Netlify Edge Function (Deno) والاختبارات — بلا أي مكتبة، fetch فقط.
+ * مشترك بين Netlify Edge Function (Deno) وCloudflare Pages Functions والاختبارات — بلا أي مكتبة، fetch فقط.
+ * (الاستيراد بامتداد .ts: Deno يشترطه)
  */
+import { IMG_PREFIX, directImageUrl } from "./img.ts";
 
 export type OgProperty = {
   code: string;
@@ -26,7 +28,14 @@ const SITE_NAME: Record<OgLang, string> = { ar: "أرماندو القاضي ل�
 const pick = (lang: OgLang, ar: string | undefined, en: string | null | undefined) => (lang === "en" && en?.trim() ? en.trim() : ar ?? "");
 
 /** يجلب العقار المنشور بالكود عبر REST العام (المفتاح العام + RLS: المنشور فقط) */
-export async function fetchOgProperty(supabaseUrl: string, anonKey: string, code: string, lang: OgLang = "ar"): Promise<OgProperty | null> {
+export async function fetchOgProperty(
+  supabaseUrl: string,
+  anonKey: string,
+  code: string,
+  lang: OgLang = "ar",
+  /** أصل الموقع (https://…) لرابط الصورة عبر /img — بدونه رابط Supabase المباشر */
+  siteOrigin?: string,
+): Promise<OgProperty | null> {
   if (!/^[A-Za-z0-9-]{2,20}$/.test(code)) return null;
   const base = supabaseUrl.replace(/\/$/, "");
   const select =
@@ -54,10 +63,12 @@ export async function fetchOgProperty(supabaseUrl: string, anonKey: string, code
   // صورة المشاركة JPEG إن وُجدت (واتساب)، وإلا نسخة WebP 1080
   let image: string | null = null;
   if (cover) {
-    const webp = `${base}/storage/v1/object/public/property-images/${cover.path_1080}`;
-    const jpeg = webp.replace(/-1080\.webp$/, "-og.jpg");
-    const head = await fetch(jpeg, { method: "HEAD" }).catch(() => null);
-    image = head?.ok ? jpeg : webp;
+    const webpPath = `property-images/${cover.path_1080}`;
+    const jpegPath = webpPath.replace(/-1080\.webp$/, "-og.jpg");
+    // الفحص مباشرة على Supabase (HEAD بلا محتوى)، والرابط المنشور عبر /img (كاش Cloudflare)
+    const head = await fetch(directImageUrl(base, jpegPath), { method: "HEAD" }).catch(() => null);
+    const chosen = head?.ok ? jpegPath : webpPath;
+    image = siteOrigin ? `${siteOrigin}${IMG_PREFIX}${chosen}` : directImageUrl(base, chosen);
   }
   return {
     code: row.code,
@@ -106,4 +117,34 @@ export function injectOg(html: string, og: { title: string; tags: string }, lang
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${escape(og.title)}</title>`)
     .replace(/<meta\s+name="description"[\s\S]*?\/>\s*/, "")
     .replace("</head>", `    ${og.tags}\n  </head>`);
+}
+
+/**
+ * صفحة عقار جاهزة (index.html من الاستضافة) + وسوم معاينة العقار. مشترك بين Netlify Edge Function
+ * وCloudflare Pages Functions. /en/property/:code بالإنجليزي، /property/:code بالعربي.
+ * أي خطأ أو عقار غير موجود: الصفحة كما هي.
+ */
+export async function withPropertyOg(request: Request, page: Response, supabaseUrl?: string, anonKey?: string): Promise<Response> {
+  if (!page.headers.get("content-type")?.includes("text/html")) return page;
+  const url = new URL(request.url);
+  const parts = url.pathname.split("/").filter(Boolean);
+  const lang: OgLang = parts[0] === "en" ? "en" : "ar";
+  let code = "";
+  try {
+    code = decodeURIComponent(parts[lang === "en" ? 2 : 1] ?? "");
+  } catch {
+    return page;
+  }
+  if (!code || !supabaseUrl || !anonKey) return page;
+  try {
+    const property = await fetchOgProperty(supabaseUrl, anonKey, code, lang, url.origin);
+    if (!property) return page;
+    const html = injectOg(await page.text(), buildOgTags(property, request.url), lang);
+    const headers = new Headers(page.headers);
+    headers.delete("content-length");
+    return new Response(html, { status: page.status, headers });
+  } catch (error) {
+    console.error("[property-og]", error);
+    return page;
+  }
 }

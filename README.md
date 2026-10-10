@@ -1,7 +1,8 @@
 # Armando Alkadi Holiday Homes
 
 Website and office dashboard for monthly and yearly rentals in Dubai.
-React + Vite on Netlify, data in Supabase (Postgres, Auth, Storage).
+React + Vite on Cloudflare Pages (free plan), data in Supabase (Postgres, Auth, Storage, free plan).
+Everything stays on free plans with no credit card; see [Free-plan safeguards](#free-plan-safeguards) and `docs/DECISIONS.md` D23–D26.
 
 - Public site: `/`, `/properties`, `/property/:code`, `/contact`
 - Dashboard: `/admin` (email + password, admins only)
@@ -15,7 +16,9 @@ React + Vite on Netlify, data in Supabase (Postgres, Auth, Storage).
 | Pages | `client/src/pages`, dashboard in `client/src/pages/admin` (one lazy chunk) |
 | Data layer | `client/src/lib/catalog` — `store.tsx` (rules), `backend.ts` (read + inquiries), `supabaseAdmin.ts` (writes, lazy) |
 | Database | `supabase/migrations/0001…0005` — tables, RLS, storage buckets, RPCs |
-| Link previews | `netlify/edge-functions/property-og.ts` + `shared/og.ts` |
+| Link previews | `functions/property/[code].ts`, `functions/en/property/[code].ts` (Cloudflare) + `shared/og.ts`; Netlify copy in `netlify/edge-functions/` |
+| Property images | `/img/<bucket>/<path>` → `functions/img/[[path]].ts` (edge cache) + `shared/img.ts`; fallback to Supabase in `client/src/lib/imgFallback.ts` |
+| Keep-alive + backups | Worker `cloudflare/ops` (cron), restore with `scripts/restore-backup.ts` |
 | Brand, texts, defaults | `client/src/config/site.ts` (contact details now live in the dashboard) |
 | Styles | `client/src/index.css` (site), `client/src/styles/dashboard.css` (dashboard) |
 
@@ -27,12 +30,14 @@ See `.env.example`.
 
 | Variable | Used by | Secret |
 | --- | --- | --- |
-| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | website, Netlify build, edge function | no (public, RLS protects data) |
-| `SUPABASE_SERVICE_ROLE_KEY` | local scripts and e2e only | **yes**, never on Netlify |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | website build, Pages Functions (`wrangler.jsonc` vars), ops Worker | no (public, RLS protects data) |
+| `SUPABASE_SERVICE_ROLE_KEY` | local scripts, e2e, `db:restore`; in production **only** as the ops Worker secret | **yes**, never in the site or Pages |
+| `OPS_TOKEN` | ops Worker secret for manual runs (`POST /run`) | yes |
+| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | wrangler deploys, `db:restore --kv` | yes / no |
 | `SUPABASE_DB_PASSWORD` or `SUPABASE_DB_URL` | `npm run db:migrate` | yes |
 | `SITE_URL` | sitemap/robots (optional) | no |
 
-`npm run build:netlify` ends with `scripts/check-bundle.ts`, which fails the build if a service-role key (value, `sb_secret_…`, or a JWT with role `service_role`) appears anywhere in `dist/public`, or if dashboard code leaks into the public entry chunk.
+`npm run build:pages` (and `build:netlify`) ends with `scripts/check-bundle.ts`, which fails the build if a service-role key (value, `sb_secret_…`, or a JWT with role `service_role`) appears anywhere in `dist/public`, or if dashboard code leaks into the public entry chunk.
 
 ## Local development
 
@@ -54,7 +59,7 @@ npm run admin:create -- you@example.com "a-strong-password"
 
 | Command | What |
 | --- | --- |
-| `npm run check` | TypeScript |
+| `npm run check` | TypeScript (site + Cloudflare code) |
 | `npm test` | smoke tests (jsdom, demo data) |
 | `npm run test:e2e` | Playwright on Chromium desktop + Chromium iPhone, against a production build and the Supabase in `.env.local` |
 | `npm run test:e2e:webkit` | same suite on WebKit (iPhone 13), inside the official Playwright Docker image; start the build first: `npx vite build && PORT=4173 npx tsx server/index.ts` |
@@ -62,19 +67,27 @@ npm run admin:create -- you@example.com "a-strong-password"
 | `npm run db:check-rls` | real anonymous and non-admin write attempts against Supabase; all must fail |
 | `npm run check:bundle` | service-role key scan + dashboard code split check on `dist/public` |
 | `npx tsx scripts/check-og.ts AK-102` | runs the link-preview edge function locally |
+| `npm run pages:dev` | the built site + Pages Functions in Cloudflare's local runtime on :8788 (add `--binding VITE_SUPABASE_URL=… --binding VITE_SUPABASE_ANON_KEY=…` for a local Supabase) |
+| `npm run ops:dev` | the ops Worker locally on :8787 (secrets from `cloudflare/ops/.dev.vars`); `curl "localhost:8787/__scheduled?cron=53+2+*+*+sun"` runs the weekly backup |
 | `npx tsx scripts/screens.ts` | screenshots of every page into `docs/screens/final` |
 
 E2E creates a temporary admin with the service-role key and deletes it afterwards. Point it at a local or staging Supabase, not production.
 
-## Deploy (Netlify + Supabase)
+## Deploy (Cloudflare Pages + Supabase)
 
 1. **Supabase project** (once): create it, then apply the schema
    `SUPABASE_DB_PASSWORD=… VITE_SUPABASE_URL=… npm run db:migrate` (or `npx supabase link` + `npx supabase db push`).
 2. **Auth settings** in the Supabase dashboard: Authentication → Sign In / Providers → turn off "Allow new users to sign up". Keep Email provider on.
 3. **Demo data** (optional): `npm run db:seed`. Remove it later from the dashboard ("delete all demo properties").
 4. **Check security**: `npm run db:check-rls` — every line must be ✓.
-5. **Netlify**: connect the repo; `netlify.toml` already sets the build (`npm run build:netlify`), publish dir and the edge function. In Site configuration → Environment variables add only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-6. Deploy. The site stays **noindex** (`client/public/_headers`, `<meta name="robots">` in `client/index.html`, `indexing = false` in `config/site.ts`). At launch, flip all three.
+5. **Cloudflare account** (free, email only). Create an API token with *Cloudflare Pages: Edit*, *Workers Scripts: Edit* and *Workers KV Storage: Edit*; export `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+6. **Site**: `SITE_URL=https://<project>.pages.dev npm run build:pages && npm run pages:deploy`. The first deploy creates the Pages project `armando-alkadi`. Public values for the Functions are in `wrangler.jsonc`; nothing else to configure. `client/public/_routes.json` limits Functions to `/img/*` and the property pages, so every other file stays a free static request.
+7. **Ops Worker** (once): `npx wrangler kv namespace create armando-backups`, put the returned id in `cloudflare/ops/wrangler.jsonc`, then
+   `npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY -c cloudflare/ops/wrangler.jsonc`,
+   `npx wrangler secret put OPS_TOKEN -c cloudflare/ops/wrangler.jsonc` (any long random string) and `npm run ops:deploy`.
+8. The site stays **noindex** (`client/public/_headers`, `<meta name="robots">` in `client/index.html`, `indexing = false` in `config/site.ts`, `INDEXING` in `wrangler.jsonc` for the Function-served property pages). At launch, flip all four.
+
+Netlify (`netlify.toml`, `netlify/edge-functions/`, the `/img/*` line in `_redirects`) is kept only as a fallback host until the Cloudflare site is confirmed; every Netlify production deploy costs 15 of its 300 monthly credits (D22).
 
 ## Admins
 
@@ -94,11 +107,31 @@ Public sign-up is off; admins are Supabase Auth users that also have a row in `p
 
 Remove an admin: `delete from public.admins where user_id = (select id from auth.users where email = '…');` (or delete the user).
 
-## Backup
+## Free-plan safeguards
+
+**Images through our own domain.** Every property and area image URL is `/img/<bucket>/<path>` (`publicUrl()` in `client/src/lib/supabaseConfig.ts`). On Cloudflare, `functions/img/[[path]].ts` serves it: the first request in a Cloudflare data center fetches the file from Supabase Storage and stores it with the Cache API for a year (`Cache-Control: public, max-age=31536000, immutable`); later requests in that data center are answered from cache without touching Supabase. The response header `X-Img-Cache: HIT|MISS` shows which. Only the public buckets `property-images` and `area-covers` are allowed, errors are never cached (a just-uploaded image appears at once), and uploads never overwrite a file name (`upsert: false`, uuid names), so a cached image can never be stale. If `/img` fails (for example after the free daily Functions limit), `imgFallback.ts` reloads that image straight from Supabase. Locally, `vite` and `server/index.ts` serve `/img` the same way.
+
+**Keep-alive.** The ops Worker (`cloudflare/ops`) runs every day at 03:41 UTC and reads one row of `settings` with the anon key, so the free Supabase project never reaches a week without activity.
+
+**Weekly backup.** Every Sunday at 02:53 UTC the same Worker reads the table list from PostgREST, exports every table as JSON with the service-role key (a Worker secret only) and stores one document per run in Workers KV under `backup:<UTC time>`; it keeps the newest 8 and deletes older ones. Each document holds, per table, the primary key, the foreign keys and all rows. Not included: login accounts (`auth.users`) and image files (Supabase Storage). Manual run: `curl -X POST -H "Authorization: Bearer $OPS_TOKEN" "https://armando-ops.<account>.workers.dev/run?task=backup"` (or `task=ping`).
+
+**Restore** (`scripts/restore-backup.ts`, target = Supabase in `.env.local`, or `--env <file>`):
+
+```bash
+npm run db:restore -- --list                          # backups in KV (needs CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID)
+npm run db:restore -- --kv latest                     # dry run: prints source, target, tables and row counts; writes nothing
+npm run db:restore -- --kv latest --yes               # merge: upsert every row by primary key (undo a wrong delete or edit)
+npm run db:restore -- --kv latest --replace --yes     # replace: empty the tables, insert the backup exactly (new project / disaster)
+npm run db:restore -- backup.json --yes               # from a downloaded file
+```
+
+Tables are written parents first (from the foreign keys stored in the backup). Merge mode keeps rows created after the backup and sets `updated_at` to the restore time on rows it updates; use `--replace` on a fresh project, because the migrations add default options whose ids differ from the backup. `admins` rows whose account does not exist in the target are skipped: create the account with `npm run admin:create`. Download a backup file with `npx wrangler kv key get "backup:…" --namespace-id <id> --remote > backup.json`.
+
+## Other backups
 
 - **From the dashboard**: "نسخة احتياطية" (sidebar, or "المزيد" on a phone) downloads one JSON file with all properties (prices, images, amenities), options and settings.
-- **Full database**: Supabase dashboard → Database → Backups (daily on paid plans), or `npx supabase db dump --db-url "$SUPABASE_DB_URL" -f backup.sql`.
-- **Images**: stored in the `property-images` and `area-covers` buckets; the JSON backup lists their paths. `npm run storage:orphans` lists files that no row points to (add `--delete` to remove them).
+- **Full database by hand**: `npx supabase db dump --db-url "$SUPABASE_DB_URL" -f backup.sql` (the free plan has no automatic Supabase backups).
+- **Images**: stored in the `property-images` and `area-covers` buckets (1 GB on the free plan); backups list their paths. `npm run storage:orphans` lists files that no row points to (add `--delete` to remove them).
 
 ## Notes
 

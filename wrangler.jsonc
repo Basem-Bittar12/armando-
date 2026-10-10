@@ -1,0 +1,15 @@
+// Cloudflare Pages: الموقع (dist/public) + Pages Functions (functions/: صور /img ومعاينة روابط العقارات).
+// النشر: npm run build:pages && npm run pages:deploy   (رفع مباشر، بلا بناء على Cloudflare)
+// القيم هنا عامة فقط (نفس الظاهر بالموقع). مفتاح service_role ممنوع هنا — مكانه سرّ Worker «armando-ops» فقط.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "armando-alkadi",
+  "pages_build_output_dir": "./dist/public",
+  "compatibility_date": "2026-09-01",
+  "vars": {
+    "VITE_SUPABASE_URL": "https://fgpnasnmirfcxmjlvpey.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZncG5hc25taXJmY3htamx2cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1MjQ0MDYsImV4cCI6MjEwNzEwMDQwNn0.c70QeSpRWCL_VxofFNPnOA-QomE6i-RJjTuHSNKsB_U",
+    // "true" عند الإطلاق فقط (مع حذف noindex من client/public/_headers وindexing في config/site.ts)
+    "INDEXING": "false"
+  }
+}

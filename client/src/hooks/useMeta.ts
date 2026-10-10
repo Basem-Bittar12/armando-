@@ -62,8 +62,10 @@ export function useMeta({ title, description, image, noIndex }: MetaInput) {
     setMetaTag("name", "twitter:description", description);
 
     if (image) {
-      setMetaTag("property", "og:image", image);
-      setMetaTag("name", "twitter:image", image);
+      // صور /img نسبية: وسم المشاركة يحتاج رابطاً كاملاً
+      const absolute = image.startsWith("/") ? window.location.origin + image : image;
+      setMetaTag("property", "og:image", absolute);
+      setMetaTag("name", "twitter:image", absolute);
     }
 
     const { origin, pathname } = window.location;

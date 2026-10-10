@@ -1,1 +1,4 @@
+# Netlify فقط (النسخة الاحتياطية): صور /img من Supabase مباشرة. على Cloudflare Pages يتولاها functions/img
+# (ملف _redirects لا يُطبَّق على مسارات الـFunctions هناك، وتحويل دومين خارجي غير مدعوم فيُتجاهل).
+/img/*    https://fgpnasnmirfcxmjlvpey.supabase.co/storage/v1/object/public/:splat    200
 /*    /index.html    200

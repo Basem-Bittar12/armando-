@@ -23,10 +23,11 @@ test.describe("الموقع العام", () => {
     const strip = page.locator(".hstrip__item .property-card__link");
     await expect(strip).toHaveCount(expected.length);
     expect(await strip.allTextContents()).toEqual(expected);
-    // صور الشريط من Supabase Storage وبـ srcset
+    // صور الشريط عبر مسار الموقع /img (كاش Cloudflare أمام Supabase Storage) وبـ srcset، ومحمّلة فعلاً
     const firstImage = page.locator(".hstrip__item img").first();
-    await expect(firstImage).toHaveAttribute("src", /\/storage\/v1\/object\/public\/property-images\/.+-1080\.webp/);
-    await expect(firstImage).toHaveAttribute("srcset", /-640\.webp 640w.*-1600\.webp 1600w/);
+    await expect(firstImage).toHaveAttribute("src", /^\/img\/property-images\/.+-1080\.webp$/);
+    await expect(firstImage).toHaveAttribute("srcset", /^\/img\/.+-640\.webp 640w.*-1600\.webp 1600w/);
+    await expect.poll(() => firstImage.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
     expect(errors).toEqual([]);
   });
 

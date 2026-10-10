@@ -1,0 +1,15 @@
+{
+  // Cloudflare: Pages Functions (functions/) وWorker «armando-ops» (cloudflare/ops) — بيئة Workers لا DOM ولا Node
+  "include": ["functions/**/*", "cloudflare/**/*", "shared/img.ts", "shared/og.ts"],
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "ESNext",
+    "target": "ES2022",
+    "strict": true,
+    "lib": ["esnext", "webworker"],
+    "types": [],
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "bundler"
+  }
+}

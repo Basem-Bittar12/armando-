@@ -1,0 +1,27 @@
+// Worker «armando-ops»: منع إيقاف Supabase بسبب الخمول + نسخة احتياطية أسبوعية في KV.
+// النشر: npm run ops:deploy — الأسرار تُضاف مرة واحدة:
+//   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY -c cloudflare/ops/wrangler.jsonc
+//   npx wrangler secret put OPS_TOKEN -c cloudflare/ops/wrangler.jsonc
+// مفتاح service_role سرّ في Worker فقط (لا يُكتب هنا، ولا يدخل ملفات الموقع).
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "armando-ops",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  "triggers": {
+    // يومياً 03:41 UTC (07:41 بتوقيت دبي): قراءة صغيرة · الأحد 02:53 UTC: نسخة احتياطية كاملة
+    "crons": ["41 3 * * *", "53 2 * * sun"]
+  },
+  "vars": {
+    "SUPABASE_URL": "https://fgpnasnmirfcxmjlvpey.supabase.co",
+    // المفتاح العام (anon) — نفس المفتاح الظاهر في الموقع، ليس سراً
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZncG5hc25taXJmY3htamx2cGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1MjQ0MDYsImV4cCI6MjEwNzEwMDQwNn0.c70QeSpRWCL_VxofFNPnOA-QomE6i-RJjTuHSNKsB_U",
+    "BACKUP_CRON": "53 2 * * sun"
+  },
+  "kv_namespaces": [
+    // يُنشأ مرة واحدة: npx wrangler kv namespace create armando-backups
+    { "binding": "BACKUPS", "id": "REPLACED_AT_SETUP" }
+  ],
+  "observability": { "enabled": true }
+}

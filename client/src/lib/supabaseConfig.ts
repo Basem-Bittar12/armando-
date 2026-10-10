@@ -3,6 +3,7 @@
  * ومكتبة supabase-js تُحمَّل فقط مع لوحة التحكم (الدخول والكتابة).
  * المفتاح العام (anon) فقط — الحماية بقواعد RLS. مفتاح service_role ممنوع بأي ملف بالواجهة.
  */
+import { imgUrl } from "@shared/img";
 export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.trim().replace(/\/$/, "") ?? "";
 export const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim() ?? "";
 export const supabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
@@ -10,8 +11,11 @@ export const supabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const IMAGES_BUCKET = "property-images";
 export const AREA_COVERS_BUCKET = "area-covers";
 
-/** الرابط العام لملف داخل bucket عام */
-export const publicUrl = (bucket: string, path: string) => `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
+/**
+ * رابط ملف داخل bucket عام — دائماً عبر موقعنا (/img/…): Cloudflare يحفظ الصورة في كاشه سنة،
+ * فلا تُستهلك حصة النقل الشهرية في Supabase مع كل زائر (shared/img.ts، functions/img).
+ */
+export const publicUrl = (bucket: string, path: string) => imgUrl(bucket, path);
 
 /** جلسة المسؤول (تسجّلها لوحة التحكم بعد الدخول) حتى يقرأ المسودات والخيارات الموقوفة */
 let accessToken: (() => Promise<string | null>) | null = null;

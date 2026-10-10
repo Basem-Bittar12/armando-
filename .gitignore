@@ -122,3 +122,7 @@ e2e/.admin.json
 
 # Netlify CLI local state
 .netlify
+
+# Cloudflare (wrangler): local secrets and state
+.dev.vars
+.wrangler/
