@@ -1508,3 +1508,10 @@ bdi { unicode-bidi: isolate; }
 .tabby-badge--detail { margin-top: 10px; }
 .tabby-badge--card { display: inline-flex; margin-inline-start: 8px; vertical-align: middle; }
 .tabby-badge--card .tabby-badge__logo { height: 16px; width: 16px; border-radius: 4px; }
+
+/* ---------- الشعار مع اسم المكتب تحته (الهيدر وقائمة الموبايل) ---------- */
+.brand-lockup { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+.brand-lockup .brand-logo--monogram { height: 38px; }
+.brand-lockup__name { color: var(--espresso); font-size: 12px; line-height: 1; white-space: nowrap; }
+.brand-lockup__name:lang(en) { font-family: "Castoro", serif; letter-spacing: .06em; }
+.site-header .brand-link { padding-block: 4px; }

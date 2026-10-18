@@ -17,9 +17,9 @@ const SOURCES: Record<Variant, string> = {
   "bilingual-inverse": brand.logo.bilingualInverse,
 };
 
-export function Logo({ variant = "monogram", asLink = true }: { variant?: Variant; asLink?: boolean }) {
+export function Logo({ variant = "monogram", asLink = true, withName = false }: { variant?: Variant; asLink?: boolean; withName?: boolean }) {
   const t = useT();
-  const image = (
+  const img = (
     <img
       src={SOURCES[variant]}
       alt={t(`${brand.nameAr} — ${brand.name}`, `${brand.name} — ${brand.nameAr}`)}
@@ -27,6 +27,13 @@ export function Logo({ variant = "monogram", asLink = true }: { variant?: Varian
       decoding="async"
     />
   );
+  // withName: اسم المكتب تحت المونوغرام بلغة الصفحة وبلون الشعار (الهيدر وقائمة الموبايل)
+  const image = withName ? (
+    <span className="brand-lockup">
+      {img}
+      <span className="brand-lockup__name" aria-hidden="true">{t(brand.shortAr, "Armando Alkadi")}</span>
+    </span>
+  ) : img;
 
   if (!asLink) return image;
 

@@ -76,7 +76,7 @@ export function Header() {
     <>
       <header className={`site-header ${condensed ? "is-condensed" : ""}`}>
         <div className="container header-inner">
-          <Logo />
+          <Logo withName />
 
           <nav className="main-nav" aria-label={t("التنقل الرئيسي", "Main navigation")}>
             {mainNav.map((item) => (
@@ -123,7 +123,7 @@ export function Header() {
         <button className="mobile-drawer__backdrop" onClick={() => setMenuOpen(false)} aria-label={t("إغلاق القائمة", "Close menu")} tabIndex={-1} />
         <aside className="mobile-drawer__panel" role="dialog" aria-modal="true" aria-label={t("قائمة التنقل", "Navigation menu")}>
           <div className="mobile-drawer__head">
-            <Logo />
+            <Logo withName />
             <button className="icon-circle" onClick={() => setMenuOpen(false)} aria-label={t("إغلاق القائمة", "Close menu")}>
               <X size={20} />
             </button>
