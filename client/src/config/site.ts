@@ -108,6 +108,7 @@ export const mainNav = [
   { label: "الرئيسية", href: "/" },
   { label: "العقارات", href: "/properties" },
   { label: "تواصل معنا", href: "/contact" },
+  { label: "رؤيتنا ورسالتنا", href: "/about" },
 ] as const;
 
 /** عناوين ووصف الصفحات — تُحقن في <title> و<meta name="description"> */
@@ -126,6 +127,10 @@ export const pageMeta = {
     title: "تواصل معنا — أرماندو القاضي لبيوت العطلات",
     description:
       "تحدث مع أحد مستشاري أرماندو القاضي لمساعدتك في العثور على العقار المناسب للإيجار في دبي.",
+  },
+  about: {
+    title: "رؤيتنا ورسالتنا — أرماندو القاضي لبيوت العطلات",
+    description: "أن نكون الخيار الأول في دبي لإدارة بيوت العطلات والأبراج المفروشة. إقامة راقية ومرنة لضيوفنا، وإدارة احترافية وشفافة لعقارات ملاكنا.",
   },
   admin: {
     title: "لوحة المكتب — أرماندو القاضي لبيوت العطلات",
@@ -172,6 +177,10 @@ const pageMetaEn = {
     title: "Contact us — Armando Alkadi Holiday Homes",
     description: "Talk to an Armando Alkadi advisor to help you find the right home to rent in Dubai.",
   },
+  about: {
+    title: "Vision & Mission — Armando Alkadi Holiday Homes",
+    description: "To be Dubai's first choice for furnished holiday homes and tower management. Refined, flexible stays for our guests, and professional, transparent management for our owners.",
+  },
   admin: pageMeta.admin,
   notFound: {
     title: "Page not found — Armando Alkadi Holiday Homes",
@@ -203,6 +212,7 @@ const mainNavEn = [
   { label: "Home", href: "/" },
   { label: "Properties", href: "/properties" },
   { label: "Contact us", href: "/contact" },
+  { label: "Vision & Mission", href: "/about" },
 ] as const;
 
 export const heroStoryFor = (lang: Lang) => (lang === "en" ? heroStoryEn : heroStory);

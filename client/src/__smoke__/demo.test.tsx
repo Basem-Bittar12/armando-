@@ -420,8 +420,8 @@ describe("قائمة الموبايل", () => {
     expect(drawer.className).not.toContain("is-open");
     await click(container!.querySelector(".mobile-menu"));
     expect(container!.querySelector(".mobile-drawer")!.className).toContain("is-open");
-    // الرئيسية، العقارات، تواصل معنا + المفضلة (إيجار شهري/سنوي حُذفا من القائمة)
-    expect(container!.querySelector(".mobile-drawer__nav")!.querySelectorAll("a").length).toBe(4);
+    // الرئيسية، العقارات، تواصل معنا، رؤيتنا ورسالتنا + المفضلة (إيجار شهري/سنوي حُذفا من القائمة)
+    expect(container!.querySelector(".mobile-drawer__nav")!.querySelectorAll("a").length).toBe(5);
     await click(container!.querySelector(".mobile-drawer__head .icon-circle"));
     expect(container!.querySelector(".mobile-drawer")!.className).not.toContain("is-open");
   });

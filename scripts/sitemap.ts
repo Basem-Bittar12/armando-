@@ -38,6 +38,7 @@ const pages = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },
   { loc: "/properties", changefreq: "daily", priority: "0.9" },
   { loc: "/contact", changefreq: "monthly", priority: "0.5" },
+  { loc: "/about", changefreq: "yearly", priority: "0.4" },
   ...properties.map((p) => ({ loc: `/property/${encodeURIComponent(p.code)}`, lastmod: p.updated_at.slice(0, 10), changefreq: "weekly", priority: "0.8" })),
 ];
 // كل صفحة بالعربي (الرابط العادي) وبالإنجليزي (تحت /en)

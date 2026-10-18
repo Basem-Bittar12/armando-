@@ -1507,7 +1507,9 @@ bdi { unicode-bidi: isolate; }
 .tabby-badge__logo { height: 22px; width: 22px; display: block; border-radius: 5px; }
 .tabby-badge__brand { display: inline-flex; align-items: center; gap: 6px; font-family: "Castoro", serif; color: inherit; }
 .tabby-badge--footer { padding: 18px 0 0; color: var(--almond); flex-wrap: wrap; row-gap: 8px; }
-.pay-method { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid rgba(239,226,208,.35); border-radius: 999px; font-family: "Castoro", "Noto Kufi Arabic", serif; }
+.pay-method { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; min-width: 48px; padding: 0 10px; border: 1px solid rgba(239,226,208,.35); border-radius: 7px; color: var(--almond); }
+.pay-method svg { height: 24px; width: auto; display: block; }
+.pay-method--text { font-size: 13px; }
 .tabby-badge--detail { margin-top: 10px; }
 .tabby-badge--card { display: inline-flex; margin-inline-start: 8px; vertical-align: middle; }
 .tabby-badge--card .tabby-badge__logo { height: 16px; width: 16px; border-radius: 4px; }
@@ -1518,3 +1520,27 @@ bdi { unicode-bidi: isolate; }
 .brand-lockup__name { color: var(--espresso); font-size: 12px; line-height: 1; white-space: nowrap; }
 .brand-lockup__name:lang(en) { font-family: "Castoro", serif; letter-spacing: .06em; }
 .site-header .brand-link { padding-block: 4px; }
+
+/* ---------- رؤيتنا / رسالتنا (نص ملف المكتب Vision_Mission_Values) ---------- */
+.about-page { padding: clamp(48px, 8vw, 110px) 0 clamp(56px, 8vw, 110px); }
+.about-inner { max-width: 860px; text-align: center; }
+.about-eyebrow { margin: 0 0 14px; font-size: 13px; letter-spacing: .08em; color: var(--terracotta); }
+.about-page h1 { margin: 0 0 22px; font-size: clamp(34px, 5vw, 56px); font-weight: 400; color: var(--espresso-deep); }
+.about-statements { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 48px); margin-top: clamp(28px, 4vw, 44px); padding-top: 32px; border-top: 1px solid rgba(59,42,32,.16); }
+.about-statement h2, .about-values h2 { margin: 0 0 12px; font-size: 20px; font-weight: 400; color: var(--terracotta); }
+.about-statement p { margin: 0; font-size: clamp(18px, 2vw, 22px); line-height: 1.8; color: var(--espresso); }
+@media (max-width: 640px) { .about-statements { grid-template-columns: 1fr; } }
+.about-values { margin-top: clamp(44px, 6vw, 72px); }
+.about-values ol { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(59,42,32,.16); }
+.about-values li { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 22px 12px; border-bottom: 1px solid rgba(59,42,32,.16); }
+.about-values li:not(:nth-child(3n)) { border-inline-end: 1px solid rgba(59,42,32,.16); }
+.about-values__num { font-family: "Castoro", serif; font-size: 12px; letter-spacing: .2em; color: var(--terracotta); }
+.about-values strong { font-weight: 500; font-size: 18px; color: var(--espresso-deep); }
+.about-values__sub { font-size: 13px; color: var(--date); }
+.about-values__sub:lang(en) { font-family: "Castoro", serif; }
+.about-tagline { margin: 40px 0 0; font-family: "Castoro", serif; font-size: 13px; letter-spacing: .35em; color: var(--date); }
+@media (max-width: 640px) {
+  .about-values ol { grid-template-columns: repeat(2, 1fr); }
+  .about-values li:not(:nth-child(3n)) { border-inline-end: 0; }
+  .about-values li:nth-child(odd) { border-inline-end: 1px solid rgba(59,42,32,.16); }
+}

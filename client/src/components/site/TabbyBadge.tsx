@@ -1,5 +1,6 @@
 import { payments } from "@/config/site";
 import { Landmark } from "lucide-react";
+import { siApplepay, siMastercard, siVisa } from "simple-icons";
 import { useT } from "@/i18n/lang";
 
 /**
@@ -9,6 +10,15 @@ import { useT } from "@/i18n/lang";
  *  - card: شعار صغير بجانب السعر بالكرت
  * لا يظهر شيء قبل تفعيله من config/site.ts (payments.tabby).
  */
+/** شعار طريقة دفع بلون واحد (لون النص) داخل كبسولة متل أيقونة tabby */
+function PayIcon({ path, title }: { path: string; title: string }) {
+  return (
+    <span className="pay-method" title={title}>
+      <svg viewBox="0 0 24 24" role="img" aria-label={title} fill="currentColor"><path d={path} /></svg>
+    </span>
+  );
+}
+
 export function TabbyBadge({ placement }: { placement: "footer" | "detail" | "card" }) {
   const t = useT();
   if (!payments.tabby.enabled) return null;
@@ -34,11 +44,13 @@ export function TabbyBadge({ placement }: { placement: "footer" | "detail" | "ca
       </span>
       {placement === "footer" && (
         <>
-          {/* باقي طرق الدفع (طلب صاحب الموقع 10/2026) — نص بخط الموقع، بلا شعارات مرسومة */}
-          <bdi lang="en" className="pay-method">Visa</bdi>
-          <bdi lang="en" className="pay-method">Mastercard</bdi>
-          <bdi lang="en" className="pay-method">Apple Pay</bdi>
-          <span className="pay-method"><Landmark size={14} aria-hidden="true" /> {t("تحويل بنكي", "Bank transfer")}</span>
+          {/* باقي طرق الدفع (طلب صاحب الموقع 10/2026): شعارات الشركات من Simple Icons (CC0) بلون الفوتر */}
+          <PayIcon path={siVisa.path} title="Visa" />
+          <PayIcon path={siMastercard.path} title="Mastercard" />
+          <PayIcon path={siApplepay.path} title="Apple Pay" />
+          <span className="pay-method pay-method--text" title={t("تحويل بنكي", "Bank transfer")}>
+            <Landmark size={20} aria-hidden="true" /> {t("تحويل بنكي", "Bank transfer")}
+          </span>
         </>
       )}
     </p>

@@ -32,11 +32,11 @@ function FloatingWhatsApp() {
       target="_blank"
       rel="noreferrer"
       className="floating-whatsapp"
-      aria-label={t("تحدّث مع مستشارك عبر واتساب", "Talk to your advisor on WhatsApp")}
+      aria-label={t("تحدّث مع مستشارك عبر واتساب", "Chat with a consultant on WhatsApp")}
       title={t("واتساب", "WhatsApp")}
     >
       <WhatsAppIcon size={24} />
-      <span>{t("تحدّث مع مستشارك", "Talk to your advisor")}</span>
+      <span>{t("تحدّث مع مستشارك", "Consultant")}</span>
     </a>
   );
 }
