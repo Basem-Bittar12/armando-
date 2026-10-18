@@ -103,7 +103,6 @@ export function Header() {
 
             {/* زر اللغة: EN بالعربي، عربي بالإنجليزي (englishReady في config/site.ts) */}
             {englishReady && <LangSwitch />}
-            <WhatsAppButton label={t("واتساب", "WhatsApp")} className="header-whatsapp" />
           </div>
 
           {englishReady && <LangSwitch className="header-lang--mobile" />}

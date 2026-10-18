@@ -1,4 +1,5 @@
 import { payments } from "@/config/site";
+import { Landmark } from "lucide-react";
 import { useT } from "@/i18n/lang";
 
 /**
@@ -31,6 +32,15 @@ export function TabbyBadge({ placement }: { placement: "footer" | "detail" | "ca
         {logo}
         <bdi lang="en">tabby</bdi>
       </span>
+      {placement === "footer" && (
+        <>
+          {/* باقي طرق الدفع (طلب صاحب الموقع 10/2026) — نص بخط الموقع، بلا شعارات مرسومة */}
+          <bdi lang="en" className="pay-method">Visa</bdi>
+          <bdi lang="en" className="pay-method">Mastercard</bdi>
+          <bdi lang="en" className="pay-method">Apple Pay</bdi>
+          <span className="pay-method"><Landmark size={14} aria-hidden="true" /> {t("تحويل بنكي", "Bank transfer")}</span>
+        </>
+      )}
     </p>
   );
 }

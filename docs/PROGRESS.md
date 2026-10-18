@@ -40,3 +40,4 @@ Local Supabase: `cd /home/user/armando- && npx supabase start` (needs `SUPABASE_
 - 2026-10-10: office feedback done (D28): landline, floating WhatsApp (laptop), tabby slots hidden until the official logo file.
 - 2026-10-10: CLAUDE.md added (full handover for new sessions/machines). Domain connection to Cloudflare in progress (Connect a domain, automatic DNS import).
 - 2026-10-18: header logo: office name under the AK monogram (أرماندو القاضي / Armando Alkadi by page language, espresso like the logo), header and mobile menu. Footer unchanged.
+- 2026-10-18: header WhatsApp button removed; floating WhatsApp is now a labelled pill «تحدّث مع مستشارك / Talk to your advisor» at the line-start corner (right in Arabic, left in English; phones keep the bottom bar). Footer payment line: tabby + Visa, Mastercard, Apple Pay, bank transfer (text chips, no drawn logos).
