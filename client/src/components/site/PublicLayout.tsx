@@ -36,7 +36,7 @@ function FloatingWhatsApp() {
       title={t("واتساب", "WhatsApp")}
     >
       <WhatsAppIcon size={24} />
-      <span>{t("تحدّث مع مستشارك", "Consultant")}</span>
+      <span>{t("تحدّث مع مستشارك", "Talk to your consultant")}</span>
     </a>
   );
 }
