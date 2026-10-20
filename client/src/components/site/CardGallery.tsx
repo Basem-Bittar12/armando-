@@ -11,6 +11,10 @@ const MAX_DOTS = 4;
  * صور الكرت قابلة للتقليب من برا، قبل فتح البيت: سحب بالإصبع (scroll-snap) على التلفون، وأسهم عند المرور
  * بالماوس على اللابتوب، ونقاط تحت الصورة تبين أن هناك صوراً أخرى. الضغط على الصورة يفتح صفحة البيت.
  */
+/** عرض الصورة الحقيقي (بالكسور)، وإلا عرض المسار */
+const slideWidthOf = (track: HTMLElement) =>
+  (track.children[0] as HTMLElement | undefined)?.getBoundingClientRect().width || track.clientWidth;
+
 /** priority: أول كروت الصفحة (أكبر عنصر بالشاشة) — صورتها الأولى تُحمَّل فوراً وبأولوية */
 export function CardGallery({ images, href, alt, priority = false }: { images: string[]; href: string; alt: string; priority?: boolean }) {
   const t = useT();
@@ -23,8 +27,9 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
   // الموضع الحالي من السكرول (في RTL يكون scrollLeft سالباً، فنأخذ القيمة المطلقة)
   const onScroll = () => {
     const track = trackRef.current;
-    const width = (track?.children[0] as HTMLElement | undefined)?.getBoundingClientRect().width;
-    if (!track || !width) return;
+    if (!track) return;
+    const width = slideWidthOf(track);
+    if (!width) return;
     const next = Math.round(Math.abs(track.scrollLeft) / width);
     if (next !== index) setIndex(Math.min(count - 1, Math.max(0, next)));
   };
@@ -33,9 +38,9 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
   // scrollIntoView / scrollBy بعرض المسار كانوا أحياناً يرجعوا لنفس الصورة بالعربي (RTL) لما عرض الصورة فيه كسور بكسل
   const step = (dir: 1 | -1) => {
     const track = trackRef.current;
-    const first = track?.children[0] as HTMLElement | undefined;
-    if (!track || !first) return;
-    const slideWidth = first.getBoundingClientRect().width;
+    if (!track) return;
+    const slideWidth = slideWidthOf(track);
+    if (!slideWidth) return;
     const current = Math.round(Math.abs(track.scrollLeft) / slideWidth);
     const target = Math.min(count - 1, Math.max(0, current + dir));
     const rtl = getComputedStyle(track).direction === "rtl";
