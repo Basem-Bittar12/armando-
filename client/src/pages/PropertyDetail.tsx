@@ -78,6 +78,7 @@ export default function PropertyDetail() {
         : `${property.type} ${property.term} في ${property.location} · ${property.price} ${property.unit} · ${property.beds === 0 ? "استوديو" : `${property.beds} غرف`} · ${property.area}`
       : meta.notFound.description,
     image: property?.image,
+    noIndex: property?.isDemo,
   });
 
   if (status === "loading") {

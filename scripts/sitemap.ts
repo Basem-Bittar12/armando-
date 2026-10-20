@@ -25,7 +25,7 @@ const escape = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&l
 
 let properties: { code: string; updated_at: string }[] = [];
 if (supabaseUrl && anonKey) {
-  const response = await fetch(`${supabaseUrl}/rest/v1/properties?select=code,updated_at&is_published=eq.true&order=updated_at.desc`, {
+  const response = await fetch(`${supabaseUrl}/rest/v1/properties?select=code,updated_at&is_published=eq.true&is_demo=eq.false&order=updated_at.desc`, {
     headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
   });
   if (response.ok) properties = await response.json();

@@ -11,7 +11,7 @@ Read this first. Then `docs/DECISIONS.md` (D1–D28, every decision with reasons
 ## Hard rules (from the client brief)
 - Keep the design and brand exactly: official palette only (CSS tokens in `client/src/index.css`: espresso, espresso-deep, almond, sandstone, date, terracotta…), fonts Castoro + Noto Kufi Arabic, official logo files in `client/public/brand/aahh/` untouched, the hero video story, the horizontal "available homes" strip, all layout decisions. No new colors/fonts/styles. WhatsApp buttons are espresso/almond, not green.
 - Do not invent business facts (areas, prices, terms, legal text). Missing content = clearly marked placeholder + tell Basem.
-- Site stays **noindex** until Basem says launch (4 switches: `client/public/_headers`, `<meta robots>` in `client/index.html`, `indexing` in `client/src/config/site.ts`, `INDEXING` in `wrangler.jsonc`).
+- **Launched for search engines on 2026-10-20** (Basem: «اطلق»): noindex removed from `client/public/_headers` and `client/index.html`, `indexing = true` in `client/src/config/site.ts`, `INDEXING: "true"` in `wrangler.jsonc`. Demo homes (`is_demo`) stay noindex (page meta + property Functions) and out of the sitemap. To hide the site again, reverse those four.
 - **Everything on free plans, no credit card** (client refuses paid subscriptions). No R2, no paid Workers.
 - The service_role key must never reach the browser bundle (`npm run build:pages` runs `scripts/check-bundle.ts`). Never paste/print secrets; never ask Basem to paste keys in chat — he adds them as environment secrets.
 - Irreversible actions (deleting projects/data, DNS changes) only when Basem explicitly asks.

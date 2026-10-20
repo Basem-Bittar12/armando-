@@ -3,7 +3,7 @@
  * لروبوتات واتساب والسوشيال (shared/og.ts).
  * ملف _headers لا يُطبَّق على ردود الـFunctions، فنضيف noindex هنا حتى الإطلاق (INDEXING=true).
  */
-import { withPropertyOg } from "../../shared/og";
+import { isDemoProperty, withPropertyOg } from "../../shared/og";
 import type { PagesContext } from "../../cloudflare/pages";
 
 export async function onRequest(context: PagesContext): Promise<Response> {
@@ -11,6 +11,8 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   if (request.method !== "GET" && request.method !== "HEAD") return context.next();
   const page = await withPropertyOg(request, await context.next(), env.VITE_SUPABASE_URL, env.VITE_SUPABASE_ANON_KEY);
   const headers = new Headers(page.headers);
-  if (env.INDEXING !== "true") headers.set("X-Robots-Tag", "noindex, nofollow");
+  // قبل الإطلاق كل شي noindex؛ بعده العقارات التجريبية فقط
+  if (env.INDEXING !== "true" || (await isDemoProperty(request, env.VITE_SUPABASE_URL, env.VITE_SUPABASE_ANON_KEY)))
+    headers.set("X-Robots-Tag", "noindex, nofollow");
   return new Response(request.method === "HEAD" ? null : page.body, { status: page.status, headers });
 }

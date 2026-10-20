@@ -147,3 +147,17 @@ export async function withPropertyOg(request: Request, page: Response, supabaseU
     return page;
   }
 }
+
+/** هل العقار بهذا الرابط تجريبي (is_demo)؟ لإبقاء العقارات التجريبية خارج غوغل بعد الإطلاق */
+export async function isDemoProperty(request: Request, supabaseUrl?: string, anonKey?: string): Promise<boolean> {
+  if (!supabaseUrl || !anonKey) return false;
+  const code = new URL(request.url).pathname.split("/").filter(Boolean).pop() ?? "";
+  if (!/^[A-Za-z0-9-]{2,20}$/.test(code)) return false;
+  const response = await fetch(
+    `${supabaseUrl.replace(/\/$/, "")}/rest/v1/properties?select=is_demo&code=eq.${encodeURIComponent(code.toUpperCase())}&limit=1`,
+    { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}`, Accept: "application/json" } },
+  ).catch(() => null);
+  if (!response?.ok) return false;
+  const rows = (await response.json()) as { is_demo: boolean }[];
+  return rows[0]?.is_demo === true;
+}

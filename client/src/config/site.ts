@@ -143,10 +143,10 @@ export const pageMeta = {
 } as const;
 
 /**
- * الأرشفة بمحركات البحث: false = كل الصفحات noindex (الوضع الحالي حتى الإطلاق).
+ * الأرشفة بمحركات البحث: false = كل الصفحات noindex. true منذ الإطلاق (2026-10-20)؛ العقارات التجريبية تبقى noindex.
  * عند الإطلاق: true هنا + حذف سطر X-Robots-Tag من client/public/_headers + حذف meta robots من client/index.html.
  */
-export const indexing = false;
+export const indexing = true; // أُطلق 2026-10-20 بطلب باسم
 
 /** يظهر أعلى الموقع للتوضيح أن هذه نسخة عرض */
 export const demoNotice = {

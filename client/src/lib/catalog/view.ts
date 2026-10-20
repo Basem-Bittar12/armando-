@@ -12,6 +12,8 @@ export type { PropertyStatus } from "./types";
 export type Property = {
   id: string;
   uid: string;
+  /** عقار تجريبي: يظهر بالموقع لكن لا يُؤرشف بغوغل */
+  isDemo: boolean;
   title: string;
   location: string;
   city: string;
@@ -87,6 +89,7 @@ export function toPublic(p: FullProperty, data: CatalogData, lang: Lang = "ar"):
   return {
     id: p.code,
     uid: p.id,
+    isDemo: p.is_demo,
     title: pickLang(lang, p.title, p.title_en),
     location: [area, city].filter(Boolean).join(en ? ", " : "، "),
     city,
