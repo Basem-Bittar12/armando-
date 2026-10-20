@@ -1507,9 +1507,12 @@ bdi { unicode-bidi: isolate; }
 .tabby-badge__logo { height: 22px; width: 22px; display: block; border-radius: 5px; }
 .tabby-badge__brand { display: inline-flex; align-items: center; gap: 6px; font-family: "Castoro", serif; color: inherit; }
 .tabby-badge--footer { padding: 18px 0 0; color: var(--almond); flex-wrap: wrap; row-gap: 8px; }
-.pay-method { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; min-width: 48px; padding: 0 10px; border: 1px solid rgba(239,226,208,.35); border-radius: 7px; color: var(--almond); }
-.pay-method svg { height: 24px; width: auto; display: block; }
-.pay-method--text { font-size: 13px; }
+/* كل طرق الدفع بمربّع واحد موحّد: نفس المقاس والإطار، والشعار بالنص */
+.pay-method { display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 38px; border: 1px solid rgba(239,226,208,.35); border-radius: 8px; color: var(--almond); }
+.pay-method svg { width: 32px; height: 24px; display: block; }
+.pay-method .tabby-badge__logo { width: 24px; height: 24px; }
+/* شعار Apple Pay إطار عريض داخل مربّع 24، فيُكبَّر ليتساوى بصرياً مع الباقي */
+.pay-method--wide svg { width: 42px; height: 30px; }
 .tabby-badge--detail { margin-top: 10px; }
 .tabby-badge--card { display: inline-flex; margin-inline-start: 8px; vertical-align: middle; }
 .tabby-badge--card .tabby-badge__logo { height: 16px; width: 16px; border-radius: 4px; }

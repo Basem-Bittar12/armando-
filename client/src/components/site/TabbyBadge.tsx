@@ -11,9 +11,9 @@ import { useT } from "@/i18n/lang";
  * لا يظهر شيء قبل تفعيله من config/site.ts (payments.tabby).
  */
 /** شعار طريقة دفع بلون واحد (لون النص) داخل كبسولة متل أيقونة tabby */
-function PayIcon({ path, title }: { path: string; title: string }) {
+function PayIcon({ path, title, wide = false }: { path: string; title: string; wide?: boolean }) {
   return (
-    <span className="pay-method" title={title}>
+    <span className={`pay-method${wide ? " pay-method--wide" : ""}`} title={title}>
       <svg viewBox="0 0 24 24" role="img" aria-label={title} fill="currentColor"><path d={path} /></svg>
     </span>
   );
@@ -38,20 +38,27 @@ export function TabbyBadge({ placement }: { placement: "footer" | "detail" | "ca
   return (
     <p className={`tabby-badge tabby-badge--${placement}`}>
       <span>{placement === "footer" ? t("طرق الدفع", "Payment options") : t("متاح الدفع عبر", "Pay with")}</span>
-      <span className="tabby-badge__brand">
-        {logo}
-        <bdi lang="en">tabby</bdi>
-      </span>
-      {placement === "footer" && (
+      {placement === "footer" ? (
         <>
-          {/* باقي طرق الدفع (طلب صاحب الموقع 10/2026): شعارات الشركات من Simple Icons (CC0) بلون الفوتر */}
+          {/* كل طرق الدفع بنفس المربّع (طلب صاحب الموقع 10/2026): شعار فقط، والاسم للتلميح وقارئ الشاشة.
+              Visa/Mastercard/Apple Pay من Simple Icons (CC0) بلون الفوتر؛ tabby أيقونتها الرسمية كما هي */}
+          <span className="pay-method" title="tabby">
+            {logo}
+            <span className="sr-only">tabby</span>
+          </span>
           <PayIcon path={siVisa.path} title="Visa" />
           <PayIcon path={siMastercard.path} title="Mastercard" />
-          <PayIcon path={siApplepay.path} title="Apple Pay" />
-          <span className="pay-method pay-method--text" title={t("تحويل بنكي", "Bank transfer")}>
-            <Landmark size={20} aria-hidden="true" /> {t("تحويل بنكي", "Bank transfer")}
+          <PayIcon path={siApplepay.path} title="Apple Pay" wide />
+          <span className="pay-method" title={t("تحويل بنكي", "Bank transfer")}>
+            <Landmark aria-hidden="true" />
+            <span className="sr-only">{t("تحويل بنكي", "Bank transfer")}</span>
           </span>
         </>
+      ) : (
+        <span className="tabby-badge__brand">
+          {logo}
+          <bdi lang="en">tabby</bdi>
+        </span>
       )}
     </p>
   );
