@@ -23,14 +23,23 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
   // الموضع الحالي من السكرول (في RTL يكون scrollLeft سالباً، فنأخذ القيمة المطلقة)
   const onScroll = () => {
     const track = trackRef.current;
-    if (!track || !track.clientWidth) return;
-    const next = Math.round(Math.abs(track.scrollLeft) / track.clientWidth);
+    const width = (track?.children[0] as HTMLElement | undefined)?.getBoundingClientRect().width;
+    if (!track || !width) return;
+    const next = Math.round(Math.abs(track.scrollLeft) / width);
     if (next !== index) setIndex(Math.min(count - 1, Math.max(0, next)));
   };
 
-  const goTo = (target: number) => {
-    const slide = trackRef.current?.children[Math.min(count - 1, Math.max(0, target))] as HTMLElement | undefined;
-    slide?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+  // صورة لقدّام (1) أو لورا (-1): سكرول لموضع الصورة المطلوبة بالضبط (عرض الصورة الحقيقي بالكسور).
+  // scrollIntoView / scrollBy بعرض المسار كانوا أحياناً يرجعوا لنفس الصورة بالعربي (RTL) لما عرض الصورة فيه كسور بكسل
+  const step = (dir: 1 | -1) => {
+    const track = trackRef.current;
+    const first = track?.children[0] as HTMLElement | undefined;
+    if (!track || !first) return;
+    const slideWidth = first.getBoundingClientRect().width;
+    const current = Math.round(Math.abs(track.scrollLeft) / slideWidth);
+    const target = Math.min(count - 1, Math.max(0, current + dir));
+    const rtl = getComputedStyle(track).direction === "rtl";
+    track.scrollTo({ left: (rtl ? -1 : 1) * target * slideWidth, behavior: "smooth" });
   };
 
   return (
@@ -69,7 +78,7 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
           <button
             type="button"
             className="card-gallery__arrow card-gallery__arrow--prev"
-            onClick={() => goTo(index - 1)}
+            onClick={() => step(-1)}
             disabled={index === 0}
             aria-label={t("الصورة السابقة", "Previous photo")}
           >
@@ -78,7 +87,7 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
           <button
             type="button"
             className="card-gallery__arrow card-gallery__arrow--next"
-            onClick={() => goTo(index + 1)}
+            onClick={() => step(1)}
             disabled={index === count - 1}
             aria-label={t("الصورة التالية", "Next photo")}
           >
