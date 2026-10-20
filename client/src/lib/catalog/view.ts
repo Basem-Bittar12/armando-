@@ -94,11 +94,12 @@ export function toPublic(p: FullProperty, data: CatalogData, lang: Lang = "ar"):
     location: [area, city].filter(Boolean).join(en ? ", " : "، "),
     city,
     areaName: area,
-    price: firstPrice ? number.format(firstPrice.amount) : "—",
+    // بدون سعر (طلب صاحب الموقع 10/2026): «السعر عند الطلب» بدل الرقم
+    price: firstPrice ? number.format(firstPrice.amount) : en ? "Price on request" : "السعر عند الطلب",
     priceValue: firstPrice?.amount ?? 0,
     term: nameOf(lang, term),
     termRank: term ? terms.findIndex((t) => t.id === term.id) : 99,
-    unit: unitOf(term),
+    unit: firstPrice ? unitOf(term) : "",
     prices: sortedPrices.map((price) => {
       const t = terms.find((item) => item.id === price.rental_term_id);
       return { term: nameOf(lang, t), amount: price.amount, unit: unitOf(t) };

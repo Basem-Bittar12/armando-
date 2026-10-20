@@ -313,12 +313,13 @@ describe("لوحة المكتب", () => {
     expect(text()).not.toContain("مكتبة الصور");
   });
 
-  it("إضافة عقار: النشر يحتاج سعر وصورة، والمسودة لا تظهر بالموقع", async () => {
+  it("إضافة عقار: النشر يحتاج صورة (السعر اختياري)، والمسودة لا تظهر بالموقع", async () => {
     await mount("/admin/properties/new");
     expect((field("الكود") as HTMLInputElement).value).toBe("AK-200");
     await type(field("اسم العقار"), "شقة تجريبية للفحص");
     await click(byText(".adm-savebar button", "حفظ ونشر"));
-    expect(text()).toContain("للنشر لازم سعر واحد على الأقل");
+    expect(text()).toContain("للنشر لازم صورة واحدة على الأقل");
+    expect(text()).not.toContain("للنشر لازم سعر");
     expect(window.location.pathname).toBe("/admin/properties/new");
     await type(field("شهري"), "7000");
     await click(byText(".adm-savebar button", "حفظ كمسودة"));

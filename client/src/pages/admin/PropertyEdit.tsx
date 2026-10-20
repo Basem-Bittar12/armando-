@@ -124,7 +124,6 @@ function PropertyForm({ id }: { id: string | null }) {
     if (!form.type_id) next.type = "اختار نوع العقار";
     if (form.map_url && !/^https?:\/\//i.test(form.map_url)) next.map_url = "الرابط لازم يبدأ بـ https://";
     if (publish) {
-      if (form.prices.length === 0) next.prices = "للنشر لازم سعر واحد على الأقل";
       if (form.images.length === 0) next.images = "للنشر لازم صورة واحدة على الأقل";
     }
     setErrors(next);
