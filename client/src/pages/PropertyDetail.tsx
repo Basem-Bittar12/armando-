@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "wouter";
-import { ChevronRight, Heart, MapPin, Phone, Share2, ShieldCheck } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, MapPin, Phone, Share2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { brand, pageMetaFor, whatsappTemplatesFor } from "@/config/site";
 import { propertyUrl, useLang, useT, type Lang } from "@/i18n/lang";
@@ -81,6 +81,19 @@ export default function PropertyDetail() {
     noIndex: property?.isDemo,
   });
 
+  // شريط الصور المصغّرة يلحق الصورة الحالية (بدون تحريك الصفحة نفسها)
+  const thumbsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = thumbsRef.current;
+    const thumb = row?.children[activeImage] as HTMLElement | undefined;
+    if (!row || !thumb) return;
+    const rowRect = row.getBoundingClientRect();
+    const r = thumb.getBoundingClientRect();
+    if (r.left < rowRect.left || r.right > rowRect.right) {
+      row.scrollBy({ left: r.left + r.width / 2 - (rowRect.left + rowRect.width / 2), behavior: "smooth" });
+    }
+  }, [activeImage]);
+
   if (status === "loading") {
     return (
       <PublicLayout>
@@ -135,6 +148,8 @@ export default function PropertyDetail() {
     }
   };
 
+  // أسهم الصورة الكبيرة (طلب صاحب الموقع): السابقة/التالية، وكل سهم بيختفي عند آخر صورة بجهته
+  const stepImage = (dir: 1 | -1) => setActiveImage((i) => Math.min(total - 1, Math.max(0, i + dir)));
   const openAt = (index: number) => {
     setActiveImage(index);
     setLightbox(true);
@@ -180,10 +195,21 @@ export default function PropertyDetail() {
                 alt={property.title}
               />
               <span className="detail-gallery__count">{counter(activeImage, total, lang)}</span>
+              {total > 1 && (
+                <>
+                  <button type="button" className="detail-gallery__arrow detail-gallery__arrow--prev" onClick={() => stepImage(-1)} disabled={activeImage === 0} aria-label={t("الصورة السابقة", "Previous photo")}>
+                    <ChevronRight size={20} />
+                  </button>
+                  <button type="button" className="detail-gallery__arrow detail-gallery__arrow--next" onClick={() => stepImage(1)} disabled={activeImage === total - 1} aria-label={t("الصورة التالية", "Next photo")}>
+                    <ChevronLeft size={20} />
+                  </button>
+                </>
+              )}
             </div>
 
             {/* لابتوب: صورة كبيرة وصور مصغّرة */}
             <div className="detail-gallery__desktop">
+              <div className="detail-gallery__stage">
               <button className="detail-gallery__main" onClick={() => setLightbox(true)} aria-label={t("تكبير الصورة", "Enlarge photo")}>
                 {property.gallery.map((image, index) => (
                   <img
@@ -199,7 +225,18 @@ export default function PropertyDetail() {
                 ))}
                 <span className="detail-gallery__count">{counter(activeImage, total, lang)}</span>
               </button>
-              <div className="gallery-thumbs">
+              {total > 1 && (
+                <>
+                  <button type="button" className="detail-gallery__arrow detail-gallery__arrow--prev" onClick={() => stepImage(-1)} disabled={activeImage === 0} aria-label={t("الصورة السابقة", "Previous photo")}>
+                    <ChevronRight size={20} />
+                  </button>
+                  <button type="button" className="detail-gallery__arrow detail-gallery__arrow--next" onClick={() => stepImage(1)} disabled={activeImage === total - 1} aria-label={t("الصورة التالية", "Next photo")}>
+                    <ChevronLeft size={20} />
+                  </button>
+                </>
+              )}
+              </div>
+              <div className="gallery-thumbs" ref={thumbsRef}>
                 {property.gallery.map((image, index) => (
                   <button
                     key={image + index}

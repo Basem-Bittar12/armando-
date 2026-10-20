@@ -44,7 +44,13 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
     const current = Math.round(Math.abs(track.scrollLeft) / slideWidth);
     const target = Math.min(count - 1, Math.max(0, current + dir));
     const rtl = getComputedStyle(track).direction === "rtl";
-    track.scrollTo({ left: (rtl ? -1 : 1) * target * slideWidth, behavior: "smooth" });
+    const left = (rtl ? -1 : 1) * target * slideWidth;
+    const start = track.scrollLeft;
+    track.scrollTo({ left, behavior: "smooth" });
+    // كروم أحياناً يتجاهل أول سكرول ناعم على المسار (بدون أي حركة)؛ إذا ما تحرك، نروح للصورة مباشرة
+    window.setTimeout(() => {
+      if (track.scrollLeft === start && start !== left) track.scrollTo({ left, behavior: "instant" });
+    }, 250);
   };
 
   return (
