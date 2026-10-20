@@ -19,7 +19,7 @@ Read this first. Then `docs/DECISIONS.md` (D1–D28, every decision with reasons
 ## Live system (as of 2026-10-10)
 | Part | Where |
 | --- | --- |
-| Site | https://armando-alkadi.pages.dev (Cloudflare Pages project `armando-alkadi`, Git-connected, build `npm run build:pages`, output `dist/public`) |
+| Site | https://alkadihomes.ae + https://www.alkadihomes.ae (custom domains since 2026-10-20), also https://armando-alkadi.pages.dev (Cloudflare Pages project `armando-alkadi`, Git-connected, build `npm run build:pages`, output `dist/public`) |
 | Dashboard | https://armando-alkadi.pages.dev/admin — admins: `info@alkadihomes.ae` (office) and `basem.albittar@gmail.com`; passwords were given to Basem in chat, not stored in the repo |
 | Database | Supabase free project `armando-alkadi-me`, ref `txlvfqpnurbtnjfagsge`, region ap-south-1 Mumbai, org "Armando". (Old Tokyo project deleted; Netlify site deleted.) |
 | Ops Worker | `armando-ops` → https://armando-ops.basem-albittar.workers.dev — cron `41 3 * * *` daily anon read (prevents Supabase free-tier pause), `53 2 * * sun` weekly JSON backup of all tables to KV `armando-backups` (id `4b29983a151c491b84d07887f0a86dd6`), keeps last 8. Secrets: `SUPABASE_SERVICE_ROLE_KEY`, `OPS_TOKEN` (manual run `POST /run?task=ping|backup` with Bearer token; token value not stored — reset with `npx wrangler secret put OPS_TOKEN -c cloudflare/ops/wrangler.jsonc` if needed) |

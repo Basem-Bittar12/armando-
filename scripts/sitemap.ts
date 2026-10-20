@@ -11,7 +11,8 @@ import { config } from "dotenv";
 config({ path: ".env.local", quiet: true });
 
 const out = join(process.cwd(), "dist", "public");
-const site = (process.env.SITE_URL || process.env.URL || "").replace(/\/$/, "");
+// الدومين الرسمي (من 2026-10-20)؛ SITE_URL بالبيئة يتقدّم عليه
+const site = (process.env.SITE_URL || process.env.URL || "https://alkadihomes.ae").replace(/\/$/, "");
 const supabaseUrl = process.env.VITE_SUPABASE_URL?.replace(/\/$/, "");
 const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
 
