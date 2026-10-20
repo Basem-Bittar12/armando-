@@ -46,11 +46,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // قراءات الكتالوج (REST) تستعمل جلسة المسؤول إن وُجدت
     setAccessTokenProvider(() => auth.getSession().then(({ data }) => data.session?.access_token ?? null));
     let alive = true;
+    // صاحب الجلسة الحالي: supabase-js يبعت SIGNED_IN من جديد كل ما يرجع المستخدم للتاب،
+    // وإعادة التحميل وقتها كانت تمسح النماذج المفتوحة (مثلاً لصق رابط بعد نسخه من تطبيق تاني)
+    let userId: string | null = null;
     auth.getSession().then(({ data }) => {
+      userId = data.session?.user.id ?? null;
       if (alive) void resolve(data.session);
     });
     const { data: listener } = auth.onAuthStateChange((event, session) => {
       if (!alive || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") return;
+      const nextId = session?.user.id ?? null;
+      if (event === "SIGNED_IN" && nextId === userId) return; // نفس الشخص رجع للتاب — لا شي تغيّر
+      userId = nextId;
       // بعد الدخول/الخروج نعيد تحميل البيانات: المسؤول يرى المسودات والخيارات الموقوفة
       void resolve(session).then(() => reload());
     });

@@ -48,3 +48,4 @@ Local Supabase: `cd /home/user/armando- && npx supabase start` (needs `SUPABASE_
 - 2026-10-20: footer payment methods unified: tabby, Visa, Mastercard, Apple Pay, bank transfer each in the same 60×38 box, logo only (name in tooltip + screen-reader text).
 - 2026-10-20: payment boxes bigger (72×46, logos 30–38px) and 16px space above the footer line.
 - 2026-10-20: payment label bigger (17px laptop / 16px phone). Phone: label on its own line, the five boxes in one equal-width row (checked 360 and 430 wide, no sideways scroll).
+- 2026-10-20: bug fix: dashboard forms were wiped when returning to the tab (e.g. copying the Facebook link from another app). supabase-js fires SIGNED_IN on every hidden→visible (_onVisibilityChanged → _recoverAndRefresh), and auth.tsx treated it as a new login → catalog reload → status loading → page unmounted. Now SIGNED_IN for the same user id is ignored.
