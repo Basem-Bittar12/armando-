@@ -9,8 +9,11 @@ import TabbyBadge from "./TabbyBadge";
 import { useLang, useT, type Lang } from "@/i18n/lang";
 
 /** نوع العقار ومدة الإيجار ككلام عادي: "شقة للإيجار الشهري" */
-export const rentalLabel = (property: Pick<Property, "type" | "term">, lang: Lang = "ar") =>
-  lang === "en" ? `${property.type} for ${property.term.toLowerCase()} rent` : `${property.type} للإيجار ال${property.term}`;
+export const rentalLabel = (property: Pick<Property, "type" | "term">, lang: Lang = "ar") => {
+  // بدون سعر ما في مدة إيجار: «شقة للإيجار» بدل «شقة للإيجار ال»
+  if (!property.term) return lang === "en" ? `${property.type} for rent` : `${property.type} للإيجار`;
+  return lang === "en" ? `${property.type} for ${property.term.toLowerCase()} rent` : `${property.type} للإيجار ال${property.term}`;
+};
 
 /** المواصفات في سطر واحد */
 export const specsLine = (property: Pick<Property, "beds" | "baths" | "area">, lang: Lang = "ar") =>

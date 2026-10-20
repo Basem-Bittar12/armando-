@@ -74,8 +74,8 @@ export default function PropertyDetail() {
     title: property ? `${property.title} — ${property.id} | ${brand.name}` : meta.notFound.title,
     description: property
       ? lang === "en"
-        ? `${property.type} for ${property.term.toLowerCase()} rent in ${property.location} · ${property.price} ${property.unit} · ${specsLine(property, lang)}`
-        : `${property.type} ${property.term} في ${property.location} · ${property.price} ${property.unit} · ${property.beds === 0 ? "استوديو" : `${property.beds} غرف`} · ${property.area}`
+        ? `${rentalLabel(property, lang)} in ${property.location} · ${property.price}${property.unit ? ` ${property.unit}` : ""} · ${specsLine(property, lang)}`
+        : `${rentalLabel(property, lang)} في ${property.location} · ${property.price}${property.unit ? ` ${property.unit}` : ""} · ${property.beds === 0 ? "استوديو" : `${property.beds} غرف`} · ${property.area}`
       : meta.notFound.description,
     image: property?.image,
     noIndex: property?.isDemo,
