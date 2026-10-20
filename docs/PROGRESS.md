@@ -47,3 +47,4 @@ Local Supabase: `cd /home/user/armando- && npx supabase start` (needs `SUPABASE_
 - 2026-10-20: Cloudflare Redirect Rule (zone alkadihomes.ae, template «Redirect from WWW to root»): https://www.* → https://${1}, 301, query string preserved. Verified: www/properties?fav=1 → 301 alkadihomes.ae/properties?fav=1. www CNAME was already proxied.
 - 2026-10-20: footer payment methods unified: tabby, Visa, Mastercard, Apple Pay, bank transfer each in the same 60×38 box, logo only (name in tooltip + screen-reader text).
 - 2026-10-20: payment boxes bigger (72×46, logos 30–38px) and 16px space above the footer line.
+- 2026-10-20: payment label bigger (17px laptop / 16px phone). Phone: label on its own line, the five boxes in one equal-width row (checked 360 and 430 wide, no sideways scroll).

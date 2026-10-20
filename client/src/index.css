@@ -1506,7 +1506,7 @@ bdi { unicode-bidi: isolate; }
 .tabby-badge { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; color: var(--date); }
 .tabby-badge__logo { height: 22px; width: 22px; display: block; border-radius: 5px; }
 .tabby-badge__brand { display: inline-flex; align-items: center; gap: 6px; font-family: "Castoro", serif; color: inherit; }
-.tabby-badge--footer { padding: 18px 0 16px; color: var(--almond); flex-wrap: wrap; row-gap: 8px; }
+.tabby-badge--footer { padding: 18px 0 16px; color: var(--almond); flex-wrap: wrap; row-gap: 8px; column-gap: 12px; font-size: 17px; }
 /* كل طرق الدفع بمربّع واحد موحّد: نفس المقاس والإطار، والشعار بالنص */
 .pay-method { display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 46px; border: 1px solid rgba(239,226,208,.35); border-radius: 9px; color: var(--almond); }
 .pay-method svg { width: 40px; height: 30px; display: block; }
@@ -1546,4 +1546,13 @@ bdi { unicode-bidi: isolate; }
   .about-values ol { grid-template-columns: repeat(2, 1fr); }
   .about-values li:not(:nth-child(3n)) { border-inline-end: 0; }
   .about-values li:nth-child(odd) { border-inline-end: 1px solid rgba(59,42,32,.16); }
+}
+/* التلفون: «طرق الدفع» بسطر، وتحته المربعات الخمسة بصف واحد بعرض متساوٍ */
+@media (max-width: 640px) {
+  .tabby-badge--footer { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px 8px; font-size: 16px; }
+  .tabby-badge--footer > span:first-child { grid-column: 1 / -1; }
+  .tabby-badge--footer .pay-method { width: auto; height: 44px; }
+  .tabby-badge--footer .pay-method svg { width: 34px; height: 26px; }
+  .tabby-badge--footer .pay-method--wide svg { width: 44px; height: 32px; }
+  .tabby-badge--footer .pay-method .tabby-badge__logo { width: 26px; height: 26px; }
 }
