@@ -46,6 +46,8 @@ export function CardGallery({ images, href, alt, priority = false }: { images: s
     const rtl = getComputedStyle(track).direction === "rtl";
     // بدون حركة ناعمة: السكرول الناعم داخل الكرت (snap + RTL) كان بكروم أحياناً يتجاهل الضغطة أو ينطّ صورتين
     track.scrollTo({ left: (rtl ? -1 : 1) * target * slideWidth, behavior: "instant" });
+    // الرقم الحالي من هون مباشرة: كروم أحياناً ما يبعت حدث scroll بعد القفزة، فيضل «السابق» مطفي
+    setIndex(target);
   };
 
   return (
