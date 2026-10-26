@@ -9,11 +9,14 @@ export const REDUCED_QUERY = "(prefers-reduced-motion: reduce)";
 
 export const readReduced = () => typeof window !== "undefined" && window.matchMedia(REDUCED_QUERY).matches;
 
-/** توفير البيانات أو اتصال بطيء: النسخة الثابتة بلا حركة */
+/**
+ * توفير البيانات أو اتصال بطيء جداً (2G): النسخة الثابتة بلا حركة.
+ * 3G مش محسوب بطيء: كروم بيقدّره من سرعة الرد، وكان يطلع «3g» على نت عادي فتختفي حركة الرئيسية (10/2026).
+ */
 export function readLiteConnection() {
   if (typeof navigator === "undefined") return false;
   const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
-  return Boolean(connection?.saveData) || /^(slow-2g|2g|3g)$/.test(connection?.effectiveType ?? "");
+  return Boolean(connection?.saveData) || /^(slow-2g|2g)$/.test(connection?.effectiveType ?? "");
 }
 
 /** يتابع media query ويعيد القيمة الحالية — التغيير يصل فقط عند عبور الحد فعلاً */
