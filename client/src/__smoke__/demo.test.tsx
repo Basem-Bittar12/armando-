@@ -67,7 +67,7 @@ describe("صفحات الموقع العام", () => {
     expect(container!.querySelector(".search-panel")).toBeNull();
     expect(text()).toContain("اختيارات تستحق الانتباه");
     expect(container!.querySelectorAll(".hstrip .property-card").length).toBe(3);
-    expect(container!.querySelector(".hstrip__cta a")?.getAttribute("href")).toBe("/properties");
+    expect(container!.querySelector(".hstrip__head .hstrip__all")?.getAttribute("href")).toBe("/properties");
     // زر واتساب عائم واحد (طلب صاحب المكتب)، برسالة جاهزة
     expect(container!.querySelectorAll(".floating-whatsapp")).toHaveLength(1);
     expect(container!.querySelector(".floating-whatsapp")!.getAttribute("href")).toMatch(/^https:\/\/wa\.me\/\d+\?text=/);
