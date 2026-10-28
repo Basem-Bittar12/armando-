@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Link } from "wouter";
+import { ArrowLeft } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCatalog } from "@/lib/catalog/store";
@@ -26,7 +27,7 @@ const USER_IDLE_MS = 180;
  *  - السحب بالإصبع يمين/يسار (أو التراكباد / سحب الماوس): الصف نفسه نافذة سكرول أفقية حقيقية
  *    (سحب المتصفح الأصلي بزخمه الطبيعي) يعمل من أي مكان. وهو مثبّت يلحقه موضع الصفحة (فيبقيان متطابقين)؛
  *    قبل التثبيت أو بعده يتحرك الصف وحده والصفحة لا تتحرك.
- * بلا فراغ كبير قبل أو بعد: هامش الصف = هامش المحتوى على التلفون، وبحد أقصى 40px على الشاشات العريضة. بعد آخر كارت يفك التثبيت ويظهر «عرض كل البيوت».
+ * بلا فراغ كبير قبل أو بعد: هامش الصف = هامش المحتوى على التلفون، وبحد أقصى 40px على الشاشات العريضة. بعد آخر كارت يفك التثبيت. «عرض كل البيوت» جنب العنوان، ظاهر طول الحركة.
  * النسخة الثابتة (تقليل الحركة / توفير البيانات): صف يتسحب بالإصبع (scroll-snap) بلا تثبيت.
  */
 export function AvailableHomesStrip() {
@@ -222,6 +223,11 @@ export function AvailableHomesStrip() {
       <div ref={pinRef} className="hstrip__inner">
         <div className="container hstrip__head">
           <h2 id="hstrip-title">{t("اختيارات تستحق الانتباه", "Homes worth a closer look")}</h2>
+          {/* جنب العنوان (جزء المثبّت): ظاهر طول حركة الكروت، مش بس بعد آخر كارت (طلب صاحب الموقع) */}
+          <Link href="/properties" className="primary-button hstrip__all">
+            {t("عرض كل البيوت", "View all homes")}
+            <ArrowLeft size={18} aria-hidden="true" className="hstrip__all-icon" />
+          </Link>
         </div>
         <div ref={viewportRef} className="hstrip__viewport">
           {/* المتحرك: الأول أقصى اليسار فيدخل أولاً من اليمين؛ الثابت: ترتيب اللغة العادي (العربي من اليمين) */}
@@ -245,11 +251,7 @@ export function AvailableHomesStrip() {
           )}
         </div>
       </div>
-      <div className="container section-cta hstrip__cta">
-        <Link href="/properties" className="outline-button">
-          {t("عرض كل البيوت", "View all homes")}
-        </Link>
-      </div>
+      <div className="hstrip__cta" aria-hidden="true" />
     </section>
   );
 }
